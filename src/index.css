@@ -1,13 +1,31 @@
-// from general to specific
-
-// color
-:root {
-  --bkg: red;
-  --txt: #999;
+/* get the required local files */
+@font-face {
+  font-family: 'Roboto';
+  src: url('/assets/fonts/Roboto-Regular.ttf')  format('truetype'); /* Safari, Android, iOS */
+  font-weight: normal;
+  font-style: normal;
 }
 
-// elements
+:root {
+  --bg: silver;
+  --fg: black;
+}
+
+/* elements */
 body {
-  background-color: var(--bkg);
-  color: var(--txt);
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: 'Roboto', sans-serif;
+}
+
+input, button {
+  --padding: 0.5rem;
+  --radius: 0.25rem;
+  padding: var(--padding);
+  border: 1px solid var(--fg);
+  border-radius: var(--radius);
+  cursor: pointer;
+  &::is(input) {
+    cursor: initial;
+  }
 }
