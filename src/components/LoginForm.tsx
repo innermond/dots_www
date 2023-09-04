@@ -1,5 +1,5 @@
-import "./LoginForm.scss";
-import type { Component } from "solid-js";
+import './LoginForm.scss';
+import type { Component } from 'solid-js';
 
 const LoginForm: Component = () => {
   return (
