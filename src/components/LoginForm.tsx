@@ -1,38 +1,22 @@
-import './LoginForm.scss';
 import type { Component } from 'solid-js';
+import { createSignal } from 'solid-js';
+import { Button, Backdrop } from '@suid/material';
 
 const LoginForm: Component = () => {
+  const [open, setOpen] = createSignal(false);
+  const openBackdrop = () => setOpen(true);
+  const closeBackdrop = () => setOpen(false);
+
   return (
-    <form action="#" method="post">
-      <div class="container">
-        <label for="uname">Username</label>
-        <input type="text" placeholder="Enter Username" name="uname" required />
+  <>
+    <Button 
+      onClick={openBackdrop}
+    >
+    {open() ? 'opened' : 'closed'}
+    </Button>
 
-        <label for="psw">Password</label>
-        <input
-          type="password"
-          placeholder="Enter Password"
-          name="psw"
-          required
-        />
-
-        <button type="submit">Login</button>
-        <label>
-          <input type="checkbox" name="remember">
-            Remember me
-          </input>
-        </label>
-      </div>
-
-      <div class="container">
-        <button type="button" class="cancelbtn">
-          Cancel
-        </button>
-        <span class="psw">
-          Forgot <a href="#">password?</a>
-        </span>
-      </div>
-    </form>
+    <Backdrop open={open()} onClick={closeBackdrop}></Backdrop>
+    </>
   );
 };
 
