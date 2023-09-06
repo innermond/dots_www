@@ -1,7 +1,6 @@
 import type { Component } from 'solid-js';
 import {} from 'solid-js';
 import { Typography, Link, Container, Box, Avatar, TextField, FormControlLabel, Checkbox, Button, Grid } from '@suid/material';
-import { createTheme, ThemeProvider } from '@suid/material/styles';
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
 
 const Copyright: Component = (props: any) => {
@@ -15,11 +14,8 @@ const Copyright: Component = (props: any) => {
   );
 };
 
-const defaultTheme = createTheme();
-
 const LoginForm: Component = () => {
   return (
-  <ThemeProvider theme={defaultTheme}>
   <Container component="main" maxWidth="xs">
     <Box
       sx={{
@@ -66,7 +62,6 @@ const LoginForm: Component = () => {
     </Box>
     <Copyright sx={{mt: 8, mb:4}}/>
   </Container>
-  </ThemeProvider>
   );
 };
 
