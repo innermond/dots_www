@@ -8,6 +8,7 @@ import { CssBaseline } from '@suid/material';
 import { createTheme, ThemeProvider } from '@suid/material/styles';
 
 import LoginForm from './components/LoginForm';
+import Dashboard from './components/Dashboard';
 
 const App: Component = () => {
 const defaultTheme = createTheme();
@@ -19,7 +20,7 @@ const defaultTheme = createTheme();
   return (
   <ThemeProvider theme={defaultTheme}>
   <CssBaseline />
-  <LoginForm />
+  <Dashboard />
   </ThemeProvider>
   );
 };

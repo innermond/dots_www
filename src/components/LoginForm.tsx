@@ -2,6 +2,7 @@ import type { Component } from 'solid-js';
 import {} from 'solid-js';
 import { Typography, Link, Container, Box, Avatar, TextField, FormControlLabel, Checkbox, Button, Grid } from '@suid/material';
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
+//import ErrorOutlinedIcon from '@suid/icons-material/ErrorOutlined';
 
 const Copyright: Component = (props: any) => {
   return (
