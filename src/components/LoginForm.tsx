@@ -27,7 +27,7 @@ const LoginForm: Component = () => {
       <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
         <LockOutlinedIcon />
       </Avatar>
-      <Typography component="h1" variant="h5">Sign In</Typography>
+      <Typography component="h1" variant="h5">Log In</Typography>
       <Box component="form" sx={{ mt: 1 }} >
         <TextField
           margin="normal"
@@ -60,7 +60,7 @@ const LoginForm: Component = () => {
         </Grid>
       </Box>
     </Box>
-    <Copyright sx={{mt: 8, mb:4}}/>
+    <Copyright sx={{mt: 8, mb:4}}></Copyright>
   </Container>
   );
 };

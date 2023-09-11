@@ -1,3 +1,8 @@
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
 import type { Component } from 'solid-js';
 import { CssBaseline } from '@suid/material';
 import { createTheme, ThemeProvider } from '@suid/material/styles';
@@ -5,14 +10,14 @@ import { createTheme, ThemeProvider } from '@suid/material/styles';
 import LoginForm from './components/LoginForm';
 
 const App: Component = () => {
-//const defaultTheme = createTheme();
-const darkTheme = createTheme({
+const defaultTheme = createTheme();
+/*const darkTheme = createTheme({
   palette: {
     mode: 'dark',
   },
-});
+});*/
   return (
-  <ThemeProvider theme={darkTheme}>
+  <ThemeProvider theme={defaultTheme}>
   <CssBaseline />
   <LoginForm />
   </ThemeProvider>
