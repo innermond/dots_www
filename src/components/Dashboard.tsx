@@ -6,7 +6,9 @@ import NotificationsIcon from '@suid/icons-material/Notifications';
 
 import {createSignal} from 'solid-js';
 
+import { defaultTheme as theme } from '../theme';
 import {MainListItems, SecondaryListItems} from './ListItems';
+
 
 const drawerWidth: number = 240;
 
@@ -21,10 +23,18 @@ const Dashboard: Component = () => {
       <AppBar 
         position="absolute"
         sx={{
-          zIndex: 9999, 
+          zIndex: theme.zIndex.drawer + 1, 
+          transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
           ...(open() && {
             marginLeft: `${drawerWidth}px`, 
             width: `calc(100% - ${drawerWidth}px)`,
+            transition: theme.transitions.create(['width', 'margin'], {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
           }),
         }}
        >
