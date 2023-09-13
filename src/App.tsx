@@ -15,13 +15,13 @@ import { defaultTheme } from './theme';
 
 const App: Component = () => {
   return (
-  <ThemeProvider theme={defaultTheme}>
-  <CssBaseline />
-    <Routes>
-      <Route path='/' component={Dashboard} />
-      <Route path='/login' component={LoginForm} />
-    </Routes>
-  </ThemeProvider>
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <Routes>
+        <Route path="/" component={Dashboard} />
+        <Route path="/login" component={LoginForm} />
+      </Routes>
+    </ThemeProvider>
   );
 };
 
