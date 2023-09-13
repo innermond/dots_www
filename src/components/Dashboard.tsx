@@ -1,18 +1,19 @@
-import type { Component } from 'solid-js';
+import type { Component, JSX } from 'solid-js';
 import { Box, AppBar, Toolbar, IconButton, Drawer, Divider, List, Typography, Badge } from '@suid/material';
 import MenuIcon from '@suid/icons-material/Menu';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import NotificationsIcon from '@suid/icons-material/Notifications';
 
-import {createSignal} from 'solid-js';
+import { createSignal } from 'solid-js';
 
 import { defaultTheme as theme } from '../theme';
-import {MainListItems, SecondaryListItems} from './ListItems';
+import { MainListItems, SecondaryListItems } from './ListItems';
 
 
 const drawerWidth: number = 240;
 
 const Dashboard: Component = () => {
+
   const [open, setOpen] = createSignal(true);
   const toggleDrawer = () => {
     setOpen(!open());
@@ -91,6 +92,5 @@ const Dashboard: Component = () => {
     </Box>
   )
 }
-
 
 export default Dashboard;
