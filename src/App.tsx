@@ -5,7 +5,7 @@ import '@fontsource/roboto/700.css';
 
 import { createResource, type Component, ErrorBoundary } from 'solid-js';
 import { Match, Switch } from 'solid-js';
-import { Routes, Route, Params, useRouteData, Navigate } from '@solidjs/router';
+import { Routes, Route, useRouteData, Navigate } from '@solidjs/router';
 import { Alert, Box, CircularProgress, CssBaseline } from '@suid/material';
 import { ThemeProvider } from '@suid/material/styles';
 
@@ -15,14 +15,12 @@ import LoginForm from './components/LoginForm';
 import { defaultTheme } from './theme';
 
 const fetchUser = async () => {
-  return new Promise((_, reject) => setTimeout(()=>reject('strange error'), 3000));
+  return new Promise((resolve,) => setTimeout(()=>resolve(false), 3000));
 };
 
 function UserData() {
-
   const [user] = createResource(fetchUser);
   return user;
-
 }
 
 const App: Component = () => {
