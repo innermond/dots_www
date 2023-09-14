@@ -1,9 +1,12 @@
 const API = 'http://api.dots.volt.com/v1';
 
-async function send<T>(method: string, url: string, data: T): Promise<JSON | Error> {
-  const 
-  headers: HeadersInit = {'Content-type': 'application/json'}, 
-  opts: RequestInit= {method, headers,};
+async function send<T>(
+  method: string,
+  url: string,
+  data: T,
+): Promise<JSON | Error> {
+  const headers: HeadersInit = { 'Content-type': 'application/json' },
+    opts: RequestInit = { method, headers };
 
   if (data !== undefined) {
     opts.body = JSON.stringify(data);
@@ -21,7 +24,7 @@ async function send<T>(method: string, url: string, data: T): Promise<JSON | Err
 type LoginParams = {
   usr: string;
   pwd: string;
-}; 
+};
 
 export function login(data: LoginParams): Promise<JSON | Error> {
   return send<LoginParams>('POST', '/login', data);

@@ -1,5 +1,15 @@
 import type { Component, JSX } from 'solid-js';
-import { Box, AppBar, Toolbar, IconButton, Drawer, Divider, List, Typography, Badge } from '@suid/material';
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Drawer,
+  Divider,
+  List,
+  Typography,
+  Badge,
+} from '@suid/material';
 import MenuIcon from '@suid/icons-material/Menu';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import NotificationsIcon from '@suid/icons-material/Notifications';
@@ -13,24 +23,23 @@ import { Navigate, useRouteData } from '@solidjs/router';
 const drawerWidth: number = 240;
 
 const Dashboard: Component = () => {
-
   const [open, setOpen] = createSignal(true);
   const toggleDrawer = () => {
     setOpen(!open());
   };
 
   return (
-    <Box sx={{display: 'flex'}}>
-      <AppBar 
+    <Box sx={{ display: 'flex' }}>
+      <AppBar
         position="absolute"
         sx={{
-          zIndex: theme.zIndex.drawer + 1, 
+          zIndex: theme.zIndex.drawer + 1,
           transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
           ...(open() && {
-            marginLeft: `${drawerWidth}px`, 
+            marginLeft: `${drawerWidth}px`,
             width: `calc(100% - ${drawerWidth}px)`,
             transition: theme.transitions.create(['width', 'margin'], {
               easing: theme.transitions.easing.sharp,
@@ -38,14 +47,14 @@ const Dashboard: Component = () => {
             }),
           }),
         }}
-       >
-        <Toolbar sx={{pr:'24px'}}>
+      >
+        <Toolbar sx={{ pr: '24px' }}>
           <IconButton
             size="large"
             edge="start"
             color="inherit"
             aria-label="open drawer"
-            sx={{marginRight: '36px', ...(open() && { display: 'none' }),}}
+            sx={{ marginRight: '36px', ...(open() && { display: 'none' }) }}
             onClick={toggleDrawer}
           >
             <MenuIcon />
@@ -54,7 +63,7 @@ const Dashboard: Component = () => {
             component="h1"
             variant="h6"
             color="inherit"
-            sx={{flexGrow: 1, whiteSpace: 'nowrap'}}
+            sx={{ flexGrow: 1, whiteSpace: 'nowrap' }}
           >
             Dashboard
           </Typography>
@@ -64,24 +73,26 @@ const Dashboard: Component = () => {
             </Badge>
           </IconButton>
         </Toolbar>
-      </AppBar>      
-      <Drawer 
-        variant="permanent"
-        open={open()}
-      >
+      </AppBar>
+      <Drawer variant="permanent" open={open()}>
         <Box
           sx={{
             width: `${drawerWidth}px`,
           }}
         >
           <Toolbar
-            sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: [1],}}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              px: [1],
+            }}
           >
-            <IconButton  onClick={toggleDrawer}>
+            <IconButton onClick={toggleDrawer}>
               <ChevronLeftIcon />
             </IconButton>
           </Toolbar>
-          <Divider sx={{my: 1}} />
+          <Divider sx={{ my: 1 }} />
           <List component="nav">
             <MainListItems />
             <Divider />
@@ -90,7 +101,7 @@ const Dashboard: Component = () => {
         </Box>
       </Drawer>
     </Box>
-  )
-}
+  );
+};
 
 export default Dashboard;

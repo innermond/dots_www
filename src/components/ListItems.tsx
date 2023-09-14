@@ -1,5 +1,10 @@
 import type { Component } from 'solid-js';
-import { ListItemButton, ListItemIcon, ListItemText, ListSubheader } from '@suid/material';
+import {
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+} from '@suid/material';
 
 import DashboardIcon from '@suid/icons-material/Dashboard';
 import AssignmentIcon from '@suid/icons-material/Assignment';
@@ -14,7 +19,7 @@ export const MainListItems: Component = () => {
         <ListItemText primary="Dashboard" />
       </ListItemButton>
     </>
-  )
+  );
 };
 
 export const SecondaryListItems: Component = () => {
@@ -30,7 +35,5 @@ export const SecondaryListItems: Component = () => {
         <ListItemText primary="Assignment" />
       </ListItemButton>
     </>
-  )
+  );
 };
-
-
