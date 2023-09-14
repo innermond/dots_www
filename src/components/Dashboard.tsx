@@ -4,11 +4,11 @@ import MenuIcon from '@suid/icons-material/Menu';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import NotificationsIcon from '@suid/icons-material/Notifications';
 
-import { createSignal } from 'solid-js';
+import { Match, Show, Switch, createSignal } from 'solid-js';
 
 import { defaultTheme as theme } from '../theme';
 import { MainListItems, SecondaryListItems } from './ListItems';
-
+import { Navigate, useRouteData } from '@solidjs/router';
 
 const drawerWidth: number = 240;
 
