@@ -18,6 +18,7 @@ services:
     volumes:
      - ./www/dist:/var/www/html/public:cached
      - ./files/etc/nginx/sites-enabled/site.conf:/etc/nginx/sites-enabled/site.conf
+     - ./files/etc/nginx/nginx.conf:/etc/nginx/nginx.conf
      - ./files/tmp:/tmp
      - ~/.ssh:/tmp/.ssh
     networks:
