@@ -14,7 +14,7 @@ services:
     extra_hosts:
       - "www.dots.volt.com api.dots.volt.com:172.16.0.1"
     user: "$UID:0"
-    working_dir: /var/www/html/public/
+    working_dir: /var/www/html/public
     volumes:
      - ./www/dist:/var/www/html/public:cached
      - ./files/etc/nginx/sites-enabled/site.conf:/etc/nginx/sites-enabled/site.conf
