@@ -1,0 +1,31 @@
+version: '5'
+
+services:
+  dots_www:
+    tty: true
+    container_name: dots_www
+    hostname: dots_www
+    build: ./
+    ports:
+     - "8080:8080"
+     - "8443:8443"
+    environment:
+     - VIRTUAL_HOST=www.dots.volt.com
+     - VIRTUAL_PORT=8080
+     - VIRTUAL_PORT_SSL=8443
+     - HTTPS_METHOD=noredirect
+    extra_hosts:
+      - "www.dots.volt.com api.dots.volt.com:172.16.0.1"
+    user: "$UID:0"
+    working_dir: /usr/share/nginx/html
+    volumes:
+     - ./dist:/usr/share/nginx/html:cached
+     - ./files/etc/nginx/sites-enabled/site.conf:/etc/nginx/sites-enabled/site.conf
+n
+     - ~/.ssh:/tmp/.ssh
+    networks:
+     - dots_proxy_net
+networks:
+  dots_proxy_net:
+    external: true
+
