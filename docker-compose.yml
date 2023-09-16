@@ -18,8 +18,6 @@ services:
     volumes:
      - ./www/dist:/var/www/html/public:cached
      - ./files/etc/nginx/sites-enabled/site.conf:/etc/nginx/sites-enabled/site.conf
-     - ./files/var/cache/nginx:/var/cache/nginx
-     - ./files/tmp:/tmp
      - ~/.ssh:/tmp/.ssh
     networks:
      - dots_proxy_net
