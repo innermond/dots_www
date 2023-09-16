@@ -19,7 +19,8 @@ services:
      - ./www/dist:/var/www/html/public:cached
      - ~/.ssh:/tmp/.ssh
      - ~/.ssh:/root/.ssh
-     - ./files/etc/nginx/sites-enabled/site.conf:/etc/nginx/sites-enabled/site.conf
+     - ./files/etc/nginx/conf.d/site.conf:/etc/nginx/conf.d/site.conf
+     - ./files/etc/ssl/certs:/etc/ssl/certs
     networks:
      - dots_proxy_net
 networks:
