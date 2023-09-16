@@ -20,6 +20,7 @@ services:
      - ~/.ssh:/tmp/.ssh
      - ~/.ssh:/root/.ssh
      - ./files/etc/nginx/conf.d/site.conf:/etc/nginx/conf.d/site.conf
+     - ./files/var/cache/nginx:/var/cache/nginx
      - ./files/etc/ssl/certs:/etc/ssl/certs
     networks:
      - dots_proxy_net
