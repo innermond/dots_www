@@ -16,12 +16,10 @@ services:
     user: "$UID:0"
     working_dir: /var/www/html/public
     volumes:
-     - ./www/dist:/var/www/html/public:cached
+     - ./www/dist:/var/www/html/public
      - ~/.ssh:/tmp/.ssh
      - ~/.ssh:/root/.ssh
      - ./files/etc/nginx/conf.d/site.conf:/etc/nginx/conf.d/site.conf
-     - ./files/var/cache/nginx:/var/cache/nginx
-     - ./files/etc/ssl/certs:/etc/ssl/certs
     networks:
      - dots_proxy_net
 networks:
