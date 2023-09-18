@@ -16,7 +16,7 @@ services:
     user: "$UID:0"
     working_dir: /var/www/html/public
     volumes:
-     - ./www/dist:/var/www/html/public
+     - ./www/distant:/var/www/html/public:rw
      - ~/.ssh:/tmp/.ssh
      - ~/.ssh:/root/.ssh
      - ./files/etc/nginx/conf.d/site.conf:/etc/nginx/conf.d/site.conf
