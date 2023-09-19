@@ -8,9 +8,13 @@ async function send<T>(
   const headers: HeadersInit = { 'Content-type': 'application/json' },
     opts: RequestInit = { method, headers };
 
+  opts.mode = 'cors';
+  opts.redirect = 'follow';
+
   if (data !== undefined) {
     opts.body = JSON.stringify(data);
   }
+  console.log(opts);
 
   try {
     const response: Response = await fetch(API + url, opts);
