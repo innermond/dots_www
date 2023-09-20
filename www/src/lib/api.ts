@@ -14,14 +14,16 @@ async function send<T>(
   if (data !== undefined) {
     opts.body = JSON.stringify(data);
   }
-  console.log(opts);
 
   try {
     const response: Response = await fetch(API + url, opts);
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
     const json: JSON = await response.json();
     return json;
   } catch (err) {
-    return err as Error;
+    return Promise.reject(err);
   }
 }
 

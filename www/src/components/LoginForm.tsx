@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import {} from 'solid-js';
+import {createEffect, createResource, createSignal, Show } from 'solid-js';
 import {
   Typography,
   Link,
@@ -11,6 +11,7 @@ import {
   Checkbox,
   Button,
   Grid,
+  CircularProgress,
 } from '@suid/material';
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
 //import ErrorOutlinedIcon from '@suid/icons-material/ErrorOutlined';
@@ -25,12 +26,7 @@ async function handleSubmit(e: Event) {
   }
   const { email, password } = result;
   const requestData = { usr: email, pwd: password };
-  try {
-    const response = await login(requestData);
-    console.log(response);
-  } catch (err) {
-    console.log(err as Error);
-  }
+  return login(requestData);
 }
 
 const Copyright: Component = (props: any) => {
@@ -50,6 +46,11 @@ const Copyright: Component = (props: any) => {
 };
 
 const LoginForm: Component = () => {
+  const [startSubmit, setStartSubmit] = createSignal();
+  const [submitForm] = createResource(startSubmit, handleSubmit);
+
+  let isDisabled = submitForm.loading;
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -65,7 +66,14 @@ const LoginForm: Component = () => {
         <Typography component="h1" variant="h5">
           Log In
         </Typography>
-        <form onSubmit={handleSubmit}>
+        <Typography component="p">
+{submitForm.loading && 'loading'}
+{submitForm.error && 'error'}
+{submitForm.state}
+        </Typography>
+        <form 
+          onSubmit={e => setStartSubmit(e)}
+        >
           <TextField
             margin="normal"
             required
@@ -75,6 +83,7 @@ const LoginForm: Component = () => {
             name="email"
             autoComplete="off"
             autoFocus
+            disabled={isDisabled}
           />
           <TextField
             margin="normal"
@@ -85,6 +94,7 @@ const LoginForm: Component = () => {
             type="password"
             id="password"
             autoComplete="off"
+            disabled={isDisabled}
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
@@ -95,8 +105,11 @@ const LoginForm: Component = () => {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={isDisabled}
           >
-            Sign In
+<Show when={submitForm.loading} fallback={'Sign In'}>
+<CircularProgress size={'1.5rem'} /> {'Sign In'}
+</Show>
           </Button>
           <Grid container>
             <Grid item xs>

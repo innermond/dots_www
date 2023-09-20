@@ -15,7 +15,7 @@ import LoginForm from './components/LoginForm';
 import { defaultTheme } from './theme';
 
 const fetchUser = async () => {
-  return new Promise((resolve,) => setTimeout(()=>resolve(false), 3000));
+  return new Promise((resolve,) => setTimeout(()=>resolve(false), 100));
 };
 
 function UserData() {
