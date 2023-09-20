@@ -35,7 +35,7 @@ async function fetchLoginData(e: Event) {
 const Copyright: Component = () => {
   return (
     <Typography
-      sx={{ mt: 8, mb: 4 }} 
+      sx={{ mt: 8, mb: 4 }}
       variant="body2"
       color="text.secundary"
       align="center"
@@ -49,17 +49,22 @@ const Copyright: Component = () => {
 };
 
 const LoginForm: Component = (): JSX.Element => {
-  const [startSubmit, setStartSubmit] = createSignal<Event|null>();
+  const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, fetchLoginData);
 
   let isDisabled = submitForm.loading;
 
   createEffect(() => {
     if (submitForm.error) {
-    toast.custom(() => <Alert severity="error">This is an error alert — check it out!</Alert>, {
-	duration: 6000,
-	unmountDelay: 0
-})
+      toast.custom(
+        () => (
+          <Alert severity="error">This is an error alert — check it out!</Alert>
+        ),
+        {
+          duration: 6000,
+          unmountDelay: 0,
+        },
+      );
     }
   });
 
@@ -79,13 +84,11 @@ const LoginForm: Component = (): JSX.Element => {
           Log In
         </Typography>
         <Typography component="p">
-{submitForm.loading && 'loading'}
-{submitForm.error && 'error'}
-{submitForm.state}
+          {submitForm.loading && 'loading'}
+          {submitForm.error && 'error'}
+          {submitForm.state}
         </Typography>
-        <form 
-          onSubmit={e => setStartSubmit(e)}
-        >
+        <form onSubmit={e => setStartSubmit(e)}>
           <TextField
             margin="normal"
             required
@@ -119,11 +122,16 @@ const LoginForm: Component = (): JSX.Element => {
             sx={{ mt: 3, mb: 2 }}
             disabled={isDisabled}
           >
-          <Show when={submitForm.loading} fallback={'Sign In'}>
-            <Stack spacing={'1rem'} direction="row" >
-              <CircularProgress sx={{color: '#fff'}} disableShrink size={'1rem'} /> <p>Sign In</p>
-            </Stack>
-          </Show>
+            <Show when={submitForm.loading} fallback={'Sign In'}>
+              <Stack spacing={'1rem'} direction="row">
+                <CircularProgress
+                  sx={{ color: '#fff' }}
+                  disableShrink
+                  size={'1rem'}
+                />{' '}
+                <p>Sign In</p>
+              </Stack>
+            </Show>
           </Button>
           <Grid container>
             <Grid item xs>
@@ -139,7 +147,7 @@ const LoginForm: Component = (): JSX.Element => {
           </Grid>
         </form>
       </Box>
-      <Copyright ></Copyright>
+      <Copyright></Copyright>
     </Container>
   );
 };
