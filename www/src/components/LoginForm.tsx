@@ -1,5 +1,5 @@
-import type { Component } from 'solid-js';
-import {createEffect, createResource, createSignal, Show } from 'solid-js';
+import type { Component, JSX } from 'solid-js';
+import { createSignal, createEffect, createResource, Show } from 'solid-js';
 import {
   Typography,
   Link,
@@ -12,12 +12,15 @@ import {
   Button,
   Grid,
   CircularProgress,
+  Stack,
+  Alert,
 } from '@suid/material';
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
 //import ErrorOutlinedIcon from '@suid/icons-material/ErrorOutlined';
+import { toast } from 'solid-toast';
 import { login } from '../lib/api';
 
-async function handleSubmit(e: Event) {
+async function fetchLoginData(e: Event) {
   e.preventDefault();
   const data = new FormData(e.target as HTMLFormElement).entries();
   const result: Record<string, string> = {};
@@ -29,13 +32,13 @@ async function handleSubmit(e: Event) {
   return login(requestData);
 }
 
-const Copyright: Component = (props: any) => {
+const Copyright: Component = () => {
   return (
     <Typography
+      sx={{ mt: 8, mb: 4 }} 
       variant="body2"
       color="text.secundary"
       align="center"
-      {...props}
     >
       {'Copyright © '}
       <Link href="https://volt-media.ro">volt-media.ro</Link>{' '}
@@ -45,11 +48,20 @@ const Copyright: Component = (props: any) => {
   );
 };
 
-const LoginForm: Component = () => {
-  const [startSubmit, setStartSubmit] = createSignal();
-  const [submitForm] = createResource(startSubmit, handleSubmit);
+const LoginForm: Component = (): JSX.Element => {
+  const [startSubmit, setStartSubmit] = createSignal<Event|null>();
+  const [submitForm] = createResource(startSubmit, fetchLoginData);
 
   let isDisabled = submitForm.loading;
+
+  createEffect(() => {
+    if (submitForm.error) {
+    toast.custom(() => <Alert severity="error">This is an error alert — check it out!</Alert>, {
+	duration: 6000,
+	unmountDelay: 0
+})
+    }
+  });
 
   return (
     <Container component="main" maxWidth="xs">
@@ -107,9 +119,11 @@ const LoginForm: Component = () => {
             sx={{ mt: 3, mb: 2 }}
             disabled={isDisabled}
           >
-<Show when={submitForm.loading} fallback={'Sign In'}>
-<CircularProgress size={'1.5rem'} /> {'Sign In'}
-</Show>
+          <Show when={submitForm.loading} fallback={'Sign In'}>
+            <Stack spacing={'1rem'} direction="row" >
+              <CircularProgress sx={{color: '#fff'}} disableShrink size={'1rem'} /> <p>Sign In</p>
+            </Stack>
+          </Show>
           </Button>
           <Grid container>
             <Grid item xs>
@@ -125,7 +139,7 @@ const LoginForm: Component = () => {
           </Grid>
         </form>
       </Box>
-      <Copyright sx={{ mt: 8, mb: 4 }}></Copyright>
+      <Copyright ></Copyright>
     </Container>
   );
 };
