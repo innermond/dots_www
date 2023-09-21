@@ -11,14 +11,14 @@ import {
   Checkbox,
   Button,
   Grid,
-  CircularProgress,
-  Stack,
+  LinearProgress,
   Alert,
 } from '@suid/material';
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
 //import ErrorOutlinedIcon from '@suid/icons-material/ErrorOutlined';
 import { toast } from 'solid-toast';
 import { login } from '../lib/api';
+import { setLoading } from './Loading';
 
 async function fetchLoginData(e: Event) {
   e.preventDefault();
@@ -52,7 +52,12 @@ const LoginForm: Component = (): JSX.Element => {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, fetchLoginData);
 
-  let isDisabled = submitForm.loading;
+  //const isDisabled = () => !!startSubmit() && ['pending', 'refreshing'].includes(submitForm.state);
+  const isDisabled = () => submitForm.loading;
+
+  createEffect(() =>
+    isDisabled() ? setLoading(true) && toast.dismiss() : setLoading(false),
+  );
 
   createEffect(() => {
     if (submitForm.error) {
@@ -83,11 +88,6 @@ const LoginForm: Component = (): JSX.Element => {
         <Typography component="h1" variant="h5">
           Log In
         </Typography>
-        <Typography component="p">
-          {submitForm.loading && 'loading'}
-          {submitForm.error && 'error'}
-          {submitForm.state}
-        </Typography>
         <form onSubmit={e => setStartSubmit(e)}>
           <TextField
             margin="normal"
@@ -98,7 +98,7 @@ const LoginForm: Component = (): JSX.Element => {
             name="email"
             autoComplete="off"
             autoFocus
-            disabled={isDisabled}
+            disabled={isDisabled()}
           />
           <TextField
             margin="normal"
@@ -109,10 +109,16 @@ const LoginForm: Component = (): JSX.Element => {
             type="password"
             id="password"
             autoComplete="off"
-            disabled={isDisabled}
+            disabled={isDisabled()}
           />
           <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
+            control={
+              <Checkbox
+                value="remember"
+                color="primary"
+                disabled={isDisabled()}
+              />
+            }
             label="Remember me"
           />
           <Button
@@ -120,18 +126,9 @@ const LoginForm: Component = (): JSX.Element => {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={isDisabled}
+            disabled={isDisabled()}
           >
-            <Show when={submitForm.loading} fallback={'Sign In'}>
-              <Stack spacing={'1rem'} direction="row">
-                <CircularProgress
-                  sx={{ color: '#fff' }}
-                  disableShrink
-                  size={'1rem'}
-                />{' '}
-                <p>Sign In</p>
-              </Stack>
-            </Show>
+            Sign In
           </Button>
           <Grid container>
             <Grid item xs>

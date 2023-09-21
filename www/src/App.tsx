@@ -4,14 +4,28 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 import type { Component } from 'solid-js';
-import { Match, Switch, createResource, ErrorBoundary } from 'solid-js';
+import {
+  Match,
+  Switch,
+  createResource,
+  ErrorBoundary,
+  Show,
+  createSignal,
+} from 'solid-js';
 import { Routes, Route, useRouteData, Navigate } from '@solidjs/router';
-import { Alert, Box, CircularProgress, CssBaseline } from '@suid/material';
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  CssBaseline,
+  LinearProgress,
+} from '@suid/material';
 import { ThemeProvider } from '@suid/material/styles';
 import { Toaster } from 'solid-toast';
 
 import Dashboard from './components/Dashboard';
 import LoginForm from './components/LoginForm';
+import Loading from './components/Loading';
 
 import { defaultTheme } from './theme';
 
@@ -33,6 +47,7 @@ const App: Component = () => {
         <Route path="/login" component={LoginForm} />
       </Routes>
       <Toaster />
+      <Loading />
     </ThemeProvider>
   );
 };
