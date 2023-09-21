@@ -1,17 +1,18 @@
 import type { Component, JSX } from 'solid-js';
-import { createSignal, createEffect, createResource, Show } from 'solid-js';
+import { createSignal, createEffect, createResource, For } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import {
   Typography,
   Link,
   Container,
   Box,
+  Stack,
   Avatar,
   TextField,
   FormControlLabel,
   Checkbox,
   Button,
   Grid,
-  LinearProgress,
   Alert,
 } from '@suid/material';
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
@@ -32,6 +33,78 @@ async function fetchLoginData(e: Event) {
   return login(requestData);
 }
 
+type Validable = {
+  [key in 'email' | 'password']: {
+    error: boolean,
+    //message: JSX.Element,
+    message: string,
+  }
+};
+
+const defaultInputs: Validable = {
+  email: {
+    error: false,
+    //message: <></>,
+    message: '',
+  },
+  password: {
+    error: false,
+    //message:<></>,
+    message: '',
+  },
+};
+
+function required(v: any): boolean {
+  return !!v; 
+}
+function minlen(len: number): (v:any) => boolean {
+  return v => {
+    const ok = (v?.length ?? 0) >= len;
+    return ok;
+  }
+}
+function maxlen(len: number): (v:any) => boolean {
+  return v => {
+    const ok = (v?.length ?? 0) <= len;
+    return ok;
+  }
+}
+type Validators = {
+  [key in 'email' | 'password']: Function[];
+};
+const validators: Validators = {
+  email: [required, minlen(3), maxlen(10)],
+  password: [required, minlen(4), maxlen(10)],
+};
+const messages = {
+  email: [(f:any) => `${f} is required`, (f:any, v:any=3) => `${f} must be more than ${v}`, (f:any, v:any=10) => `${f} must be less than ${v}`],
+  password: [(f:any) => `${f} is required`, (f:any, v:any=4) => `${f} must be more than ${v}`, (f:any, v:any=10) => `${f} must be less than ${v}`],
+};
+
+const [inputs, setInputs] = createStore(defaultInputs);
+
+function handleInput(e: Event) {
+  e.preventDefault();
+  const {name, value} = e.target as HTMLInputElement;
+  if (!['email', 'password'].includes(name)) return;
+
+  const multierrors: string[] = [];
+  (validators[name as 'email' | 'password'] as Function[]).forEach((validator: Function, inx:number) => {
+      if (!validator(value)) {
+        const curr = messages[name as 'email'|'password'][inx](name);
+        multierrors.push(curr);
+      } 
+  })
+  setInputs(name as 'email'|'password', v => {
+    //return {...v, error: multierrors.length > 0, message: <HelperTextMultiline lines={multierrors} />};
+    return {...v, error: multierrors.length > 0, message: multierrors.join('|')};
+  });
+}
+
+const HelperTextMultiline = (props: {lines: string[]}) => {
+  return <Stack direction="column"><For each={props.lines}>{line =><Box>{line}</Box>}</For></Stack>
+}
+
 const Copyright: Component = () => {
   return (
     <Typography
@@ -50,9 +123,8 @@ const Copyright: Component = () => {
 
 const LoginForm: Component = (): JSX.Element => {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
+  
   const [submitForm] = createResource(startSubmit, fetchLoginData);
-
-  //const isDisabled = () => !!startSubmit() && ['pending', 'refreshing'].includes(submitForm.state);
   const isDisabled = () => submitForm.loading;
 
   createEffect(() =>
@@ -88,7 +160,7 @@ const LoginForm: Component = (): JSX.Element => {
         <Typography component="h1" variant="h5">
           Log In
         </Typography>
-        <form onSubmit={e => setStartSubmit(e)}>
+        <form novalidate onInput={handleInput} onSubmit={setStartSubmit}>
           <TextField
             margin="normal"
             required
@@ -99,6 +171,8 @@ const LoginForm: Component = (): JSX.Element => {
             autoComplete="off"
             autoFocus
             disabled={isDisabled()}
+            error={inputs.email.error}
+            helperText={inputs.email.error && inputs.email.message}
           />
           <TextField
             margin="normal"
