@@ -1,5 +1,11 @@
 import type { Component, JSX } from 'solid-js';
-import { createSignal, createEffect, createResource, For, Show } from 'solid-js';
+import {
+  createSignal,
+  createEffect,
+  createResource,
+  For,
+  Show,
+} from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
   Typography,
@@ -35,12 +41,12 @@ async function fetchLoginData(e: Event) {
 
 type Validable = {
   [key in 'email' | 'password']: {
-    error: boolean,
-    message: string[],
-  }
+    error: boolean;
+    message: string[];
+  };
 };
 
-type FuncWithArgs = ((...params:any) => boolean) & {args: object};
+type FuncWithArgs = ((...params: any) => boolean) & { args: object };
 
 const defaultInputs: Validable = {
   email: {
@@ -54,28 +60,28 @@ const defaultInputs: Validable = {
 };
 
 function required(v: any): boolean {
-  return !!v; 
+  return !!v;
 }
 function likeemail(v: any): boolean {
-  return v.includes('@'); 
+  return v.includes('@');
 }
 function minlen(len: number): FuncWithArgs {
   const fn = (v: any) => {
     const ok = (v?.length ?? 0) >= len;
     return ok;
-  }
+  };
 
-  fn.args = {len};
+  fn.args = { len };
 
   return fn;
 }
-function maxlen(len: number): (v:any) => boolean {
+function maxlen(len: number): (v: any) => boolean {
   const fn = (v: any) => {
     const ok = (v?.length ?? 0) <= len;
     return ok;
-  }
+  };
 
-  fn.args = {len};
+  fn.args = { len };
 
   return fn;
 }
@@ -86,7 +92,7 @@ function checkPasswordStrength(password: string): [number, string[]] {
 
   // Check password length
   if (password.length < 8) {
-    tips.push("make the password longer.");
+    tips.push('make the password longer.');
   } else {
     strength += 1;
   }
@@ -95,44 +101,43 @@ function checkPasswordStrength(password: string): [number, string[]] {
   if (password.match(/[a-z]/) && password.match(/[A-Z]/)) {
     strength += 1;
   } else {
-    tips.push("use both lowercase and uppercase letters.");
+    tips.push('use both lowercase and uppercase letters.');
   }
 
   // Check for numbers
   if (password.match(/\d/)) {
     strength += 1;
   } else {
-    tips.push("include at least one number.");
+    tips.push('include at least one number.');
   }
 
   // Check for special characters
   if (password.match(/[^a-zA-Z\d]/)) {
     strength += 1;
   } else {
-    tips.push("include at least one special character.");
+    tips.push('include at least one special character.');
   }
 
   // Return results
   if (strength < 2) {
-    tips.unshift("easy to guess.");
+    tips.unshift('easy to guess.');
   } else if (strength === 2) {
-    tips.unshift("medium difficulty.");
+    tips.unshift('medium difficulty.');
   } else if (strength === 3) {
-    tips.unshift("difficult.");
+    tips.unshift('difficult.');
   } else {
-    tips.unshift("extremely difficult.");
+    tips.unshift('extremely difficult.');
   }
 
   return [strength, tips];
 }
-function checkpass(tips: string[] = ['']): (v:any) => boolean {
-
-  const fn = (v:string) => {
+function checkpass(tips: string[] = ['']): (v: any) => boolean {
+  const fn = (v: string) => {
     const [strength, tips] = checkPasswordStrength(v);
-    fn.args = {tips};
-    return (strength > 3);
+    fn.args = { tips };
+    return strength > 3;
   };
-  fn.args = {tips};
+  fn.args = { tips };
 
   return fn;
 }
@@ -143,19 +148,22 @@ type Validators = {
 const validators: Validators = {
   email: [required, likeemail, minlen(3), maxlen(10)],
   //password: [required, minlen(8), maxlen(15), checkpass([""])],
-  password: [checkpass([""])],
+  password: [checkpass([''])],
 };
 const messages = {
   email: [
-    (f:string) => `${f} is required`, 
-    (f:string) => `${f} expects a valid email address`, 
-    (f:string, v:string, {len}:{len:number}) => `${f} must be more than ${len} - has ${v.length}`, 
-    (f:string, v:string, {len}:{len:number}) => `${f} must be less than ${len} - has ${v.length}`],
+    (f: string) => `${f} is required`,
+    (f: string) => `${f} expects a valid email address`,
+    (f: string, v: string, { len }: { len: number }) =>
+      `${f} must be more than ${len} - has ${v.length}`,
+    (f: string, v: string, { len }: { len: number }) =>
+      `${f} must be less than ${len} - has ${v.length}`,
+  ],
   password: [
     //(f:string) => `${f} is required`,
     //(f:string, v:string, {len}:{len:number}) => `${f} must be more than ${len} - has ${v.length}`,
     //(f:string, v:string, {len}:{len:number}) => `${f} must be less than ${len} - has ${v.length}`,
-    (f:string, v:string, {tips}:{tips: string[]}) => tips,
+    (f: string, v: string, { tips }: { tips: string[] }) => tips,
   ],
 };
 
@@ -163,40 +171,48 @@ const [inputs, setInputs] = createStore(defaultInputs);
 
 function handleInput(e: Event) {
   e.preventDefault();
-  const {name, value} = e.target as HTMLInputElement;
+  const { name, value } = e.target as HTMLInputElement;
   if (!['email', 'password'].includes(name)) return;
 
   const multierrors: string[] = [];
-  (validators[name as 'email' | 'password'] as Array<Function|FuncWithArgs>).forEach((validator: Function|FuncWithArgs, inx:number) => {
-      if (!validator(value)) {
-        if (!(name in messages)) {
-          multierrors.push(`${name} is not valid`);
-          return;
-        }
-        const fn = (messages[name as 'email'|'password'] as Array<Function|FuncWithArgs>)[inx];
-        let msg: string|string[] = '';
-        let args = {};
-        if ('args' in validator) {
-          args = {...validator.args};
-        }
-        if (Object.keys(args).length === 0) { 
-          msg = fn(name, value);
-        } else {
-          msg = fn(name, value, args);
-        }
-        Array.isArray(msg) ? multierrors.push(...msg) : multierrors.push(msg);
-      } 
-  })
-  setInputs(name as 'email'|'password', v => {
-    return {...v, error: multierrors.length > 0, message: multierrors};
+  (
+    validators[name as 'email' | 'password'] as Array<Function | FuncWithArgs>
+  ).forEach((validator: Function | FuncWithArgs, inx: number) => {
+    if (!validator(value)) {
+      if (!(name in messages)) {
+        multierrors.push(`${name} is not valid`);
+        return;
+      }
+      const fn = (
+        messages[name as 'email' | 'password'] as Array<Function | FuncWithArgs>
+      )[inx];
+      let msg: string | string[] = '';
+      let args = {};
+      if ('args' in validator) {
+        args = { ...validator.args };
+      }
+      if (Object.keys(args).length === 0) {
+        msg = fn(name, value);
+      } else {
+        msg = fn(name, value, args);
+      }
+      Array.isArray(msg) ? multierrors.push(...msg) : multierrors.push(msg);
+    }
+  });
+  setInputs(name as 'email' | 'password', v => {
+    return { ...v, error: multierrors.length > 0, message: multierrors };
   });
 }
 
-const HelperTextMultiline = (props: {lines: string[]}) => {
-  return <Show when={!!props.lines?.length}>
-    <Stack direction="column"><For each={props.lines}>{line =><Box>{line}</Box>}</For></Stack>
-  </Show>
-}
+const HelperTextMultiline = (props: { lines: string[] }) => {
+  return (
+    <Show when={!!props.lines?.length}>
+      <Stack direction="column">
+        <For each={props.lines}>{line => <Box>{line}</Box>}</For>
+      </Stack>
+    </Show>
+  );
+};
 
 const Copyright: Component = () => {
   return (
@@ -216,7 +232,7 @@ const Copyright: Component = () => {
 
 const LoginForm: Component = (): JSX.Element => {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
-  
+
   const [submitForm] = createResource(startSubmit, fetchLoginData);
   const isDisabled = () => submitForm.loading;
 
