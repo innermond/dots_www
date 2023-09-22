@@ -1,5 +1,5 @@
 import type { Component, JSX } from 'solid-js';
-import { createSignal, createEffect, createResource, For } from 'solid-js';
+import { createSignal, createEffect, createResource, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
   Typography,
@@ -36,49 +36,127 @@ async function fetchLoginData(e: Event) {
 type Validable = {
   [key in 'email' | 'password']: {
     error: boolean,
-    //message: JSX.Element,
-    message: string,
+    message: string[],
   }
 };
+
+type FuncWithArgs = ((...params:any) => boolean) & {args: object};
 
 const defaultInputs: Validable = {
   email: {
     error: false,
-    //message: <></>,
-    message: '',
+    message: [],
   },
   password: {
     error: false,
-    //message:<></>,
-    message: '',
+    message: [],
   },
 };
 
 function required(v: any): boolean {
   return !!v; 
 }
-function minlen(len: number): (v:any) => boolean {
-  return v => {
+function likeemail(v: any): boolean {
+  return v.includes('@'); 
+}
+function minlen(len: number): FuncWithArgs {
+  const fn = (v: any) => {
     const ok = (v?.length ?? 0) >= len;
     return ok;
   }
+
+  fn.args = {len};
+
+  return fn;
 }
 function maxlen(len: number): (v:any) => boolean {
-  return v => {
+  const fn = (v: any) => {
     const ok = (v?.length ?? 0) <= len;
     return ok;
   }
+
+  fn.args = {len};
+
+  return fn;
 }
+function checkPasswordStrength(password: string): [number, string[]] {
+  // Initialize variables
+  let strength: number = 0;
+  const tips: string[] = [];
+
+  // Check password length
+  if (password.length < 8) {
+    tips.push("make the password longer.");
+  } else {
+    strength += 1;
+  }
+
+  // Check for mixed case
+  if (password.match(/[a-z]/) && password.match(/[A-Z]/)) {
+    strength += 1;
+  } else {
+    tips.push("use both lowercase and uppercase letters.");
+  }
+
+  // Check for numbers
+  if (password.match(/\d/)) {
+    strength += 1;
+  } else {
+    tips.push("include at least one number.");
+  }
+
+  // Check for special characters
+  if (password.match(/[^a-zA-Z\d]/)) {
+    strength += 1;
+  } else {
+    tips.push("include at least one special character.");
+  }
+
+  // Return results
+  if (strength < 2) {
+    tips.unshift("easy to guess.");
+  } else if (strength === 2) {
+    tips.unshift("medium difficulty.");
+  } else if (strength === 3) {
+    tips.unshift("difficult.");
+  } else {
+    tips.unshift("extremely difficult.");
+  }
+
+  return [strength, tips];
+}
+function checkpass(tips: string[] = ['']): (v:any) => boolean {
+
+  const fn = (v:string) => {
+    const [strength, tips] = checkPasswordStrength(v);
+    fn.args = {tips};
+    return (strength > 3);
+  };
+  fn.args = {tips};
+
+  return fn;
+}
+
 type Validators = {
-  [key in 'email' | 'password']: Function[];
+  [key in 'email' | 'password']: (FuncWithArgs | Function)[];
 };
 const validators: Validators = {
-  email: [required, minlen(3), maxlen(10)],
-  password: [required, minlen(4), maxlen(10)],
+  email: [required, likeemail, minlen(3), maxlen(10)],
+  //password: [required, minlen(8), maxlen(15), checkpass([""])],
+  password: [checkpass([""])],
 };
 const messages = {
-  email: [(f:any) => `${f} is required`, (f:any, v:any=3) => `${f} must be more than ${v}`, (f:any, v:any=10) => `${f} must be less than ${v}`],
-  password: [(f:any) => `${f} is required`, (f:any, v:any=4) => `${f} must be more than ${v}`, (f:any, v:any=10) => `${f} must be less than ${v}`],
+  email: [
+    (f:string) => `${f} is required`, 
+    (f:string) => `${f} expects a valid email address`, 
+    (f:string, v:string, {len}:{len:number}) => `${f} must be more than ${len} - has ${v.length}`, 
+    (f:string, v:string, {len}:{len:number}) => `${f} must be less than ${len} - has ${v.length}`],
+  password: [
+    //(f:string) => `${f} is required`,
+    //(f:string, v:string, {len}:{len:number}) => `${f} must be more than ${len} - has ${v.length}`,
+    //(f:string, v:string, {len}:{len:number}) => `${f} must be less than ${len} - has ${v.length}`,
+    (f:string, v:string, {tips}:{tips: string[]}) => tips,
+  ],
 };
 
 const [inputs, setInputs] = createStore(defaultInputs);
@@ -89,20 +167,35 @@ function handleInput(e: Event) {
   if (!['email', 'password'].includes(name)) return;
 
   const multierrors: string[] = [];
-  (validators[name as 'email' | 'password'] as Function[]).forEach((validator: Function, inx:number) => {
+  (validators[name as 'email' | 'password'] as Array<Function|FuncWithArgs>).forEach((validator: Function|FuncWithArgs, inx:number) => {
       if (!validator(value)) {
-        const curr = messages[name as 'email'|'password'][inx](name);
-        multierrors.push(curr);
+        if (!(name in messages)) {
+          multierrors.push(`${name} is not valid`);
+          return;
+        }
+        const fn = (messages[name as 'email'|'password'] as Array<Function|FuncWithArgs>)[inx];
+        let msg: string|string[] = '';
+        let args = {};
+        if ('args' in validator) {
+          args = {...validator.args};
+        }
+        if (Object.keys(args).length === 0) { 
+          msg = fn(name, value);
+        } else {
+          msg = fn(name, value, args);
+        }
+        Array.isArray(msg) ? multierrors.push(...msg) : multierrors.push(msg);
       } 
   })
   setInputs(name as 'email'|'password', v => {
-    //return {...v, error: multierrors.length > 0, message: <HelperTextMultiline lines={multierrors} />};
-    return {...v, error: multierrors.length > 0, message: multierrors.join('|')};
+    return {...v, error: multierrors.length > 0, message: multierrors};
   });
 }
 
 const HelperTextMultiline = (props: {lines: string[]}) => {
-  return <Stack direction="column"><For each={props.lines}>{line =><Box>{line}</Box>}</For></Stack>
+  return <Show when={!!props.lines?.length}>
+    <Stack direction="column"><For each={props.lines}>{line =><Box>{line}</Box>}</For></Stack>
+  </Show>
 }
 
 const Copyright: Component = () => {
@@ -172,7 +265,7 @@ const LoginForm: Component = (): JSX.Element => {
             autoFocus
             disabled={isDisabled()}
             error={inputs.email.error}
-            helperText={inputs.email.error && inputs.email.message}
+            helperText={<HelperTextMultiline lines={inputs.email.message} />}
           />
           <TextField
             margin="normal"
@@ -184,6 +277,8 @@ const LoginForm: Component = (): JSX.Element => {
             id="password"
             autoComplete="off"
             disabled={isDisabled()}
+            error={inputs.password.error}
+            helperText={<HelperTextMultiline lines={inputs.password.message} />}
           />
           <FormControlLabel
             control={
