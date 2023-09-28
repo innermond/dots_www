@@ -9,7 +9,6 @@ import {
   Switch,
   createResource,
   ErrorBoundary,
-  Show,
   createSignal,
 } from 'solid-js';
 import { Routes, Route, useRouteData, Navigate } from '@solidjs/router';
@@ -18,7 +17,6 @@ import {
   Box,
   CircularProgress,
   CssBaseline,
-  LinearProgress,
 } from '@suid/material';
 import { ThemeProvider } from '@suid/material/styles';
 import { Toaster } from 'solid-toast';
@@ -34,7 +32,8 @@ const fetchUser = async () => {
 };
 
 function UserData() {
-  const [user] = createResource(fetchUser);
+  const [user, setUser] = createSignal(false);
+  setUser(!!sessionStorage.getItem("dots.tok"));
   return user;
 }
 
@@ -56,7 +55,7 @@ export default App;
 
 function Guard(child: Component) {
   const user: any = useRouteData();
-  console.log(user);
+  console.log(user());
 
   return (
     <ErrorBoundary

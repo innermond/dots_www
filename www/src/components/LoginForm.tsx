@@ -3,8 +3,6 @@ import {
   createSignal,
   createEffect,
   createResource,
-  For,
-  Show,
 } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
@@ -12,7 +10,6 @@ import {
   Link,
   Container,
   Box,
-  Stack,
   Avatar,
   TextField,
   FormControlLabel,
@@ -22,12 +19,14 @@ import {
   Alert,
 } from '@suid/material';
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
-//import ErrorOutlinedIcon from '@suid/icons-material/ErrorOutlined';
 import { toast } from 'solid-toast';
+
 import { login } from '../lib/api';
 import { setLoading } from './Loading';
-import type { Validable, Validator, Validators, MessagesMap, Messages } from '../lib/form';
+import type { Validable, Validators, MessagesMap } from '../lib/form';
 import {required, minlen, maxlen, likeemail, checkpass, validate} from '../lib/form';
+import HelperTextMultiline from './HelperTextMultiline';
+import { useNavigate } from '@solidjs/router';
 
 async function fetchLoginData(e: Event) {
   e.preventDefault();
@@ -39,6 +38,8 @@ async function fetchLoginData(e: Event) {
   const { email, password } = result;
   const requestData = { usr: email, pwd: password };
   return login(requestData);
+  //const requested = await login(requestData);
+  //return requested;
 }
 
 const defaultInputs: Validable<'email'|'password'> = {
@@ -87,16 +88,6 @@ function handleInput(e: Event) {
   });
 }
 
-const HelperTextMultiline = (props: { lines: string[] }) => {
-  return (
-    <Show when={!!props.lines?.length}>
-      <Stack direction="column">
-        <For each={props.lines}>{line => <Box>{line}</Box>}</For>
-      </Stack>
-    </Show>
-  );
-};
-
 const Copyright: Component = () => {
   return (
     <Typography
@@ -113,15 +104,25 @@ const Copyright: Component = () => {
   );
 };
 
+type LoginResponse =
+  | { token_access: string; error?: never }
+  | { error: string; token_access?: never };
+
 const LoginForm: Component = (): JSX.Element => {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
 
   const [submitForm] = createResource(startSubmit, fetchLoginData);
   const isDisabled = () => submitForm.loading;
+  const navigate = useNavigate();
 
-  createEffect(() =>
-    isDisabled() ? setLoading(true) && toast.dismiss() : setLoading(false),
-  );
+  let formRef: HTMLFormElement;
+
+  createEffect(() => {
+    if (submitForm.loading) {
+      toast.dismiss();
+      setLoading(true);
+    }
+  });
 
   createEffect(() => {
     if (submitForm.error) {
@@ -134,6 +135,28 @@ const LoginForm: Component = (): JSX.Element => {
           unmountDelay: 0,
         },
       );
+      setLoading(false);
+    }
+  });
+
+  createEffect(() => {
+    if (submitForm.state === "ready") {
+      toast.dismiss();
+
+      const zero = {
+        error: false,
+        message: [],
+      };
+      setInputs({email: zero, password: zero});
+      setLoading(false);
+      formRef.reset();
+
+      const result = submitForm() as any;
+      if (!(result instanceof Error) && result.hasOwnProperty('token_access')) {
+        const token_access = result.token_access; 
+        sessionStorage.setItem('dots.tok', token_access);
+        navigate("/");
+      }
     }
   });
 
@@ -152,7 +175,7 @@ const LoginForm: Component = (): JSX.Element => {
         <Typography component="h1" variant="h5">
           Log In
         </Typography>
-        <form novalidate onInput={handleInput} onSubmit={setStartSubmit}>
+        <form ref={formRef} novalidate onInput={handleInput} onSubmit={setStartSubmit}>
           <TextField
             margin="normal"
             required
