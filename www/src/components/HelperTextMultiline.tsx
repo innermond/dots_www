@@ -1,14 +1,8 @@
 import type { JSX } from 'solid-js';
 
-import {
-  For,
-  Show,
-} from 'solid-js';
+import { For, Show } from 'solid-js';
 
-import {
-  Box,
-  Stack,
-} from '@suid/material';
+import { Box, Stack } from '@suid/material';
 
 const HelperTextMultiline = (props: { lines: string[] }): JSX.Element => {
   return (

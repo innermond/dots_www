@@ -1,9 +1,5 @@
 import type { Component, JSX } from 'solid-js';
-import {
-  createSignal,
-  createEffect,
-  createResource,
-} from 'solid-js';
+import { createSignal, createEffect, createResource } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
   Typography,
@@ -24,7 +20,14 @@ import { toast } from 'solid-toast';
 import { login } from '../lib/api';
 import { setLoading } from './Loading';
 import type { Validable, Validators, MessagesMap } from '../lib/form';
-import {required, minlen, maxlen, likeemail, checkpass, validate} from '../lib/form';
+import {
+  required,
+  minlen,
+  maxlen,
+  likeemail,
+  checkpass,
+  validate,
+} from '../lib/form';
 import HelperTextMultiline from './HelperTextMultiline';
 import { useNavigate } from '@solidjs/router';
 
@@ -42,7 +45,7 @@ async function fetchLoginData(e: Event) {
   //return requested;
 }
 
-const defaultInputs: Validable<'email'|'password'> = {
+const defaultInputs: Validable<'email' | 'password'> = {
   email: {
     error: false,
     message: [],
@@ -53,12 +56,12 @@ const defaultInputs: Validable<'email'|'password'> = {
   },
 };
 
-const validators: Validators<'email'|'password'> = {
+const validators: Validators<'email' | 'password'> = {
   email: [required, likeemail, minlen(3), maxlen(10)],
   //password: [required, minlen(8), maxlen(15), checkpass([""])],
   password: [checkpass([''])],
 };
-const messages: MessagesMap<'email'|'password'> = {
+const messages: MessagesMap<'email' | 'password'> = {
   email: [
     (f: string) => `${f} is required`,
     (f: string) => `${f} expects a valid email address`,
@@ -79,10 +82,15 @@ const [inputs, setInputs] = createStore(defaultInputs);
 
 function handleInput(e: Event) {
   e.preventDefault();
-  const { name, value } = e.target as HTMLInputElement
+  const { name, value } = e.target as HTMLInputElement;
   if (!['email', 'password'].includes(name)) return;
 
-  const multierrors: string[] = validate< 'email' | 'password'>(name, value, validators, messages);
+  const multierrors: string[] = validate<'email' | 'password'>(
+    name,
+    value,
+    validators,
+    messages,
+  );
   setInputs(name as 'email' | 'password', v => {
     return { ...v, error: multierrors.length > 0, message: multierrors };
   });
@@ -140,22 +148,22 @@ const LoginForm: Component = (): JSX.Element => {
   });
 
   createEffect(() => {
-    if (submitForm.state === "ready") {
+    if (submitForm.state === 'ready') {
       toast.dismiss();
 
       const zero = {
         error: false,
         message: [],
       };
-      setInputs({email: zero, password: zero});
+      setInputs({ email: zero, password: zero });
       setLoading(false);
       formRef.reset();
 
       const result = submitForm() as any;
       if (!(result instanceof Error) && result.hasOwnProperty('token_access')) {
-        const token_access = result.token_access; 
+        const token_access = result.token_access;
         sessionStorage.setItem('dots.tok', token_access);
-        navigate("/");
+        navigate('/');
       }
     }
   });
@@ -175,7 +183,12 @@ const LoginForm: Component = (): JSX.Element => {
         <Typography component="h1" variant="h5">
           Log In
         </Typography>
-        <form ref={formRef} novalidate onInput={handleInput} onSubmit={setStartSubmit}>
+        <form
+          ref={formRef}
+          novalidate
+          onInput={handleInput}
+          onSubmit={setStartSubmit}
+        >
           <TextField
             margin="normal"
             required
