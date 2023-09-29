@@ -1,5 +1,5 @@
 import type { Component, JSX } from 'solid-js';
-import { createSignal, createEffect, createResource } from 'solid-js';
+import { createSignal, createEffect, createResource, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
   Typography,
@@ -30,7 +30,6 @@ import {
 } from '../lib/form';
 import HelperTextMultiline from './HelperTextMultiline';
 import { useNavigate } from '@solidjs/router';
-import { getSessionKey, setSessionKey } from '../lib/session';
 
 async function fetchLoginData(e: Event) {
   e.preventDefault();
@@ -120,6 +119,13 @@ const LoginForm: Component = (): JSX.Element => {
 
   let formRef: HTMLFormElement;
 
+  onMount(() => {
+    const key = 'dots.tok';
+    if (!!sessionStorage.getItem(key)) {
+      navigate("/");
+    } 
+  });
+
   createEffect(() => {
     if (submitForm.loading) {
       toast.dismiss();
@@ -147,15 +153,7 @@ const LoginForm: Component = (): JSX.Element => {
       const result = submitForm() as any;
       if (!(result instanceof Error) && result.hasOwnProperty('token_access')) {
         const token_access = result.token_access;
-
-        const data = new FormData(startSubmit()?.target as HTMLFormElement);
-        let key = data.get('email');
-        if (key === null) {
-          return
-        }
-        setSessionKey(key)
-        key = getSessionKey();
-
+        const key = 'dots.tok';
         sessionStorage.setItem(key, token_access);
         navigate('/');
       }

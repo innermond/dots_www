@@ -3,7 +3,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import type { Accessor, Component, Signal } from 'solid-js';
+import type { Accessor, Component } from 'solid-js';
 import {
   Match,
   Switch,
@@ -25,11 +25,10 @@ import LoginForm from './components/LoginForm';
 import Loading from './components/Loading';
 
 import { defaultTheme } from './theme';
-import {getSessionKey} from './lib/session';
 
 function TokenData() {
   const [token, setToken] = createSignal("");
-  const key = getSessionKey();
+  const key = 'dots.tok';
   const tok = sessionStorage.getItem(key);
   setToken(tok ?? '');
   return token;
@@ -42,6 +41,7 @@ const App: Component = () => {
       <Routes>
         <Route path="/" element={Guard(Dashboard)} data={TokenData} />
         <Route path="/login" component={LoginForm} />
+        <Route path="/*" component={() => <Alert severity="warning">Not found</Alert>} />
       </Routes>
       <Toaster />
       <Loading />

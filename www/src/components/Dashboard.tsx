@@ -21,7 +21,7 @@ import { createSignal } from 'solid-js';
 
 import { defaultTheme as theme } from '../theme';
 import { MainListItems, SecondaryListItems } from './ListItems';
-import {AccountCircle} from '@suid/icons-material';
+import { useNavigate } from '@solidjs/router';
 
 const drawerWidth: number = 240;
 
@@ -38,6 +38,15 @@ const Dashboard: Component = () => {
   const handleMenuProfile = (evt: MouseEvent) => {
       setAnchorProfile(evt.currentTarget as HTMLElement);
   };
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    const key = 'dots.tok';
+    sessionStorage.removeItem(key);    
+    handleClose();
+    navigate("/login");
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -122,7 +131,7 @@ const Dashboard: Component = () => {
               vertical: "bottom",
             }}
           >
-            <MenuItem onClick={handleClose}>
+            <MenuItem onClick={handleLogout}>
               <ListItemIcon>
                 <Logout fontSize="small" />
               </ListItemIcon>
