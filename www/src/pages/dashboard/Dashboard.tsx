@@ -19,8 +19,8 @@ import Logout from '@suid/icons-material/Logout';
 
 import { createSignal } from 'solid-js';
 
-import { defaultTheme as theme } from '../theme';
-import { MainListItems, SecondaryListItems } from './ListItems';
+import { defaultTheme as theme } from '../../theme';
+import { MainListItems, SecondaryListItems } from '../../components/ListItems';
 import { useNavigate } from '@solidjs/router';
 
 const drawerWidth: number = 240;

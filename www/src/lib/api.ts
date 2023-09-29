@@ -5,8 +5,8 @@ async function send<T>(
   url: string,
   data: T,
 ): Promise<JSON | Error> {
-  const headers: HeadersInit = { 'Content-type': 'application/json' },
-    opts: RequestInit = { method, headers };
+  const headers: HeadersInit = { 'Content-type': 'application/json' };
+  const opts: RequestInit = { method, headers };
 
   opts.mode = 'cors';
   opts.redirect = 'follow';
@@ -18,10 +18,10 @@ async function send<T>(
   try {
     const response: Response = await fetch(API + url, opts);
     if (!response.ok) {
-      return Promise.reject(response);
+      const json = await response.json();
+      return Promise.reject(json);
     }
-    const json: JSON = await response.json();
-    return json;
+    return response.json();
   } catch (err) {
     return Promise.reject(err);
   }

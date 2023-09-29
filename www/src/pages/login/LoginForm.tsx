@@ -17,9 +17,9 @@ import {
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
 import { toast } from 'solid-toast';
 
-import { login } from '../lib/api';
-import { setLoading } from './Loading';
-import type { Validable, Validators, MessagesMap } from '../lib/form';
+import { login } from '../../lib/api';
+import { setLoading } from '../../components/Loading';
+import type { Validable, Validators, MessagesMap } from '../../lib/form';
 import {
   required,
   minlen,
@@ -27,8 +27,8 @@ import {
   likeemail,
   checkpass,
   validate,
-} from '../lib/form';
-import HelperTextMultiline from './HelperTextMultiline';
+} from '../../lib/form';
+import HelperTextMultiline from '../../components/HelperTextMultiline';
 import { useNavigate } from '@solidjs/router';
 
 async function fetchLoginData(e: Event) {
@@ -55,7 +55,7 @@ const defaultInputs: Validable<'email' | 'password'> = {
 };
 
 const validators: Validators<'email' | 'password'> = {
-  email: [required, likeemail, minlen(3), maxlen(10)],
+  email: [required, likeemail, minlen(7), maxlen(100)],
   //password: [required, minlen(8), maxlen(15), checkpass([""])],
   password: [checkpass([''])],
 };
@@ -134,21 +134,6 @@ const LoginForm: Component = (): JSX.Element => {
   });
 
   createEffect(() => {
-    if (submitForm.error) {
-      toast.custom(
-        () => (
-          <Alert severity="error">This is an error alert — check it out!</Alert>
-        ),
-        {
-          duration: 6000,
-          unmountDelay: 0,
-        },
-      );
-      setLoading(false);
-    }
-  });
-
-  createEffect(() => {
     if (submitForm.state === 'ready') {
       const result = submitForm() as any;
       if (!(result instanceof Error) && result.hasOwnProperty('token_access')) {
@@ -167,6 +152,24 @@ const LoginForm: Component = (): JSX.Element => {
       setInputs({ email: zero, password: zero });
       setLoading(false);
       formRef.reset();
+    }
+  });
+
+  createEffect(() => {
+    if (submitForm.error) {
+      const data = submitForm.error;
+      const message = data?.error ?? data?.cause?.error ?? 'An error occured';
+      //const message = 'An error occured';
+      toast.custom(
+        () => (
+          <Alert severity="error">{message}</Alert>
+        ),
+        {
+          duration: 6000,
+          unmountDelay: 0,
+        },
+      );
+      setLoading(false);
     }
   });
 
