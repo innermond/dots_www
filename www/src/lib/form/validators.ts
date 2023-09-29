@@ -1,4 +1,4 @@
-import {Func, FuncWithArgs} from './form';
+import { Func, FuncWithArgs } from './form';
 
 function required(v: any): boolean {
   return !!v;
@@ -88,4 +88,4 @@ function checkPasswordStrength(password: string): [number, string[]] {
   return [strength, tips];
 }
 
-export {required, minlen, maxlen, likeemail, checkpass};
+export { required, minlen, maxlen, likeemail, checkpass };

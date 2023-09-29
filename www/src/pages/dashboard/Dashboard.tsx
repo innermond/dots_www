@@ -31,22 +31,24 @@ const Dashboard: Component = () => {
     setOpen(!open());
   };
 
-  const [anchorProfile, setAnchorProfile] = createSignal<null | HTMLElement>(null);
+  const [anchorProfile, setAnchorProfile] = createSignal<null | HTMLElement>(
+    null,
+  );
   const openProfile = () => Boolean(anchorProfile());
   const handleClose = () => setAnchorProfile(null);
 
   const handleMenuProfile = (evt: MouseEvent) => {
-      setAnchorProfile(evt.currentTarget as HTMLElement);
+    setAnchorProfile(evt.currentTarget as HTMLElement);
   };
 
   const navigate = useNavigate();
 
   const handleLogout = () => {
     const key = 'dots.tok';
-    sessionStorage.removeItem(key);    
+    sessionStorage.removeItem(key);
     handleClose();
-    navigate("/login");
-  }
+    navigate('/login');
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -105,30 +107,30 @@ const Dashboard: Component = () => {
             PaperProps={{
               elevation: 0,
               sx: {
-                overflow: "visible",
-                filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
                 mt: 0,
-                "&:before": {
+                '&:before': {
                   content: '""',
-                  display: "block",
-                  position: "absolute",
+                  display: 'block',
+                  position: 'absolute',
                   top: 0,
                   right: 14,
                   width: 10,
                   height: 10,
-                  bgcolor: "background.paper",
-                  transform: "translateY(-50%) rotate(45deg)",
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
                   zIndex: 0,
                 },
               },
             }}
             transformOrigin={{
-              horizontal: "right",
-              vertical: "top",
+              horizontal: 'right',
+              vertical: 'top',
             }}
             anchorOrigin={{
-              horizontal: "right",
-              vertical: "bottom",
+              horizontal: 'right',
+              vertical: 'bottom',
             }}
           >
             <MenuItem onClick={handleLogout}>

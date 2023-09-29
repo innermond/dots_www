@@ -122,8 +122,8 @@ const LoginForm: Component = (): JSX.Element => {
   onMount(() => {
     const key = 'dots.tok';
     if (!!sessionStorage.getItem(key)) {
-      navigate("/");
-    } 
+      navigate('/');
+    }
   });
 
   createEffect(() => {
@@ -160,15 +160,10 @@ const LoginForm: Component = (): JSX.Element => {
       const data = submitForm.error;
       const message = data?.error ?? data?.cause?.error ?? 'An error occured';
       //const message = 'An error occured';
-      toast.custom(
-        () => (
-          <Alert severity="error">{message}</Alert>
-        ),
-        {
-          duration: 6000,
-          unmountDelay: 0,
-        },
-      );
+      toast.custom(() => <Alert severity="error">{message}</Alert>, {
+        duration: 6000,
+        unmountDelay: 0,
+      });
       setLoading(false);
     }
   });
