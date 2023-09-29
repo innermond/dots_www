@@ -9,6 +9,8 @@ import {
   List,
   Typography,
   Badge,
+  Menu,
+  MenuItem,
 } from '@suid/material';
 import MenuIcon from '@suid/icons-material/Menu';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
@@ -19,6 +21,7 @@ import { Match, Show, Switch, createSignal } from 'solid-js';
 import { defaultTheme as theme } from '../theme';
 import { MainListItems, SecondaryListItems } from './ListItems';
 import { Navigate, useRouteData } from '@solidjs/router';
+import {AccountCircle} from '@suid/icons-material';
 
 const drawerWidth: number = 240;
 
@@ -26,6 +29,16 @@ const Dashboard: Component = () => {
   const [open, setOpen] = createSignal(true);
   const toggleDrawer = () => {
     setOpen(!open());
+  };
+
+  const [anchorProfile, setAnchorProfile] = createSignal<null | HTMLElement>(null);
+  const openProfile = () => Boolean(anchorProfile());
+  const handleClose = () => setAnchorProfile(null);
+
+  const handleMenuProfile = (evt: MouseEvent) => {
+    if (!!evt.currentTarget) {
+      setAnchorProfile(evt.currentTarget as HTMLElement);
+    }
   };
 
   return (
@@ -67,11 +80,17 @@ const Dashboard: Component = () => {
           >
             Dashboard
           </Typography>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
+          <IconButton color="inherit" size="large" onclick={handleMenuProfile}>
+            <AccountCircle />
           </IconButton>
+          <Menu
+            id="profile-menu"
+            anchorEl={anchorProfile()}
+            open={openProfile()}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={handleClose}>Logout</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open()}>

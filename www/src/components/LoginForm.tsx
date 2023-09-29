@@ -30,6 +30,7 @@ import {
 } from '../lib/form';
 import HelperTextMultiline from './HelperTextMultiline';
 import { useNavigate } from '@solidjs/router';
+import { getSessionKey, setSessionKey } from '../lib/session';
 
 async function fetchLoginData(e: Event) {
   e.preventDefault();
@@ -41,8 +42,6 @@ async function fetchLoginData(e: Event) {
   const { email, password } = result;
   const requestData = { usr: email, pwd: password };
   return login(requestData);
-  //const requested = await login(requestData);
-  //return requested;
 }
 
 const defaultInputs: Validable<'email' | 'password'> = {
@@ -96,7 +95,7 @@ function handleInput(e: Event) {
   });
 }
 
-const Copyright: Component = () => {
+const Copyright: Component = (): JSX.Element => {
   return (
     <Typography
       sx={{ mt: 8, mb: 4 }}
@@ -111,10 +110,6 @@ const Copyright: Component = () => {
     </Typography>
   );
 };
-
-type LoginResponse =
-  | { token_access: string; error?: never }
-  | { error: string; token_access?: never };
 
 const LoginForm: Component = (): JSX.Element => {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
@@ -149,6 +144,22 @@ const LoginForm: Component = (): JSX.Element => {
 
   createEffect(() => {
     if (submitForm.state === 'ready') {
+      const result = submitForm() as any;
+      if (!(result instanceof Error) && result.hasOwnProperty('token_access')) {
+        const token_access = result.token_access;
+
+        const data = new FormData(startSubmit()?.target as HTMLFormElement);
+        let key = data.get('email');
+        if (key === null) {
+          return
+        }
+        setSessionKey(key)
+        key = getSessionKey();
+
+        sessionStorage.setItem(key, token_access);
+        navigate('/');
+      }
+
       toast.dismiss();
 
       const zero = {
@@ -158,13 +169,6 @@ const LoginForm: Component = (): JSX.Element => {
       setInputs({ email: zero, password: zero });
       setLoading(false);
       formRef.reset();
-
-      const result = submitForm() as any;
-      if (!(result instanceof Error) && result.hasOwnProperty('token_access')) {
-        const token_access = result.token_access;
-        sessionStorage.setItem('dots.tok', token_access);
-        navigate('/');
-      }
     }
   });
 

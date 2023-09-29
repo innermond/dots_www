@@ -3,11 +3,10 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
-import type { Component } from 'solid-js';
+import type { Accessor, Component, Signal } from 'solid-js';
 import {
   Match,
   Switch,
-  createResource,
   ErrorBoundary,
   createSignal,
 } from 'solid-js';
@@ -26,15 +25,14 @@ import LoginForm from './components/LoginForm';
 import Loading from './components/Loading';
 
 import { defaultTheme } from './theme';
+import {getSessionKey} from './lib/session';
 
-const fetchUser = async () => {
-  return new Promise(resolve => setTimeout(() => resolve(false), 100));
-};
-
-function UserData() {
-  const [user, setUser] = createSignal(false);
-  setUser(!!sessionStorage.getItem("dots.tok"));
-  return user;
+function TokenData() {
+  const [token, setToken] = createSignal("");
+  const key = getSessionKey();
+  const tok = sessionStorage.getItem(key);
+  setToken(tok ?? '');
+  return token;
 }
 
 const App: Component = () => {
@@ -42,7 +40,7 @@ const App: Component = () => {
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
       <Routes>
-        <Route path="/" element={Guard(Dashboard)} data={UserData} />
+        <Route path="/" element={Guard(Dashboard)} data={TokenData} />
         <Route path="/login" component={LoginForm} />
       </Routes>
       <Toaster />
@@ -54,16 +52,15 @@ const App: Component = () => {
 export default App;
 
 function Guard(child: Component) {
-  const user: any = useRouteData();
-  console.log(user());
+  const token: any = useRouteData();
 
   return (
     <ErrorBoundary
       fallback={err => <Alert severity="error">{err.message}</Alert>}
     >
       <Switch fallback={<Progress />}>
-        <Match when={user()}>{child}</Match>
-        <Match when={user() === false}>
+        <Match when={!!token()}>{child}</Match>
+        <Match when={token() === ''}>
           <Navigate href="/login" />
         </Match>
       </Switch>
