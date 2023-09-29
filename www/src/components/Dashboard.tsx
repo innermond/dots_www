@@ -7,20 +7,20 @@ import {
   Drawer,
   Divider,
   List,
+  ListItemIcon,
   Typography,
-  Badge,
   Menu,
   MenuItem,
+  Avatar,
 } from '@suid/material';
 import MenuIcon from '@suid/icons-material/Menu';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
-import NotificationsIcon from '@suid/icons-material/Notifications';
+import Logout from '@suid/icons-material/Logout';
 
-import { Match, Show, Switch, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 
 import { defaultTheme as theme } from '../theme';
 import { MainListItems, SecondaryListItems } from './ListItems';
-import { Navigate, useRouteData } from '@solidjs/router';
 import {AccountCircle} from '@suid/icons-material';
 
 const drawerWidth: number = 240;
@@ -36,9 +36,7 @@ const Dashboard: Component = () => {
   const handleClose = () => setAnchorProfile(null);
 
   const handleMenuProfile = (evt: MouseEvent) => {
-    if (!!evt.currentTarget) {
       setAnchorProfile(evt.currentTarget as HTMLElement);
-    }
   };
 
   return (
@@ -81,15 +79,55 @@ const Dashboard: Component = () => {
             Dashboard
           </Typography>
           <IconButton color="inherit" size="large" onclick={handleMenuProfile}>
-            <AccountCircle />
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+              }}
+            >
+              M
+            </Avatar>
           </IconButton>
           <Menu
             id="profile-menu"
             anchorEl={anchorProfile()}
             open={openProfile()}
             onClose={handleClose}
+            PaperProps={{
+              elevation: 0,
+              sx: {
+                overflow: "visible",
+                filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                mt: 0,
+                "&:before": {
+                  content: '""',
+                  display: "block",
+                  position: "absolute",
+                  top: 0,
+                  right: 14,
+                  width: 10,
+                  height: 10,
+                  bgcolor: "background.paper",
+                  transform: "translateY(-50%) rotate(45deg)",
+                  zIndex: 0,
+                },
+              },
+            }}
+            transformOrigin={{
+              horizontal: "right",
+              vertical: "top",
+            }}
+            anchorOrigin={{
+              horizontal: "right",
+              vertical: "bottom",
+            }}
           >
-            <MenuItem onClick={handleClose}>Logout</MenuItem>
+            <MenuItem onClick={handleClose}>
+              <ListItemIcon>
+                <Logout fontSize="small" />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
