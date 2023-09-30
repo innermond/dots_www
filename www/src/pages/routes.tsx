@@ -1,0 +1,42 @@
+import {useRouteData, RouteDefinition, Navigate} from "@solidjs/router";
+import type { Component, JSX } from 'solid-js';
+import { Match, Switch, ErrorBoundary, createSignal } from 'solid-js';
+import { Alert } from '@suid/material';
+import Progress from '../components/Progress';
+import Dashboard from './dashboard';
+import LoginForm from './login';
+
+function TokenData() {
+  const [token, setToken] = createSignal('');
+  const key = 'dots.tok';
+  const tok = sessionStorage.getItem(key);
+  setToken(tok ?? '');
+  return token;
+}
+
+const alert = (err: Error): JSX.Element => (<Alert severity="error">{err.message}</Alert>);
+
+const guard = (child: Component): Component => {
+  return  (): JSX.Element => {
+    const token: any = useRouteData();
+
+    return (
+      <ErrorBoundary fallback={alert} >
+        <Switch fallback={<Progress />}>
+          <Match when={!!token()}>{child}</Match>
+          <Match when={token() === ''}>
+            <Navigate href="/login" />
+          </Match>
+        </Switch>
+      </ErrorBoundary>
+    );
+  };
+};
+
+const routes: RouteDefinition[] = [
+  {path: "/", component: guard(Dashboard), data: TokenData},
+  {path: "/login", component: LoginForm},
+  {path: "/*", component: () => <Alert severity="warning">Not found</Alert>},
+];
+
+export default routes;
