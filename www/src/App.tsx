@@ -10,8 +10,8 @@ import { Alert, Box, CircularProgress, CssBaseline } from '@suid/material';
 import { ThemeProvider } from '@suid/material/styles';
 import { Toaster } from 'solid-toast';
 
-import Dashboard from './pages/dashboard/Dashboard';
-import LoginForm from './pages/login/LoginForm';
+import Dashboard from './pages/dashboard';
+import LoginForm from './pages/login';
 import Loading from './components/Loading';
 
 import { defaultTheme } from './theme';
