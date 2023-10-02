@@ -8,11 +8,16 @@ import {
 
 import DashboardIcon from '@suid/icons-material/Dashboard';
 import AssignmentIcon from '@suid/icons-material/Assignment';
+import HeartBrokenOutlinedIcon from '@suid/icons-material/HeartBrokenOutlined';
+
+import { useNavigate } from '@solidjs/router';
+
 
 export const MainListItems: Component = () => {
+  const navigate = useNavigate();
   return (
     <>
-      <ListItemButton>
+      <ListItemButton onClick={() => navigate('/dashboard')}>
         <ListItemIcon>
           <DashboardIcon />
         </ListItemIcon>
@@ -23,16 +28,23 @@ export const MainListItems: Component = () => {
 };
 
 export const SecondaryListItems: Component = () => {
+  const navigate = useNavigate();
   return (
     <>
       <ListSubheader component="div" inset>
         Reports
       </ListSubheader>
-      <ListItemButton>
+      <ListItemButton onClick={() => navigate('/assignment')}>
         <ListItemIcon>
           <AssignmentIcon />
         </ListItemIcon>
         <ListItemText primary="Assignment" />
+      </ListItemButton>
+      <ListItemButton onClick={() => navigate('42')}>
+        <ListItemIcon>
+          <HeartBrokenOutlinedIcon />
+        </ListItemIcon>
+        <ListItemText primary="Not found" />
       </ListItemButton>
     </>
   );

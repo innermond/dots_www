@@ -5,6 +5,8 @@ import { Alert } from '@suid/material';
 import Progress from '../components/Progress';
 import Dashboard from './dashboard';
 import LoginForm from './login';
+import Assignment from './Assignment';
+import HelloDashboard from './HelloDashboard';
 import NotFound from './404';
 
 function TokenData() {
@@ -35,8 +37,10 @@ const guard = (child: Component): Component => {
 };
 
 const routes: RouteDefinition[] = [
-  {path: "/", component: guard(Dashboard), data: TokenData},
+  //{path: "/", component: guard(Dashboard), data: TokenData},
+  {path: "/dashboard", component: HelloDashboard},
   {path: "/login", component: LoginForm},
+  {path: "/", component: guard(Dashboard), data: TokenData, children: [{path: "/", component: HelloDashboard}, {path: "/assignment", component: Assignment}]},
   {path: "/*", component: NotFound},
 ];
 

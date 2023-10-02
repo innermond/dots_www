@@ -21,7 +21,7 @@ import { createSignal } from 'solid-js';
 
 import { defaultTheme as theme } from '../../theme';
 import { MainListItems, SecondaryListItems } from '../../components/ListItems';
-import { useNavigate } from '@solidjs/router';
+import { useNavigate, Outlet } from '@solidjs/router';
 
 const drawerWidth: number = 240;
 
@@ -168,6 +168,9 @@ const Dashboard: Component = () => {
           </List>
         </Box>
       </Drawer>
+      <Box sx={{width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+      <Outlet />
+      </Box>
     </Box>
   );
 };
