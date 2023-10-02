@@ -5,6 +5,7 @@ import { Alert } from '@suid/material';
 import Progress from '../components/Progress';
 import Dashboard from './dashboard';
 import LoginForm from './login';
+import NotFound from './404';
 
 function TokenData() {
   const [token, setToken] = createSignal('');
@@ -36,7 +37,7 @@ const guard = (child: Component): Component => {
 const routes: RouteDefinition[] = [
   {path: "/", component: guard(Dashboard), data: TokenData},
   {path: "/login", component: LoginForm},
-  {path: "/*", component: () => <Alert severity="warning">Not found</Alert>},
+  {path: "/*", component: NotFound},
 ];
 
 export default routes;
