@@ -1,4 +1,4 @@
-import type { Component, JSX } from 'solid-js';
+import type { Component } from 'solid-js';
 import {
   Box,
   AppBar,
@@ -21,12 +21,12 @@ import { createSignal } from 'solid-js';
 
 import { defaultTheme as theme } from '../../theme';
 import { MainListItems, SecondaryListItems } from '../../components/ListItems';
-import { useNavigate } from '@solidjs/router';
+import { useNavigate, Outlet } from '@solidjs/router';
 
 const drawerWidth: number = 240;
 
 const Dashboard: Component = () => {
-  const [open, setOpen] = createSignal(true);
+  const [open, setOpen] = createSignal(false);
   const toggleDrawer = () => {
     setOpen(!open());
   };
@@ -54,21 +54,6 @@ const Dashboard: Component = () => {
     <Box sx={{ display: 'flex' }}>
       <AppBar
         position="absolute"
-        sx={{
-          zIndex: theme.zIndex.drawer + 1,
-          transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-          ...(open() && {
-            marginLeft: `${drawerWidth}px`,
-            width: `calc(100% - ${drawerWidth}px)`,
-            transition: theme.transitions.create(['width', 'margin'], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-          }),
-        }}
       >
         <Toolbar sx={{ pr: '24px' }}>
           <IconButton
@@ -142,12 +127,17 @@ const Dashboard: Component = () => {
           </Menu>
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open()}>
-        <Box
-          sx={{
+      <Drawer
+        anchor="left"
+        open={open()}
+        PaperProps={{
+          sx:{
             width: `${drawerWidth}px`,
-          }}
-        >
+            position: 'relative',
+          }
+        }}
+        onClick={toggleDrawer}
+      >
           <Toolbar
             sx={{
               display: 'flex',
@@ -156,7 +146,7 @@ const Dashboard: Component = () => {
               px: [1],
             }}
           >
-            <IconButton onClick={toggleDrawer}>
+            <IconButton>
               <ChevronLeftIcon />
             </IconButton>
           </Toolbar>
@@ -166,8 +156,10 @@ const Dashboard: Component = () => {
             <Divider />
             <SecondaryListItems />
           </List>
-        </Box>
       </Drawer>
+      <Box sx={{width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+      <Outlet />
+      </Box>
     </Box>
   );
 };

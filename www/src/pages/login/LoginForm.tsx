@@ -117,7 +117,7 @@ const LoginForm: Component = (): JSX.Element => {
   const isDisabled = () => submitForm.loading;
   const navigate = useNavigate();
 
-  let formRef: HTMLFormElement;
+  let formRef: HTMLFormElement | null  = null;
 
   onMount(() => {
     const key = 'dots.tok';
@@ -151,7 +151,7 @@ const LoginForm: Component = (): JSX.Element => {
       };
       setInputs({ email: zero, password: zero });
       setLoading(false);
-      formRef.reset();
+      formRef?.reset();
     }
   });
 
@@ -183,7 +183,7 @@ const LoginForm: Component = (): JSX.Element => {
           Log In
         </Typography>
         <form
-          ref={formRef}
+          ref={formRef!}
           novalidate
           onInput={handleInput}
           onSubmit={setStartSubmit}

@@ -3,6 +3,9 @@ import type { Component, JSX } from 'solid-js';
 import { Match, Switch, ErrorBoundary, createSignal, lazy } from 'solid-js';
 import { Alert } from '@suid/material';
 import Progress from '../components/Progress';
+import Assignment from './Assignment';
+import HelloDashboard from './HelloDashboard';
+import NotFound from './404';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
@@ -35,9 +38,9 @@ const guard = (child: Component): Component => {
 };
 
 const routes: RouteDefinition[] = [
-  {path: "/", component: guard(Dashboard), data: TokenData},
   {path: "/login", component: LoginForm},
-  {path: "/*", component: () => <Alert severity="warning">Not found</Alert>},
+  {path: "/", component: guard(Dashboard), data: TokenData, children: [{path: "/", component: HelloDashboard}, {path: "/assignment", component: Assignment}]},
+  {path: "/*", component: NotFound},
 ];
 
 export default routes;
