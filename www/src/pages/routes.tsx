@@ -3,12 +3,13 @@ import type { Component, JSX } from 'solid-js';
 import { Match, Switch, ErrorBoundary, createSignal, lazy } from 'solid-js';
 import { Alert } from '@suid/material';
 import Progress from '../components/Progress';
-import Assignment from './Assignment';
-import HelloDashboard from './HelloDashboard';
 import NotFound from './404';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
+const HelloDashboard = lazy(() => import('./HelloDashboard'));
+const Assignment = lazy(() => import('./Assignment'));
+const NotFound = lazy(() => import('./404'));
 
 function TokenData() {
   const [token, setToken] = createSignal('');
