@@ -1,20 +1,29 @@
-import {useRouteData} from '@solidjs/router';
-import { onMount, type Component, type JSX, Accessor, onCleanup } from 'solid-js';
-import {setLoading} from '../components/Loading';
+import { onMount, type Component, type JSX, onCleanup, createResource } from 'solid-js';
 
 const HelloDashboard: Component = (): JSX.Element =>  {
+  console.log('outise');
+
+  const delay = () => {
+    return new Promise(resolve => {
+      const timespan = 1000;
+      setTimeout(() => resolve(timespan), timespan);
+    });
+  }
+
+  const [time] = createResource(delay);
+
   onMount(() => {
-    const data: any = useRouteData();
-    console.log('HelloDashboard monted', data());
-    setLoading(false);
+    console.log('HelloDashboard monted');
   });
 
   onCleanup(() => {
     console.log('HelloDashboard cleaned up');
-    setLoading(true);
-  })
+  });
 
-  return <p>HelloDashboard component works!</p>
+  return (
+      <p>{time() as string} {'HelloDashboard component works!'}</p>
+  );
+   
 };
 
 export default HelloDashboard;

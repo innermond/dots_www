@@ -1,19 +1,29 @@
-import {useRouteData} from '@solidjs/router';
-import { onMount, type Component, type JSX, onCleanup } from 'solid-js';
+import { onMount, type Component, type JSX, onCleanup, createResource, Show, createEffect } from 'solid-js';
 import {setLoading} from '../components/Loading';
 
 const Assignment: Component = (): JSX.Element =>  {
+  console.log('outise');
+
+  const delay = () => {
+    return new Promise(resolve => {
+      const timespan = 1000;
+      setTimeout(() => resolve(timespan), timespan);
+    });
+  }
+
+  const [time] = createResource(delay);
+
   onMount(() => {
-    const data: any = useRouteData();
-    console.log('Accessor monted', data());
-    setLoading(false);
+    console.log('Accessor monted');
   });
 
   onCleanup(() => {
     console.log('Accessor cleaned up');
-    setLoading(true);
   })
-  return <p>Assignment component works!</p>
+
+  return (
+      <p>{time() as string} {'Accessor component works!'}</p>
+  );
 };
 
 export default Assignment;
