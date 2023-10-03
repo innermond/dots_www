@@ -1,9 +1,18 @@
-import {useRouteData, RouteDefinition, Navigate} from "@solidjs/router";
+import { useRouteData, RouteDefinition, Navigate } from '@solidjs/router';
 import type { Component, JSX } from 'solid-js';
-import { Show, Suspense, Match, Switch, ErrorBoundary, createSignal, lazy, createEffect } from 'solid-js';
+import {
+  Show,
+  Suspense,
+  Match,
+  Switch,
+  ErrorBoundary,
+  createSignal,
+  lazy,
+  createEffect,
+} from 'solid-js';
 import { Alert } from '@suid/material';
-import Progress, {isRunning} from '../components/Progress';
-import {setLoading} from '../components/Loading';
+import Progress, { isRunning } from '../components/Progress';
+import { setLoading } from '../components/Loading';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
@@ -19,14 +28,16 @@ function TokenData() {
   return token;
 }
 
-const alert = (err: Error): JSX.Element => (<Alert severity="error">{err.message}</Alert>);
+const alert = (err: Error): JSX.Element => (
+  <Alert severity="error">{err.message}</Alert>
+);
 
 const guard = (child: Component): Component => {
-  return  (): JSX.Element => {
+  return (): JSX.Element => {
     const token: any = useRouteData();
 
     return (
-      <ErrorBoundary fallback={alert} >
+      <ErrorBoundary fallback={alert}>
         <Switch fallback={<Progress />}>
           <Match when={!!token()}>{child}</Match>
           <Match when={token() === ''}>
@@ -57,9 +68,17 @@ const progress = (child: Component): Component => {
 };
 
 const routes: RouteDefinition[] = [
-  {path: "/login", component: LoginForm},
-  {path: "/", component: guard(Dashboard), data: TokenData, children: [{path: "/", component: HelloDashboard}, {path: "/assignment", component: Assignment}]},
-  {path: "/*", component: NotFound},
+  { path: '/login', component: LoginForm },
+  {
+    path: '/',
+    component: guard(Dashboard),
+    data: TokenData,
+    children: [
+      { path: '/', component: HelloDashboard },
+      { path: '/assignment', component: Assignment },
+    ],
+  },
+  { path: '/*', component: NotFound },
 ];
 
 export default routes;

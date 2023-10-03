@@ -117,7 +117,7 @@ const LoginForm: Component = (): JSX.Element => {
   const isDisabled = () => submitForm.loading;
   const navigate = useNavigate();
 
-  let formRef: HTMLFormElement | null  = null;
+  let formRef: HTMLFormElement | null = null;
 
   onMount(() => {
     const key = 'dots.tok';

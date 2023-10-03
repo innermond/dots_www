@@ -12,7 +12,6 @@ import HeartBrokenOutlinedIcon from '@suid/icons-material/HeartBrokenOutlined';
 
 import { useNavigate } from '@solidjs/router';
 
-
 export const MainListItems: Component = () => {
   const navigate = useNavigate();
   return (

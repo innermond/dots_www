@@ -51,9 +51,7 @@ const Dashboard: Component = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar
-        position="absolute"
-      >
+      <AppBar position="absolute">
         <Toolbar sx={{ pr: '24px' }}>
           <IconButton
             size="large"
@@ -130,34 +128,42 @@ const Dashboard: Component = () => {
         anchor="left"
         open={open()}
         PaperProps={{
-          sx:{
+          sx: {
             width: `${drawerWidth}px`,
             position: 'relative',
-          }
+          },
         }}
         onClick={toggleDrawer}
       >
-          <Toolbar
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              px: [1],
-            }}
-          >
-            <IconButton>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Toolbar>
-          <Divider sx={{ my: 1 }} />
-          <List component="nav">
-            <MainListItems />
-            <Divider />
-            <SecondaryListItems />
-          </List>
+        <Toolbar
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            px: [1],
+          }}
+        >
+          <IconButton>
+            <ChevronLeftIcon />
+          </IconButton>
+        </Toolbar>
+        <Divider sx={{ my: 1 }} />
+        <List component="nav">
+          <MainListItems />
+          <Divider />
+          <SecondaryListItems />
+        </List>
       </Drawer>
-      <Box sx={{width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-      <Outlet />
+      <Box
+        sx={{
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Outlet />
       </Box>
     </Box>
   );

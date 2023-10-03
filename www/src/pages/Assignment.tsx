@@ -1,6 +1,12 @@
-import { onMount, type Component, type JSX, onCleanup, createResource } from 'solid-js';
+import {
+  onMount,
+  type Component,
+  type JSX,
+  onCleanup,
+  createResource,
+} from 'solid-js';
 
-const Assignment: Component = (): JSX.Element =>  {
+const Assignment: Component = (): JSX.Element => {
   console.log('outise');
 
   const delay = () => {
@@ -8,7 +14,7 @@ const Assignment: Component = (): JSX.Element =>  {
       const timespan = 2000;
       setTimeout(() => resolve(timespan), timespan);
     });
-  }
+  };
 
   const [time] = createResource(delay);
 
@@ -18,12 +24,13 @@ const Assignment: Component = (): JSX.Element =>  {
 
   onCleanup(() => {
     console.log('Accessor cleaned up');
-  })
+  });
 
   return (
-      <p>{time() as string} {'Accessor component works!'}</p>
+    <p>
+      {time() as string} {'Accessor component works!'}
+    </p>
   );
 };
 
 export default Assignment;
-
