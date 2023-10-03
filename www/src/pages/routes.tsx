@@ -1,6 +1,6 @@
 import {useRouteData, RouteDefinition, Navigate} from "@solidjs/router";
 import type { Component, JSX } from 'solid-js';
-import { onMount, Show, Suspense, Match, Switch, ErrorBoundary, createSignal, lazy, createEffect } from 'solid-js';
+import { Show, Suspense, Match, Switch, ErrorBoundary, createSignal, lazy, createEffect } from 'solid-js';
 import { Alert } from '@suid/material';
 import Progress, {isRunning} from '../components/Progress';
 import {setLoading} from '../components/Loading';
@@ -58,7 +58,7 @@ const progress = (child: Component): Component => {
 
 const routes: RouteDefinition[] = [
   {path: "/login", component: LoginForm},
-  {path: "/", component: guard(Dashboard), data: TokenData, children: [{path: "/", component: progress(HelloDashboard)}, {path: "/assignment", component: progress(Assignment)}]},
+  {path: "/", component: guard(Dashboard), data: TokenData, children: [{path: "/", component: HelloDashboard}, {path: "/assignment", component: Assignment}]},
   {path: "/*", component: NotFound},
 ];
 
