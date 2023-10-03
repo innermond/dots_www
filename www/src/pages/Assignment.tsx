@@ -1,12 +1,11 @@
-import { onMount, type Component, type JSX, onCleanup, createResource, Show, createEffect } from 'solid-js';
-import {setLoading} from '../components/Loading';
+import { onMount, type Component, type JSX, onCleanup, createResource } from 'solid-js';
 
 const Assignment: Component = (): JSX.Element =>  {
   console.log('outise');
 
   const delay = () => {
     return new Promise(resolve => {
-      const timespan = 1000;
+      const timespan = 2000;
       setTimeout(() => resolve(timespan), timespan);
     });
   }
