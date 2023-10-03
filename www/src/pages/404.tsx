@@ -42,7 +42,7 @@ export default function NotFound(): JSX.Element {
           minHeight: '100vh'
         }}
       >
-        <Stack direction="row" gap="1rem">
+        <Stack direction="row" gap="1rem" sx={{alignItems: 'center'}}>
           {icon}
         <Typography variant="h6">
           We couldn’t find the page. Perhaps you’ve mistyped the URL? Be sure to check your spelling.
