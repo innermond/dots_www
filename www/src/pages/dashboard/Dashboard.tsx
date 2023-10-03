@@ -19,7 +19,6 @@ import Logout from '@suid/icons-material/Logout';
 
 import { createSignal } from 'solid-js';
 
-import { defaultTheme as theme } from '../../theme';
 import { MainListItems, SecondaryListItems } from '../../components/ListItems';
 import { useNavigate, Outlet } from '@solidjs/router';
 

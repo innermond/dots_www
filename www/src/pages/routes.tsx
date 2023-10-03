@@ -3,7 +3,6 @@ import type { Component, JSX } from 'solid-js';
 import { Match, Switch, ErrorBoundary, createSignal, lazy } from 'solid-js';
 import { Alert } from '@suid/material';
 import Progress from '../components/Progress';
-import NotFound from './404';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
