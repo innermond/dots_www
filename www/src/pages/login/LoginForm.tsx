@@ -159,7 +159,6 @@ const LoginForm: Component = (): JSX.Element => {
     if (submitForm.error) {
       const data = submitForm.error;
       const message = data?.error ?? data?.cause?.error ?? 'An error occured';
-      //const message = 'An error occured';
       toast.custom(() => <Alert severity="error">{message}</Alert>, {
         duration: 6000,
         unmountDelay: 0,

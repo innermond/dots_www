@@ -1,10 +1,11 @@
 import {useRouteData, RouteDefinition, Navigate} from "@solidjs/router";
 import type { Component, JSX } from 'solid-js';
-import { Match, Switch, ErrorBoundary, createSignal } from 'solid-js';
+import { Match, Switch, ErrorBoundary, createSignal, lazy } from 'solid-js';
 import { Alert } from '@suid/material';
 import Progress from '../components/Progress';
-import Dashboard from './dashboard';
-import LoginForm from './login';
+
+const LoginForm = lazy(() => import('./login'));
+const Dashboard = lazy(() => import('./dashboard'));
 
 function TokenData() {
   const [token, setToken] = createSignal('');
