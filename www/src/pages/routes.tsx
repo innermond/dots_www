@@ -1,8 +1,9 @@
 import {useRouteData, RouteDefinition, Navigate} from "@solidjs/router";
 import type { Component, JSX } from 'solid-js';
-import { Match, Switch, ErrorBoundary, createSignal, lazy } from 'solid-js';
+import { onMount, Show, Suspense, Match, Switch, ErrorBoundary, createSignal, lazy, createEffect } from 'solid-js';
 import { Alert } from '@suid/material';
-import Progress from '../components/Progress';
+import Progress, {isRunning} from '../components/Progress';
+import {setLoading} from '../components/Loading';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
@@ -37,9 +38,27 @@ const guard = (child: Component): Component => {
   };
 };
 
+const progress = (child: Component): Component => {
+  return (): JSX.Element => {
+    createEffect(() => {
+      if (isRunning()) {
+        setLoading(true);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return (
+      <Suspense fallback={<Progress notifyIsRunning />}>
+        <Show when={true}>{child}</Show>
+      </Suspense>
+    );
+  };
+};
+
 const routes: RouteDefinition[] = [
   {path: "/login", component: LoginForm},
-  {path: "/", component: guard(Dashboard), data: TokenData, children: [{path: "/", component: HelloDashboard}, {path: "/assignment", component: Assignment}]},
+  {path: "/", component: guard(Dashboard), data: TokenData, children: [{path: "/", component: progress(HelloDashboard)}, {path: "/assignment", component: progress(Assignment)}]},
   {path: "/*", component: NotFound},
 ];
 
