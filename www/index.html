@@ -25,13 +25,12 @@
         z-index: 9999;
         opacity: 1;
         visibility: visible;
-        transition: opacity 0.5s, visibility 0.5s;
+        transition: opacity 0.5s;
         color: #3498db;
       }
 
       #loading-indicator.hidden {
         opacity: 0;
-        visibility: hidden;
       }
 
       .spinner {
@@ -56,9 +55,13 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        // Hide the loading indicator when the DOM is ready
         const $indicator = document.getElementById('loading-indicator');
         $indicator.classList.add('hidden');
+        $indicator.addEventListener('transitionend', () => {
+          if (!$indicator.style.opacity) {
+            $indicator.remove();
+          }
+        });
       });
     </script>
 
