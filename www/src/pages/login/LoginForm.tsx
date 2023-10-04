@@ -76,24 +76,6 @@ const messages: MessagesMap<'email' | 'password'> = {
   ],
 };
 
-const [inputs, setInputs] = createStore(defaultInputs);
-
-function handleInput(e: Event) {
-  e.preventDefault();
-  const { name, value } = e.target as HTMLInputElement;
-  if (!['email', 'password'].includes(name)) return;
-
-  const multierrors: string[] = validate<'email' | 'password'>(
-    name,
-    value,
-    validators,
-    messages,
-  );
-  setInputs(name as 'email' | 'password', v => {
-    return { ...v, error: multierrors.length > 0, message: multierrors };
-  });
-}
-
 const Copyright: Component = (): JSX.Element => {
   return (
     <Typography
@@ -111,6 +93,25 @@ const Copyright: Component = (): JSX.Element => {
 };
 
 const LoginForm: Component = (): JSX.Element => {
+
+  const [inputs, setInputs] = createStore(defaultInputs);
+
+  function handleInput(e: Event) {
+    e.preventDefault();
+    const { name, value } = e.target as HTMLInputElement;
+    if (!['email', 'password'].includes(name)) return;
+
+    const multierrors: string[] = validate<'email' | 'password'>(
+      name,
+      value,
+      validators,
+      messages,
+    );
+    setInputs(name as 'email' | 'password', v => {
+      return { ...v, error: multierrors.length > 0, message: multierrors };
+    });
+  }
+
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
 
   const [submitForm] = createResource(startSubmit, fetchLoginData);
@@ -119,12 +120,10 @@ const LoginForm: Component = (): JSX.Element => {
 
   let formRef: HTMLFormElement | null = null;
 
-  onMount(() => {
-    const key = 'dots.tok';
-    if (!!sessionStorage.getItem(key)) {
-      navigate('/');
-    }
-  });
+  const key = 'dots.tok';
+  if (!!sessionStorage.getItem(key)) {
+    navigate('/');
+  }
 
   createEffect(() => {
     if (submitForm.loading) {
@@ -144,13 +143,13 @@ const LoginForm: Component = (): JSX.Element => {
       }
 
       toast.dismiss();
+      setLoading(false);
 
       const zero = {
         error: false,
         message: [],
       };
       setInputs({ email: zero, password: zero });
-      setLoading(false);
       formRef?.reset();
     }
   });
