@@ -11,7 +11,7 @@ const Assignment: Component = (): JSX.Element => {
 
   const delay = () => {
     return new Promise(resolve => {
-      const timespan = 2000;
+      const timespan = 1000;
       setTimeout(() => resolve(timespan), timespan);
     });
   };
