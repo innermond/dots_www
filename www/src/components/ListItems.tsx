@@ -1,4 +1,5 @@
-import type { Component } from 'solid-js';
+import type { Component, JSX } from 'solid-js';
+import { Show, For } from 'solid-js';
 import {
   ListItemButton,
   ListItemIcon,
@@ -10,41 +11,73 @@ import DashboardIcon from '@suid/icons-material/Dashboard';
 import AssignmentIcon from '@suid/icons-material/Assignment';
 import HeartBrokenOutlinedIcon from '@suid/icons-material/HeartBrokenOutlined';
 
-import { useNavigate } from '@solidjs/router';
+import { useNavigate, type Navigator } from '@solidjs/router';
+
+type GetNav = {
+  (): Navigator;
+  instance?: Navigator;
+ }
+// TODO: using here const navigate = useNavigate() produces error
+const  getNavigate: GetNav = (): Navigator => {
+  if (!getNavigate?.instance) {
+    getNavigate.instance = useNavigate();
+  }
+  return getNavigate.instance;
+}
+
+const listItem = (icon: any, text: string, path: string): JSX.Element => {
+  console.log(icon, text, path);
+  const navigate = getNavigate();
+  return (<ListItemButton onClick={() => navigate(path)}>
+    <ListItemIcon>
+      <Show when={true}>
+      {icon}
+      </Show>
+    </ListItemIcon>
+    <ListItemText primary={text} />
+  </ListItemButton>);
+};
 
 export const MainListItems: Component = () => {
-  const navigate = useNavigate();
+  const items = [
+    {
+      icon: DashboardIcon,
+      text: 'Dashboard',
+      path: '/',
+    },
+    {
+      icon: HeartBrokenOutlinedIcon,
+      text: 'Not Found',
+      path: '/42',
+    },
+  ];
   return (
     <>
-      <ListItemButton onClick={() => navigate('/')}>
-        <ListItemIcon>
-          <DashboardIcon />
-        </ListItemIcon>
-        <ListItemText primary="Dashboard" />
-      </ListItemButton>
+      <For each={items}>{item => listItem(item.icon, item.text, item.path) }</For>
     </>
   );
 };
 
 export const SecondaryListItems: Component = () => {
-  const navigate = useNavigate();
+  const items = [
+    {
+      icon: AssignmentIcon,
+      text: 'Assignment',
+      path: '/assignment',
+    },
+    {
+      icon: HeartBrokenOutlinedIcon,
+      text: 'Not Found',
+      path: '/42',
+    },
+  ];
+
   return (
     <>
       <ListSubheader component="div" inset>
         Reports
       </ListSubheader>
-      <ListItemButton onClick={() => navigate('/assignment')}>
-        <ListItemIcon>
-          <AssignmentIcon />
-        </ListItemIcon>
-        <ListItemText primary="Assignment" />
-      </ListItemButton>
-      <ListItemButton onClick={() => navigate('42')}>
-        <ListItemIcon>
-          <HeartBrokenOutlinedIcon />
-        </ListItemIcon>
-        <ListItemText primary="Not found" />
-      </ListItemButton>
+      <For each={items}>{item => listItem(item.icon, item.text, item.path) }</For>
     </>
   );
-};
+  }
