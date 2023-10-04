@@ -13,14 +13,16 @@ import {
   MenuItem,
   Avatar,
 } from '@suid/material';
-import MenuIcon from '@suid/icons-material/Menu';
-import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
-import Logout from '@suid/icons-material/Logout';
-
 import { createSignal } from 'solid-js';
+import MenuIcon from '@suid/icons-material/Menu';
+import Logout from '@suid/icons-material/Logout';
+import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
+import { useNavigate, Outlet } from '@solidjs/router';
 
 import { MainListItems, SecondaryListItems } from '../../components/ListItems';
-import { useNavigate, Outlet } from '@solidjs/router';
+
+import appstate from '../../lib/app';
+const { currentPageTitle } = appstate;
 
 const drawerWidth: number = 240;
 
@@ -69,7 +71,7 @@ const Dashboard: Component = () => {
             color="inherit"
             sx={{ flexGrow: 1, whiteSpace: 'nowrap' }}
           >
-            Dashboard
+            {currentPageTitle()}
           </Typography>
           <IconButton color="inherit" size="large" onclick={handleMenuProfile}>
             <Avatar

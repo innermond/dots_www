@@ -13,6 +13,9 @@ import HeartBrokenOutlinedIcon from '@suid/icons-material/HeartBrokenOutlined';
 
 import { useNavigate, type Navigator } from '@solidjs/router';
 
+import appstate from '../lib/app';
+const { setCurrentPageTitle } = appstate;
+
 type GetNav = {
   (): Navigator;
   instance?: Navigator;
@@ -25,10 +28,17 @@ const  getNavigate: GetNav = (): Navigator => {
   return getNavigate.instance;
 }
 
-const listItem = (icon: any, text: string, path: string): JSX.Element => {
-  console.log(icon, text, path);
+const goto = (path: string, text: string): any => {
   const navigate = getNavigate();
-  return (<ListItemButton onClick={() => navigate(path)}>
+  console.log('goto', text)
+  return () => {
+    setCurrentPageTitle(text);
+    navigate(path);
+  }
+};
+
+const listItem = (icon: any, text: string, path: string): JSX.Element => {
+  return (<ListItemButton onClick={goto(path, text)}>
     <ListItemIcon>
       <Show when={true}>
       {icon}
