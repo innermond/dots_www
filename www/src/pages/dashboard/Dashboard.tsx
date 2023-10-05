@@ -13,13 +13,13 @@ import {
   MenuItem,
   Avatar,
 } from '@suid/material';
-import { createSignal } from 'solid-js';
+import { createEffect, createMemo, createSignal } from 'solid-js';
 import MenuIcon from '@suid/icons-material/Menu';
 import Logout from '@suid/icons-material/Logout';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
-import { useNavigate, Outlet } from '@solidjs/router';
+import { useNavigate, Outlet, useLocation } from '@solidjs/router';
 
-import { MainListItems, SecondaryListItems } from '../../components/ListItems';
+import ListItems, { MainListItems, SecondaryListItems } from './ListItems';
 
 import appstate from '../../lib/app';
 const { currentPageTitle } = appstate;
@@ -43,6 +43,9 @@ const Dashboard: Component = () => {
   };
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = createMemo(() => location.pathname);
+  createEffect(() => console.log(pathname()));
 
   const handleLogout = () => {
     const key = 'dots.tok';
@@ -151,9 +154,7 @@ const Dashboard: Component = () => {
         </Toolbar>
         <Divider sx={{ my: 1 }} />
         <List component="nav">
-          <MainListItems />
-          <Divider />
-          <SecondaryListItems />
+          <ListItems />
         </List>
       </Drawer>
       <Box
