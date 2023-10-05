@@ -1,5 +1,5 @@
 import type { Component, JSX } from 'solid-js';
-import { createSignal, createEffect, createResource, onMount } from 'solid-js';
+import { createSignal, createEffect, createResource } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
   Typography,

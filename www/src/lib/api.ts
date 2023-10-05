@@ -4,8 +4,9 @@ async function send<T>(
   method: string,
   url: string,
   data: T,
+  extraHeaders?: {[key: string]: string}, 
 ): Promise<JSON | Error> {
-  const headers: HeadersInit = { 'Content-type': 'application/json' };
+  const headers: HeadersInit = { 'Content-type': 'application/json', ...extraHeaders };
   const opts: RequestInit = { method, headers };
 
   opts.mode = 'cors';
@@ -34,4 +35,13 @@ type LoginParams = {
 
 export function login(data: LoginParams): Promise<JSON | Error> {
   return send<LoginParams>('POST', '/login', data);
+}
+
+const key = 'dots.tok';
+export const company = {
+  all: async function (run: boolean): Promise<JSON | Error> {
+    console.log('run', run)
+    const headers = {'Authorization': 'Bearer ' + sessionStorage.getItem(key) ?? ''};
+    return send<undefined>('GET', '/companies', undefined, headers);
+  }
 }

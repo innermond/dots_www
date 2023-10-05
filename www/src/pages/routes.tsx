@@ -17,7 +17,7 @@ import { setLoading } from '../components/Loading';
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
 const HelloDashboard = lazy(() => import('./HelloDashboard'));
-const Assignment = lazy(() => import('./Assignment'));
+const Company = lazy(() => import('./Company'));
 const NotFound = lazy(() => import('./404'));
 
 function TokenData() {
@@ -75,7 +75,7 @@ const routes: RouteDefinition[] = [
     data: TokenData,
     children: [
       { path: '/', component: HelloDashboard },
-      { path: '/assignment', component: Assignment },
+      { path: '/company', component: Company },
     ],
   },
   { path: '/*', component: NotFound },

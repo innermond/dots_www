@@ -12,7 +12,7 @@ const items: Item[] = [
   },
   'Reports',
   {
-  '/assignment': [AssignmentIcon, 'Assignment',],
+  '/company': [AssignmentIcon, 'Company',],
   '/43': [HeartBrokenOutlinedIcon, 'Not Found',],
   },
 ];
