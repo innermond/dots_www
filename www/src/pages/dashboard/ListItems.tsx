@@ -9,14 +9,9 @@ import {
   SvgIcon,
 } from '@suid/material';
 
-import HeartBrokenOutlinedIcon from '@suid/icons-material/HeartBrokenOutlined';
-
 import { useNavigate } from '@solidjs/router';
 
 import items from './items';
-
-import appstate from '../../lib/app';
-const { setCurrentPageTitle } = appstate;
 
 const listItem = (icon: any, text: string, path: string): JSX.Element => {
   const navigate = useNavigate();

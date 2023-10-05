@@ -19,10 +19,11 @@ import Logout from '@suid/icons-material/Logout';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import { useNavigate, Outlet, useLocation } from '@solidjs/router';
 
-import ListItems, { MainListItems, SecondaryListItems } from './ListItems';
+import ListItems from './ListItems';
+import  {getPathTitleMap} from './items';
 
 import appstate from '../../lib/app';
-const { currentPageTitle } = appstate;
+const { currentPageTitle, setCurrentPageTitle } = appstate;
 
 const drawerWidth: number = 240;
 
@@ -42,11 +43,15 @@ const Dashboard: Component = () => {
     setAnchorProfile(evt.currentTarget as HTMLElement);
   };
 
-  const navigate = useNavigate();
   const location = useLocation();
   const pathname = createMemo(() => location.pathname);
-  createEffect(() => console.log(pathname()));
+  createEffect(() => {
+    console.log(pathname());
+    const title = getPathTitleMap().get(pathname() ?? 'DOTS');
+    setCurrentPageTitle(title);
+  });
 
+  const navigate = useNavigate();
   const handleLogout = () => {
     const key = 'dots.tok';
     sessionStorage.removeItem(key);
