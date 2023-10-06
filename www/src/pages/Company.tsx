@@ -1,23 +1,38 @@
 import {
+  For,
   onMount,
   onCleanup,
   createResource,
   createSignal,
   createEffect,
+  Switch,
+  Show,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@suid/material";
 import { SelectChangeEvent } from "@suid/material/Select";
 
 import { company } from '../lib/api';
+
 const Company: Component = (): JSX.Element => {
   
   const [change, setChange] = createSignal(false);
-  const [companies] = createResource(change, company.all);
-    createEffect(() => {
-    console.log(companies());
-    setChange(false);
-    })
+  const [result] = createResource(change, company.all);
+  const companies = () => {
+    const info = result();
+    if (info instanceof Error || !info) {
+      return [];
+    }
+
+    const {data, n} = info as any;
+    return n ? data : [];
+  };
+
+  setChange(true);
+
+  createEffect(() => {
+    console.log(result(), result.state);
+  })
 
   onMount(() => {
     console.log('Company mounted');
@@ -27,27 +42,33 @@ const Company: Component = (): JSX.Element => {
     console.log('Company cleaned up');
   });
   
-  const handleChange = (event: SelectChangeEvent) => {
-    console.log(event.target.value);
-    setChange(true);
+  const [valueOption, setValueOption] = createSignal("");
 
+  const handleChange = (e: SelectChangeEvent) => {
+    setValueOption(e.target.value);
   };
 
   return (
       <Box sx={{ minWidth: 120 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">Age</InputLabel>
+        <InputLabel id="demo-simple-select-label">Company</InputLabel>
+
+<Show when={result.state === 'ready'}>
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={20}
-          label="Age"
+          label="Company"
+          value={valueOption()}
           onChange={handleChange}
         >
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {companies().map((c:any) => {
+            return <MenuItem value={c.id}>{c.longname}</MenuItem>;
+          })}
         </Select>
+</Show>
       </FormControl>
     </Box>
   );
