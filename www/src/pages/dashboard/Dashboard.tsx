@@ -12,6 +12,9 @@ import {
   Menu,
   MenuItem,
   Avatar,
+  ListItemButton,
+  ListItemText,
+  ListSubheader,
 } from '@suid/material';
 import { createEffect, createMemo, createSignal } from 'solid-js';
 import MenuIcon from '@suid/icons-material/Menu';
@@ -161,6 +164,13 @@ const Dashboard: Component = () => {
         <Divider sx={{ my: 1 }} />
         <List component="nav">
           <ListItems />
+          <Divider />
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon>
+              <Logout fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
         </List>
       </Drawer>
       <Box
