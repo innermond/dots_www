@@ -14,7 +14,7 @@ const CompanyDetails: Component = (): JSX.Element => {
 
   const delay = () => {
     return new Promise(resolve => {
-      const timespan = 1000;
+      const timespan = 100;
       setTimeout(() => resolve(timespan), timespan);
     });
   };

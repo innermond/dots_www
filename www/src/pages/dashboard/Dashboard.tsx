@@ -6,15 +6,14 @@ import {
   IconButton,
   Drawer,
   Divider,
-  List,
-  ListItemIcon,
   Typography,
   Menu,
   MenuItem,
   Avatar,
+  List,
+  ListItemIcon,
   ListItemButton,
   ListItemText,
-  ListSubheader,
 } from '@suid/material';
 import { createEffect, createMemo, createSignal } from 'solid-js';
 import MenuIcon from '@suid/icons-material/Menu';
@@ -24,6 +23,7 @@ import { useNavigate, Outlet, useLocation } from '@solidjs/router';
 
 import ListItems from './ListItems';
 import  {getPathTitleMap} from './items';
+import MenuItemCompany from '../company/menuitem-companies';
 
 import appstate from '../../lib/app';
 const { currentPageTitle, setCurrentPageTitle } = appstate;
@@ -49,7 +49,6 @@ const Dashboard: Component = () => {
   const location = useLocation();
   const pathname = createMemo(() => location.pathname);
   createEffect(() => {
-    console.log(pathname());
     const title = getPathTitleMap().get(pathname() ?? 'DOTS');
     setCurrentPageTitle(title);
   });
@@ -139,6 +138,7 @@ const Dashboard: Component = () => {
         </Toolbar>
       </AppBar>
       <Drawer
+        variant="temporary"
         anchor="left"
         open={open()}
         PaperProps={{
@@ -164,6 +164,8 @@ const Dashboard: Component = () => {
         <Divider sx={{ my: 1 }} />
         <List component="nav">
           <ListItems />
+          <Divider />
+          <MenuItemCompany />
           <Divider />
           <ListItemButton onClick={handleLogout}>
             <ListItemIcon>
