@@ -77,7 +77,8 @@ const Dashboard: Component = () => {
             component="h1"
             variant="h6"
             color="inherit"
-            sx={{ flexGrow: 1, whiteSpace: 'nowrap' }}
+            title={currentPageTitle()}
+            sx={{ flexGrow: 1,  textTransform: 'capitalize', }}
           >
             {currentPageTitle()}
           </Typography>

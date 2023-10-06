@@ -1,6 +1,5 @@
 import DashboardIcon from '@suid/icons-material/Dashboard';
 import AssignmentIcon from '@suid/icons-material/Assignment';
-import HeartBrokenOutlinedIcon from '@suid/icons-material/HeartBrokenOutlined';
 import SvgIcon from '@suid/material/SvgIcon';
 
 type Item = null|string|{[key: string]: [typeof SvgIcon, string]}
@@ -8,12 +7,9 @@ const items: Item[] = [
   null,
   {
   '/': [DashboardIcon, 'Dashboard',],
-  '/42': [HeartBrokenOutlinedIcon, 'Not Found',],
   },
-  'Reports',
   {
   '/company': [AssignmentIcon, 'Company',],
-  '/43': [HeartBrokenOutlinedIcon, 'Not Found',],
   },
 ];
 

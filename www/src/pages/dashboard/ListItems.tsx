@@ -6,7 +6,6 @@ import {
   ListItemIcon,
   ListItemText,
   ListSubheader,
-  SvgIcon,
 } from '@suid/material';
 
 import { useNavigate } from '@solidjs/router';
