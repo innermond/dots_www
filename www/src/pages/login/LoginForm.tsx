@@ -93,7 +93,6 @@ const Copyright: Component = (): JSX.Element => {
 };
 
 const LoginForm: Component = (): JSX.Element => {
-
   const [inputs, setInputs] = createStore(defaultInputs);
 
   function handleInput(e: Event) {

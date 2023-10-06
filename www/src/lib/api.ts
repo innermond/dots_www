@@ -4,9 +4,12 @@ async function send<T>(
   method: string,
   url: string,
   data: T,
-  extraHeaders?: {[key: string]: string}, 
+  extraHeaders?: { [key: string]: string },
 ): Promise<JSON | Error> {
-  const headers: HeadersInit = { 'Content-type': 'application/json', ...extraHeaders };
+  const headers: HeadersInit = {
+    'Content-type': 'application/json',
+    ...extraHeaders,
+  };
   const opts: RequestInit = { method, headers };
 
   opts.mode = 'cors';
@@ -40,14 +43,21 @@ export function login(data: LoginParams): Promise<JSON | Error> {
 const key = 'dots.tok';
 export const company = {
   all: async function (run: boolean): Promise<JSON | Error> {
-    console.log('run', run)
-    const headers = {'Authorization': 'Bearer ' + sessionStorage.getItem(key) ?? ''};
+    console.log('run', run);
+    const headers = {
+      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
+    };
     try {
-      const out = await send<undefined>('GET', '/companies', undefined, headers);
+      const out = await send<undefined>(
+        'GET',
+        '/companies',
+        undefined,
+        headers,
+      );
       return Promise.resolve(out);
     } catch (err) {
       return err as Error;
     }
     //return send<undefined>('GET', '/companies', undefined, headers);
-  }
-}
+  },
+};

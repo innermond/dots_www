@@ -1,10 +1,6 @@
-import {
-  onMount,
-  onCleanup,
-  createResource,
-} from 'solid-js';
+import { onMount, onCleanup, createResource } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
-import {useParams} from '@solidjs/router';
+import { useParams } from '@solidjs/router';
 
 import appstate from '../../lib/app';
 const { currentCompany, setCurrentPageTitle } = appstate;
@@ -22,7 +18,7 @@ const CompanyDetails: Component = (): JSX.Element => {
   const [time] = createResource(delay);
 
   onMount(() => {
-    const n = currentCompany().longname || 'Company'; 
+    const n = currentCompany().longname || 'Company';
     setCurrentPageTitle(n);
   });
 
@@ -31,11 +27,11 @@ const CompanyDetails: Component = (): JSX.Element => {
   });
 
   return (
-    <p>{params.id}
+    <p>
+      {params.id}
       {time() as string} {'CompanyDetails component works!'}
     </p>
   );
 };
 
 export default CompanyDetails;
-

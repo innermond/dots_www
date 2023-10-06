@@ -30,8 +30,8 @@ function TokenData() {
 }
 
 const alert = (err: Error): JSX.Element => {
-  console.log(err)
-  return <Alert severity="error">{err.message}</Alert>
+  console.log(err);
+  return <Alert severity="error">{err.message}</Alert>;
 };
 
 const guard = (child: Component): Component => {
@@ -77,7 +77,7 @@ const routes: RouteDefinition[] = [
     data: TokenData,
     children: [
       { path: '/', component: HelloDashboard },
-      { path: '/company/:id', component: CompanyDetails, },
+      { path: '/company/:id', component: CompanyDetails },
       { path: '/company', component: Company },
     ],
   },

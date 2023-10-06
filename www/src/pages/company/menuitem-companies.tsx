@@ -1,7 +1,7 @@
 import { JSX, Component, Show, createSignal } from 'solid-js';
 import AssignmentIcon from '@suid/icons-material/Assignment';
-import ExpandLessIcon from "@suid/icons-material/ExpandLess";
-import ExpandMoreIcon from "@suid/icons-material/ExpandMore";
+import ExpandLessIcon from '@suid/icons-material/ExpandLess';
+import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import {
   List,
   ListItemIcon,
@@ -16,7 +16,7 @@ const MenuItemCompany: Component = (): JSX.Element => {
 
   const handleClick = (evt: Event) => {
     evt.stopPropagation();
-    setOpen((prev) => !prev);
+    setOpen(prev => !prev);
   };
 
   const handleCompanyClick = () => {
@@ -26,24 +26,23 @@ const MenuItemCompany: Component = (): JSX.Element => {
 
   return (
     <>
-  <ListItemButton onClick={handleClick}>
-    <ListItemIcon>
-      <AssignmentIcon fontSize="small" />
-    </ListItemIcon>
-    <ListItemText primary="Companies" />
-    {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-  </ListItemButton>
-  <Show when={open()}>
-  <List disablePadding>
-  <ListItemButton onClick={handleCompanyClick}>
-    <ListItemIcon>
-    </ListItemIcon>
-    <ListItemText secondary="Volt-media" />
-  </ListItemButton>
-  </List>
-  </Show>
+      <ListItemButton onClick={handleClick}>
+        <ListItemIcon>
+          <AssignmentIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText primary="Companies" />
+        {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+      </ListItemButton>
+      <Show when={open()}>
+        <List disablePadding>
+          <ListItemButton onClick={handleCompanyClick}>
+            <ListItemIcon></ListItemIcon>
+            <ListItemText secondary="Volt-media" />
+          </ListItemButton>
+        </List>
+      </Show>
     </>
-    )
+  );
 };
 
-export default MenuItemCompany; 
+export default MenuItemCompany;

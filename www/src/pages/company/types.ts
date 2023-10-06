@@ -1,8 +1,8 @@
 export type CompanyData = {
-  id: number,
-  longname: string,
-  rn: string,
-  tin: string,
+  id: number;
+  longname: string;
+  rn: string;
+  tin: string;
 };
 
 export const companyZero = {

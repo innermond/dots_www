@@ -22,7 +22,7 @@ import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import { useNavigate, Outlet, useLocation } from '@solidjs/router';
 
 import ListItems from './ListItems';
-import  {getPathTitleMap} from './items';
+import { getPathTitleMap } from './items';
 import MenuItemCompany from '../company/menuitem-companies';
 
 import appstate from '../../lib/app';
@@ -80,7 +80,7 @@ const Dashboard: Component = () => {
             variant="h6"
             color="inherit"
             title={currentPageTitle()}
-            sx={{ flexGrow: 1,  textTransform: 'capitalize', }}
+            sx={{ flexGrow: 1, textTransform: 'capitalize' }}
           >
             {currentPageTitle()}
           </Typography>
