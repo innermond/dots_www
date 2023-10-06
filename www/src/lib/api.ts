@@ -42,6 +42,12 @@ export const company = {
   all: async function (run: boolean): Promise<JSON | Error> {
     console.log('run', run)
     const headers = {'Authorization': 'Bearer ' + sessionStorage.getItem(key) ?? ''};
-    return send<undefined>('GET', '/companies', undefined, headers);
+    try {
+      const out = await send<undefined>('GET', '/companies', undefined, headers);
+      return Promise.resolve(out);
+    } catch (err) {
+      return err as Error;
+    }
+    //return send<undefined>('GET', '/companies', undefined, headers);
   }
 }
