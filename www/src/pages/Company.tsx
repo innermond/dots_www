@@ -1,16 +1,22 @@
 import {
-  For,
   onMount,
   onCleanup,
   createResource,
   createSignal,
   createEffect,
-  Switch,
   Show,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@suid/material";
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow, } from "@suid/material";
 import { SelectChangeEvent } from "@suid/material/Select";
+import { A } from "@solidjs/router";
 
 import { company } from '../lib/api';
 
@@ -49,28 +55,37 @@ const Company: Component = (): JSX.Element => {
   };
 
   return (
-      <Box sx={{ minWidth: 120 }}>
-      <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">Company</InputLabel>
-
 <Show when={result.state === 'ready'}>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          label="Company"
-          value={valueOption()}
-          onChange={handleChange}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
+    <TableContainer component={Paper}>
+      <Table size="small" aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Long name</TableCell>
+            <TableCell align="right">RN</TableCell>
+            <TableCell align="right">TIN</TableCell>
+            <TableCell align="right">Action</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {companies().map((c:any) => {
-            return <MenuItem value={c.id}>{c.longname}</MenuItem>;
+           return (<TableRow hover
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell component="th" scope="row">
+                  {c.longname}
+                </TableCell>
+                <TableCell align="right">{c.rn}</TableCell>
+                <TableCell align="right">{c.tin}</TableCell>
+                <TableCell align="right">
+                  <A href={"./" + c.id}>Go to</A>
+                </TableCell>
+              </TableRow>
+            )
           })}
-        </Select>
+        </TableBody>
+      </Table>
+    </TableContainer>
 </Show>
-      </FormControl>
-    </Box>
   );
 };
 
