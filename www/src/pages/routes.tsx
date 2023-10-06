@@ -17,8 +17,8 @@ import { setLoading } from '../components/Loading';
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
 const HelloDashboard = lazy(() => import('./HelloDashboard'));
-const Company = lazy(() => import('./Company'));
-const CompanyDetails = lazy(() => import('./CompanyDetails'));
+const Company = lazy(() => import('./company/Company'));
+const CompanyDetails = lazy(() => import('./company/CompanyDetails'));
 const NotFound = lazy(() => import('./404'));
 
 function TokenData() {

@@ -18,8 +18,10 @@ import {
 import { SelectChangeEvent } from "@suid/material/Select";
 import { A } from "@solidjs/router";
 
-import { company } from '../lib/api';
+import { company } from '../../lib/api';
 
+import appstate from '../../lib/app';
+const { setCurrentCompany } = appstate;
 const Company: Component = (): JSX.Element => {
   
   const [change, setChange] = createSignal(false);
@@ -47,12 +49,6 @@ const Company: Component = (): JSX.Element => {
   onCleanup(() => {
     console.log('Company cleaned up');
   });
-  
-  const [valueOption, setValueOption] = createSignal("");
-
-  const handleChange = (e: SelectChangeEvent) => {
-    setValueOption(e.target.value);
-  };
 
   return (
 <Show when={result.state === 'ready'}>
@@ -77,7 +73,12 @@ const Company: Component = (): JSX.Element => {
                 <TableCell align="right">{c.rn}</TableCell>
                 <TableCell align="right">{c.tin}</TableCell>
                 <TableCell align="right">
-                  <A href={"./" + c.id}>Go to</A>
+                  <A
+                    onClick={() => setCurrentCompany(c)}
+                    href={"./" + c.id}
+                  >
+                  Go to
+                  </A>
                 </TableCell>
               </TableRow>
             )
