@@ -28,9 +28,10 @@ function TokenData() {
   return token;
 }
 
-const alert = (err: Error): JSX.Element => (
-  <Alert severity="error">{err.message}</Alert>
-);
+const alert = (err: Error): JSX.Element => {
+  console.log(err)
+  return <Alert severity="error">{err.message}</Alert>
+};
 
 const guard = (child: Component): Component => {
   return (): JSX.Element => {
