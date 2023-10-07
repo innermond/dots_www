@@ -1,7 +1,8 @@
 import { JSX, createSignal, onMount, onCleanup } from 'solid-js';
 import { Box, CircularProgress } from '@suid/material';
+import {CircularProgressProps} from '@suid/material/CircularProgress';
 
-type PropsOutput = { notifyIsRunning?: boolean };
+type PropsOutput = CircularProgressProps & { notifyIsRunning?: boolean, height?: string };
 
 const [isRunning, setIsRunning] = createSignal<boolean>();
 
@@ -11,16 +12,17 @@ const Progress = (props: PropsOutput): JSX.Element => {
     onCleanup(() => setIsRunning(false));
   }
 
+  const {notifyIsRunning, height, ...circularProgressProps} = props;
   return (
     <Box
       sx={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100vh',
+        height: props.height || '100vh',
       }}
     >
-      <CircularProgress />
+      <CircularProgress {...circularProgressProps} />
     </Box>
   );
 };
