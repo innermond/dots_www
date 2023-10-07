@@ -9,7 +9,7 @@ import {
   ListItemButton,
   ListItemText,
 } from '@suid/material';
-import { useNavigate } from '@solidjs/router';
+import { Navigate, useNavigate } from '@solidjs/router';
 import {CompanyData, companyZero} from './types';
 import Progress from '../../components/Progress';
 
@@ -25,10 +25,14 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (props): JSX.Element =>
   const [open, setOpen] = createSignal(false);
   const navigate = useNavigate();
 
-  console.log('run cmp', props.data(), props.data.loading);
+createEffect(()=> {
+console.log(props.data());
+ console.log(props.data.state) 
+})
 
   const handleClick = (evt: Event) => {
     evt.stopPropagation();
+console.log(open());
     setOpen((prev: boolean) => !prev);
   };
 
@@ -42,9 +46,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (props): JSX.Element =>
 
   const c = {...companyZero, longname: 'no company'};
   const companies = () => {
-    if (props.data.loading || props.data.error) {
-      return [];
-    }
+console.log(props.data());
     if (props.data.state !== 'ready') {
       return [];
     }
@@ -93,6 +95,9 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (props): JSX.Element =>
       <Switch>
         <Match when={props.data.loading}>
           <Progress size="1rem" height='auto'/>
+        </Match>
+        <Match when={props.data.state === 'errored'}>
+          <Navigate href='/login' />
         </Match>
         <Match when={props.data.state == 'ready'}>
           <List disablePadding dense={true} >

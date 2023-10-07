@@ -20,13 +20,14 @@ async function send<T>(
   }
 
   try {
-    const response: Response = await fetch(API + url, opts);
+    const response: Response = await fetch(API + url + '?devstatus=402', opts);
+    const json = await response.json();
     if (!response.ok) {
-      const json = await response.json();
-      return Promise.reject(json);
+      throw new Error(json?.error ?? json);
     }
-    return response.json();
-  } catch (err) {
+    return json;
+  } catch (err: any) {
+    //TODO a more specific error, with more fields
     return Promise.reject(err);
   }
 }
@@ -42,12 +43,12 @@ export function login(data: LoginParams): Promise<JSON | Error> {
 
 const key = 'dots.tok';
 export const company = {
-  all: async function (run: boolean): Promise<JSON | Error> {
+  all: function (run: boolean): Promise<JSON | Error> {
     console.log('run', run);
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
     };
-    try {
+    /*try {
       const out = await send<undefined>(
         'GET',
         '/companies',
@@ -56,8 +57,8 @@ export const company = {
       );
       return Promise.resolve(out);
     } catch (err) {
-      return err as Error;
-    }
-    //return send<undefined>('GET', '/companies', undefined, headers);
+      return Promise.reject(<Error>err);
+    }*/
+    return send<undefined>('GET', '/companies', undefined, headers);
   },
 };
