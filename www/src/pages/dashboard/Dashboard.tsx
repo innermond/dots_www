@@ -15,7 +15,7 @@ import {
   ListItemButton,
   ListItemText,
 } from '@suid/material';
-import { createEffect, createMemo, createSignal } from 'solid-js';
+import { createEffect, createMemo, createResource, createSignal } from 'solid-js';
 import MenuIcon from '@suid/icons-material/Menu';
 import Logout from '@suid/icons-material/Logout';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
@@ -24,6 +24,7 @@ import { useNavigate, Outlet, useLocation } from '@solidjs/router';
 import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
 import MenuItemCompany from '../company/menuitem-companies';
+import { company } from '../../lib/api';
 
 import appstate from '../../lib/app';
 const { currentPageTitle, setCurrentPageTitle } = appstate;
@@ -60,6 +61,8 @@ const Dashboard: Component = () => {
     handleClose();
     navigate('/login');
   };
+
+  const [companyRes] = createResource(company.all);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -165,7 +168,7 @@ const Dashboard: Component = () => {
         <List component="nav">
           <ListItems />
           <Divider />
-          <MenuItemCompany />
+          <MenuItemCompany data={companyRes} />
           <Divider />
           <ListItemButton onClick={handleLogout}>
             <ListItemIcon>

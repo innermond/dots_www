@@ -16,7 +16,6 @@ import {
   TableHead,
   TableRow,
 } from '@suid/material';
-import { SelectChangeEvent } from '@suid/material/Select';
 import { A } from '@solidjs/router';
 
 import { company } from '../../lib/api';
