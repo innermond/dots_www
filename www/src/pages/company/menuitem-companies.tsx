@@ -7,6 +7,7 @@ import {
   Switch,
   Resource,
   Match,
+  ErrorBoundary,
   createEffect,
 } from 'solid-js';
 import AssignmentIcon from '@suid/icons-material/Assignment';
@@ -37,14 +38,8 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
   const [open, setOpen] = createSignal(false);
   const navigate = useNavigate();
 
-  createEffect(() => {
-    console.log(props.data());
-    console.log(props.data.state);
-  });
-
-  const handleClick = (evt: Event) => {
+  const handleListClick = (evt: Event) => {
     evt.stopPropagation();
-    console.log(open());
     setOpen((prev: boolean) => !prev);
   };
 
@@ -56,9 +51,12 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     setTimeout(() => setOpen(false), 0);
   };
 
-  const c = { ...companyZero, longname: 'no company' };
+  createEffect(() => {
+    console.log('menuitem', props.data.state);
+  })
+
+  const noCompany = { ...companyZero, longname: 'no company' };
   const companies = () => {
-    console.log(props.data());
     if (props.data.state !== 'ready') {
       return [];
     }
@@ -66,7 +64,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     const info: any = props.data();
     // TODO
     if (info instanceof Error) {
-      return [];
+      throw info;
     }
 
     const companiesFromJSON: DataCompanies = { data: [], n: 0 };
@@ -90,21 +88,22 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     const withoutempty = cc.filter(
       (c: any) => !(Object.keys(c).length === 0 && c.constructor === Object),
     );
-    if (!withoutempty.length) {
-      return [c];
-    }
-    return withoutempty;
+    return withoutempty.length ? withoutempty : [noCompany];
   };
 
-  return (
-    <>
-      <ListItemButton onClick={handleClick}>
+  const opener: JSX.Element = (
+      <ListItemButton onClick={handleListClick}>
         <ListItemIcon>
           <AssignmentIcon fontSize="small" />
         </ListItemIcon>
         <ListItemText primary="Companies" />
         {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
       </ListItemButton>
+  ); 
+
+  return (
+    <>
+      {opener}
       <Show when={open()}>
         <Switch>
           <Match when={props.data.loading}>
