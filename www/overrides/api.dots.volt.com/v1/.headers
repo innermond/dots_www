@@ -1,11 +1,1 @@
-[
-  {
-    "applyTo": "companies",
-    "headers": [
-      {
-        "name": "Hello",
-        "value": "World"
-      }
-    ]
-  }
-]
+[]
