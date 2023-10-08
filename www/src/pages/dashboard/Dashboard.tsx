@@ -32,6 +32,7 @@ import MenuItemCompany from '../company/menuitem-companies';
 import { company } from '../../lib/api';
 
 import appstate from '../../lib/app';
+import {setLoading} from '../../components/Loading';
 const { currentPageTitle, setCurrentPageTitle } = appstate;
 
 const drawerWidth: number = 240;
@@ -68,6 +69,16 @@ const Dashboard: Component = () => {
   };
 
   const [companyRes] = createResource(company.all);
+
+  createEffect(() => {
+    console.log('dash', companyRes.state);
+    /*if (companyRes.error) {
+      navigate('/login');
+    }*/
+  });
+  createEffect(() => {
+    setLoading (companyRes.loading);
+  });
 
   return (
     <Box sx={{ display: 'flex' }}>
