@@ -120,9 +120,10 @@ const LoginForm: Component = (): JSX.Element => {
   let formRef: HTMLFormElement | null = null;
 
   const key = 'dots.tok';
-  if (!!sessionStorage.getItem(key)) {
+  // TODO this is tricky
+  /*if (!!sessionStorage.getItem(key)) {
     navigate('/');
-  }
+  }*/
 
   createEffect(() => {
     if (submitForm.loading) {
