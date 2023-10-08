@@ -13,7 +13,7 @@ import {
 import { Alert } from '@suid/material';
 import Progress, { isRunning } from '../components/Progress';
 import { setLoading } from '../components/Loading';
-import {Dynamic} from 'solid-js/web';
+import { Dynamic } from 'solid-js/web';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));

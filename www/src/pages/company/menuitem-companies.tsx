@@ -1,4 +1,14 @@
-import { JSX, Component, Show, createSignal, For, Switch, Resource, Match, createEffect } from 'solid-js';
+import {
+  JSX,
+  Component,
+  Show,
+  createSignal,
+  For,
+  Switch,
+  Resource,
+  Match,
+  createEffect,
+} from 'solid-js';
 import AssignmentIcon from '@suid/icons-material/Assignment';
 import ExpandLessIcon from '@suid/icons-material/ExpandLess';
 import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
@@ -10,29 +20,31 @@ import {
   ListItemText,
 } from '@suid/material';
 import { Navigate, useNavigate } from '@solidjs/router';
-import {CompanyData, companyZero} from './types';
+import { CompanyData, companyZero } from './types';
 import Progress from '../../components/Progress';
 
 type DataMenuItemCompany = Resource<Error | JSON>;
 
 type PropsMenuItemCompany = {
-  data: DataMenuItemCompany,
+  data: DataMenuItemCompany;
 };
 
-type DataCompanies = {data: CompanyData[], n: number};
+type DataCompanies = { data: CompanyData[]; n: number };
 
-const MenuItemCompany: Component<PropsMenuItemCompany> = (props): JSX.Element => {
+const MenuItemCompany: Component<PropsMenuItemCompany> = (
+  props,
+): JSX.Element => {
   const [open, setOpen] = createSignal(false);
   const navigate = useNavigate();
 
-createEffect(()=> {
-console.log(props.data());
- console.log(props.data.state) 
-})
+  createEffect(() => {
+    console.log(props.data());
+    console.log(props.data.state);
+  });
 
   const handleClick = (evt: Event) => {
     evt.stopPropagation();
-console.log(open());
+    console.log(open());
     setOpen((prev: boolean) => !prev);
   };
 
@@ -44,9 +56,9 @@ console.log(open());
     setTimeout(() => setOpen(false), 0);
   };
 
-  const c = {...companyZero, longname: 'no company'};
+  const c = { ...companyZero, longname: 'no company' };
   const companies = () => {
-console.log(props.data());
+    console.log(props.data());
     if (props.data.state !== 'ready') {
       return [];
     }
@@ -56,16 +68,16 @@ console.log(props.data());
     if (info instanceof Error) {
       return [];
     }
-    
-    const companiesFromJSON: DataCompanies = { data: [], n: 0};
+
+    const companiesFromJSON: DataCompanies = { data: [], n: 0 };
     try {
-      companiesFromJSON.n = 0+info['n'];
+      companiesFromJSON.n = 0 + info['n'];
       for (let c of info['data']) {
         companiesFromJSON.data.push({
-          id: 0+c['id'],
-          longname: ''+c['longname'],
-          rn: ''+c['rn'],
-          tin: ''+c['tin'],
+          id: 0 + c['id'],
+          longname: '' + c['longname'],
+          rn: '' + c['rn'],
+          tin: '' + c['tin'],
         });
       }
     } catch (err) {
@@ -75,7 +87,9 @@ console.log(props.data());
 
     const { data, n } = companiesFromJSON;
     const cc = n ? data : [];
-    const withoutempty = cc.filter((c: any) => !(Object.keys(c).length === 0 && c.constructor === Object));
+    const withoutempty = cc.filter(
+      (c: any) => !(Object.keys(c).length === 0 && c.constructor === Object),
+    );
     if (!withoutempty.length) {
       return [c];
     }
@@ -92,29 +106,39 @@ console.log(props.data());
         {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
       </ListItemButton>
       <Show when={open()}>
-      <Switch>
-        <Match when={props.data.loading}>
-          <Progress size="1rem" height='auto'/>
-        </Match>
-        <Match when={props.data.state === 'errored'}>
-          <Navigate href='/login' />
-        </Match>
-        <Match when={props.data.state == 'ready'}>
-          <List disablePadding dense={true} >
-            <For each={companies()}>
-            {(c: CompanyData) => {
-              return <ListItemButton onClick={[handleCompanyClick, c.id]}>
-                <ListItemText secondary={c.longname} sx={{ml: '.5em'}}/>
-                <ListItemIcon sx={{display:'flex', justifyContent:'flex-end', minWidth:'auto',}}>
-                  <ChevronRightIcon fontSize="small" />
-                </ListItemIcon>
-              </ListItemButton>
-              }
-            }
-            </For>
-          </List>
-        </Match>
-      </Switch>
+        <Switch>
+          <Match when={props.data.loading}>
+            <Progress size="1rem" height="auto" />
+          </Match>
+          <Match when={props.data.state === 'errored'}>
+            <Navigate href="/login" />
+          </Match>
+          <Match when={props.data.state == 'ready'}>
+            <List disablePadding dense={true}>
+              <For each={companies()}>
+                {(c: CompanyData) => {
+                  return (
+                    <ListItemButton onClick={[handleCompanyClick, c.id]}>
+                      <ListItemText
+                        secondary={c.longname}
+                        sx={{ ml: '.5em' }}
+                      />
+                      <ListItemIcon
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          minWidth: 'auto',
+                        }}
+                      >
+                        <ChevronRightIcon fontSize="small" />
+                      </ListItemIcon>
+                    </ListItemButton>
+                  );
+                }}
+              </For>
+            </List>
+          </Match>
+        </Switch>
       </Show>
     </>
   );

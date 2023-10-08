@@ -15,7 +15,12 @@ import {
   ListItemButton,
   ListItemText,
 } from '@suid/material';
-import { createEffect, createMemo, createResource, createSignal } from 'solid-js';
+import {
+  createEffect,
+  createMemo,
+  createResource,
+  createSignal,
+} from 'solid-js';
 import MenuIcon from '@suid/icons-material/Menu';
 import Logout from '@suid/icons-material/Logout';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
