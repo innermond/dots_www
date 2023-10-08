@@ -1,7 +1,6 @@
-import { useRouteData, RouteDefinition, Navigate } from '@solidjs/router';
+import { useRouteData, RouteDefinition, Navigate, useNavigate } from '@solidjs/router';
 import type { Component, JSX } from 'solid-js';
 import {
-  Show,
   Suspense,
   Match,
   Switch,
@@ -14,6 +13,7 @@ import { Alert } from '@suid/material';
 import Progress, { isRunning } from '../components/Progress';
 import { setLoading } from '../components/Loading';
 import { Dynamic } from 'solid-js/web';
+import {HttpError} from '../lib/api';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
@@ -30,8 +30,14 @@ function TokenData() {
   return token;
 }
 
-const alert = (err: Error): JSX.Element => {
-  console.log(err);
+
+const AlertOrLogin = (err: Error | HttpError): JSX.Element => {
+  console.log('route', err);
+  if (err instanceof HttpError) {
+    if (err.response.status === 401) {
+      return <Navigate href="/login" />
+    }
+  }
   return <Alert severity="error">{err.message}</Alert>;
 };
 
@@ -40,7 +46,7 @@ const guard = (child: Component): Component => {
     const token: any = useRouteData();
 
     return (
-      <ErrorBoundary fallback={alert}>
+      <ErrorBoundary fallback={AlertOrLogin}>
         <Switch fallback={<Progress />}>
           <Match when={!!token()}>{child}</Match>
           <Match when={token() === ''}>
