@@ -1,5 +1,17 @@
 const API = 'http://api.dots.volt.com/v1';
 
+export class HttpError extends Error { 
+  response: Response;
+  data: any;
+
+  constructor(message: string, response: Response, data?: any) {
+    super(message);
+    this.name = 'HttpError';
+    this.response = response;
+    this.data = data;
+  }
+}
+
 async function send<T>(
   method: string,
   url: string,
@@ -20,15 +32,17 @@ async function send<T>(
   }
 
   try {
-    const response: Response = await fetch(API + url + '?devstatus=402', opts);
+    const response: Response = await fetch(API + url + '?devstatus=401', opts);
     const json = await response.json();
     if (!response.ok) {
-      throw new Error(json?.error ?? json);
+      const message = json?.error ?? 'we got error';
+      const data = json?.data;
+      const httperr = new HttpError(message, response, data);
+      throw httperr;
     }
     return json;
   } catch (err: any) {
-    //TODO a more specific error, with more fields
-    return Promise.reject(err);
+    throw err;
   }
 }
 
@@ -48,17 +62,6 @@ export const company = {
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
     };
-    /*try {
-      const out = await send<undefined>(
-        'GET',
-        '/companies',
-        undefined,
-        headers,
-      );
-      return Promise.resolve(out);
-    } catch (err) {
-      return Promise.reject(<Error>err);
-    }*/
     return send<undefined>('GET', '/companies', undefined, headers);
   },
 };
