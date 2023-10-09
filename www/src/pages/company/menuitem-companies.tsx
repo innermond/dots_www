@@ -24,7 +24,7 @@ import {
 import { useNavigate } from '@solidjs/router';
 import { toast } from 'solid-toast';
 
-import { CompanyData, companyZero } from './types';
+import { CompanyData } from './types';
 import Progress from '../../components/Progress';
 import {HttpError} from '../../lib/api';
 
@@ -52,7 +52,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
       return;
     }
     navigate(`/company/${id}`);
-    setTimeout(() => setOpen(false), 0);
+    //setTimeout(() => setOpen(false), 0);
   };
 
   createEffect(() => {
@@ -69,7 +69,6 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     }
   })
 
-  const noCompany = { ...companyZero, longname: 'no company' };
   const companies = () => {
     if (props.data.state !== 'ready') {
       return [];
@@ -102,7 +101,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     const withoutempty = cc.filter(
       (c: any) => !(Object.keys(c).length === 0 && c.constructor === Object),
     );
-    return withoutempty.length ? withoutempty : [noCompany];
+    return withoutempty;
   };
 
   const opener: JSX.Element = (
@@ -115,10 +114,19 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
       </ListItemButton>
   ); 
 
+  const noCompany: JSX.Element = (
+      <ListItemButton>
+        <ListItemIcon >
+          <ErrorIcon fontSize="small" color="warning" />
+        </ListItemIcon>
+        <ListItemText secondary="no company..." />
+      </ListItemButton>
+  ); 
+
   const errored: JSX.Element = (
       <ListItemButton>
-        <ListItemIcon>
-          <ErrorIcon fontSize="small" />
+        <ListItemIcon >
+          <ErrorIcon fontSize="small" color="error" />
         </ListItemIcon>
         <ListItemText secondary="not loaded..." />
       </ListItemButton>
@@ -137,7 +145,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
           </Match>
           <Match when={props.data.state == 'ready'}>
             <List disablePadding dense={true}>
-              <For each={companies()}>
+              <For each={companies()} fallback={noCompany}>
                 {(c: CompanyData) => {
                   return (
                     <ListItemButton onClick={[handleCompanyClick, c.id]}>

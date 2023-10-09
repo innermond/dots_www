@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import type { Component, JSX } from 'solid-js';
 import {
   Box,
   AppBar,
@@ -74,9 +74,7 @@ const Dashboard: Component = () => {
     setLoading (companyRes.loading);
   });
 
-  return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar position="absolute">
+  const appbar: JSX.Element = <AppBar position="absolute">
         <Toolbar sx={{ pr: '24px' }}>
           <IconButton
             size="large"
@@ -150,7 +148,8 @@ const Dashboard: Component = () => {
           </Menu>
         </Toolbar>
       </AppBar>
-      <Drawer
+
+  const drawer: JSX.Element = <Drawer
         variant="temporary"
         anchor="left"
         open={open()}
@@ -188,6 +187,12 @@ const Dashboard: Component = () => {
           </ListItemButton>
         </List>
       </Drawer>
+
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      {appbar}
+      {drawer}
       <Box
         sx={{
           width: '100vw',

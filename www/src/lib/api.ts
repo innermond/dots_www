@@ -33,7 +33,7 @@ async function send<T>(
   }
 
   try {
-    const response: Response = await fetch(API + url + '?devstatus=302', opts);
+    const response: Response = await fetch(API + url + '?devstatus=401', opts);
     const json = await response.json();
     if (!response.ok) {
       const message = json?.error ?? 'we got error';
