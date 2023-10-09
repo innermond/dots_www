@@ -7,22 +7,26 @@ import {
   Switch,
   Resource,
   Match,
-  ErrorBoundary,
   createEffect,
 } from 'solid-js';
 import AssignmentIcon from '@suid/icons-material/Assignment';
 import ExpandLessIcon from '@suid/icons-material/ExpandLess';
 import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
+import ErrorIcon from '@suid/icons-material/Error';
 import {
   List,
   ListItemIcon,
   ListItemButton,
   ListItemText,
+  Alert,
 } from '@suid/material';
-import { Navigate, useNavigate } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
+import { toast } from 'solid-toast';
+
 import { CompanyData, companyZero } from './types';
 import Progress from '../../components/Progress';
+import {HttpError} from '../../lib/api';
 
 type DataMenuItemCompany = Resource<Error | JSON>;
 
@@ -53,6 +57,16 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
 
   createEffect(() => {
     console.log('menuitem', props.data.state);
+    const err = props.data.error;
+    if (err) {
+      if (err instanceof HttpError) {
+        if (err.response.status === 401) {
+          throw err;
+        }
+        console.log('catched', err);
+        toast.custom(<Alert severity="error">{err.message}</Alert>);
+      }
+    }
   })
 
   const noCompany = { ...companyZero, longname: 'no company' };
@@ -101,6 +115,15 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
       </ListItemButton>
   ); 
 
+  const errored: JSX.Element = (
+      <ListItemButton>
+        <ListItemIcon>
+          <ErrorIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText secondary="not loaded..." />
+      </ListItemButton>
+  ); 
+
   return (
     <>
       {opener}
@@ -110,7 +133,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
             <Progress size="1rem" height="auto" />
           </Match>
           <Match when={props.data.state === 'errored'}>
-            <Navigate href="/login" />
+            {errored}
           </Match>
           <Match when={props.data.state == 'ready'}>
             <List disablePadding dense={true}>

@@ -71,12 +71,6 @@ const Dashboard: Component = () => {
   const [companyRes] = createResource(company.all);
 
   createEffect(() => {
-    console.log('dash', companyRes.state);
-    /*if (companyRes.error) {
-      navigate('/login');
-    }*/
-  });
-  createEffect(() => {
     setLoading (companyRes.loading);
   });
 

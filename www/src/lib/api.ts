@@ -13,6 +13,7 @@ export class HttpError extends Error {
 }
 
 async function send<T>(
+  hint: string,
   method: string,
   url: string,
   data: T,
@@ -32,12 +33,12 @@ async function send<T>(
   }
 
   try {
-    const response: Response = await fetch(API + url + '?devstatus=401', opts);
+    const response: Response = await fetch(API + url + '?devstatus=302', opts);
     const json = await response.json();
     if (!response.ok) {
       const message = json?.error ?? 'we got error';
       const data = json?.data;
-      const httperr = new HttpError(message, response, data);
+      const httperr = new HttpError(`${hint}: ${message}`, response, data);
       throw httperr;
     }
     return json;
@@ -52,16 +53,16 @@ type LoginParams = {
 };
 
 export function login(data: LoginParams): Promise<JSON | Error> {
-  return send<LoginParams>('POST', '/login', data);
+  return send<LoginParams>( 'checking credentials', 'POST', '/login', data);
 }
 
 const key = 'dots.tok';
 export const company = {
   all: function (run: boolean): Promise<JSON | Error> {
-    console.log('run', run);
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
     };
-    return send<undefined>('GET', '/companies', undefined, headers);
+    return send<undefined>( 'loading companies', 'GET', '/companies', undefined, headers);
+
   },
 };
