@@ -32,9 +32,26 @@ async function send<T>(
     opts.body = JSON.stringify(data);
   }
 
+  // TODO set server response's status and latency
+  const dev = {
+    devstatus: (window as any)?.devstatus??'',
+    devsleep: (window as any)?.devsleep??'',
+  }
+  const qp = new URLSearchParams(dev);
+  for (let [k, v] of qp.entries()) {
+    if (v === '') {
+      qp.delete(k);
+    }
+  }
+  const q = qp.toString();
+
   try {
-    const response: Response = await fetch(API + url + '?devstatus=401', opts);
-    const json = await response.json();
+    const response: Response = await fetch(API + url + `?${q}`, opts);
+    let json = await response.json();
+    // TODO use din dev data
+    if ((window as any)?.devjson) {
+      json = (window as any).devjson;
+    }
     if (!response.ok) {
       const message = json?.error ?? 'we got error';
       const data = json?.data;
