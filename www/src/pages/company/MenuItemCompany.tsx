@@ -8,6 +8,7 @@ import {
   Resource,
   Match,
   createEffect,
+  createMemo,
 } from 'solid-js';
 import AssignmentIcon from '@suid/icons-material/Assignment';
 import ExpandLessIcon from '@suid/icons-material/ExpandLess';
@@ -53,7 +54,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     }
     navigate(`/company/${id}`);
   };
-
+  
   createEffect(() => {
     console.log('menuitem', props.data.state);
     const err = props.data.error;
@@ -62,34 +63,60 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
         if (err.response.status === 401) {
           throw err;
         }
-        console.log('catched', err);
-        toast.custom(<Alert severity="error">{err.message}</Alert>);
       }
+      console.log('catched', err);
+      toast.custom(<Alert severity="error">{err.message}</Alert>);
     }
   })
 
   // this derivated signal is run only on ready side, see JSX bellow
-  const companies = () => {
-    const info: any = props.data();
-    // TODO
-    if (info instanceof Error) {
-      throw info;
+  // when drawer is open()
+  // but the memo runs its immediatly because 
+  // 1) props.data.state start with "pending"
+  // 2) it changes to "ready" or "errored"
+  //  so we need to guard
+  const companies = createMemo(() => {
+    // guard
+    if (props.data.state !== "ready") {
+      return;
     }
 
+    const info: any = props.data();
+    const isObject = (info instanceof Object && !Array.isArray(info) && info !== null);
+    if (!isObject) {
+      toast.custom(<Alert severity="error">{'cannot read data companies'}</Alert>);
+      return [new Error('reading error')];  
+    }
     const companiesFromJSON: DataCompanies = { data: [], n: 0 };
+    const errorparsing = [];
     try {
       companiesFromJSON.n = 0 + info['n'];
       for (let c of info['data']) {
-        companiesFromJSON.data.push({
-          id: 0 + c['id'],
-          longname: '' + c['longname'],
-          rn: '' + c['rn'],
-          tin: '' + c['tin'],
-        });
+        const id = Number(c['id']);
+        let cfromjson: any = {
+          id:  (isNaN(id) ? undefined : id),
+          longname:  c['longname'],
+          rn:  c['rn'],
+          tin: c['tin'],
+        };
+        const kk = Object.keys(cfromjson);
+        const kkstrong = kk.filter(k => ((cfromjson as any)[k] !== undefined));
+        if (kk.length !== kkstrong.length) {
+          cfromjson = new Error(cfromjson?.longname ??  'error reading data');
+          errorparsing.push(cfromjson.message);
+        }
+        companiesFromJSON.data.push(cfromjson as any);
       }
+      companiesFromJSON.n = isNaN(companiesFromJSON.n) ? companiesFromJSON.data.length : companiesFromJSON.n;
     } catch (err) {
       // TODO
       return [];
+    } finally {
+      if (errorparsing.length) {
+        console.log(errorparsing)
+        const errors = errorparsing.map(err => <p>{err}</p>); 
+        toast.custom(<Alert severity="error">{errors}</Alert>);
+      }
     }
 
     const { data, n } = companiesFromJSON;
@@ -98,7 +125,8 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
       (c: any) => !(Object.keys(c).length === 0 && c.constructor === Object),
     );
     return withoutempty;
-  };
+  });
+
 
   const opener: JSX.Element = (
       <ListItemButton onClick={handleListClick}>
@@ -119,12 +147,12 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
       </ListItemButton>
   ); 
 
-  const errored: JSX.Element = (
+  const errored: (hint?: string) => JSX.Element = (hint="not loaded...") => (
       <ListItemButton>
         <ListItemIcon >
           <ErrorIcon fontSize="small" color="error" />
         </ListItemIcon>
-        <ListItemText secondary="not loaded..." />
+        <ListItemText secondary={hint} />
       </ListItemButton>
   ); 
 
@@ -137,13 +165,15 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
             <Progress size="1rem" height="auto" />
           </Match>
           <Match when={props.data.state === 'errored'}>
-            {errored}
+            {errored()}
           </Match>
           <Match when={props.data.state == 'ready'}>
             <List disablePadding dense={true}>
               <For each={companies()} fallback={noCompany}>
-                {(c: CompanyData) => {
-                  return (
+                {(c: CompanyData | Error) => {
+                  return c instanceof Error ?
+                  errored(c.message):
+                  (
                     <ListItemButton onClick={[handleCompanyClick, c.id]}>
                       <ListItemText
                         secondary={c.longname}
