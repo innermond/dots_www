@@ -28,7 +28,7 @@ import { useNavigate, Outlet, useLocation } from '@solidjs/router';
 
 import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
-import MenuItemCompany from '../company/menuitem-companies';
+import MenuItemCompany from '../company/MenuItemCompany';
 import { company } from '../../lib/api';
 
 import appstate from '../../lib/app';
