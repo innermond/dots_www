@@ -1,6 +1,6 @@
 const API = 'http://api.dots.volt.com/v1';
 
-export class HttpError extends Error { 
+export class HttpError extends Error {
   response: Response;
   data: any;
 
@@ -34,9 +34,9 @@ async function send<T>(
 
   // TODO set server response's status and latency
   const dev = {
-    devstatus: (window as any)?.devstatus??'',
-    devsleep: (window as any)?.devsleep??'',
-  }
+    devstatus: (window as any)?.devstatus ?? '',
+    devsleep: (window as any)?.devsleep ?? '',
+  };
   const qp = new URLSearchParams(dev);
   for (let [k, v] of qp.entries()) {
     if (v === '') {
@@ -70,7 +70,7 @@ type LoginParams = {
 };
 
 export function login(data: LoginParams): Promise<JSON | Error> {
-  return send<LoginParams>( 'checking credentials', 'POST', '/login', data);
+  return send<LoginParams>('checking credentials', 'POST', '/login', data);
 }
 
 const key = 'dots.tok';
@@ -79,7 +79,12 @@ export const company = {
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
     };
-    return send<undefined>( 'loading companies', 'GET', '/companies', undefined, headers);
-
+    return send<undefined>(
+      'loading companies',
+      'GET',
+      '/companies',
+      undefined,
+      headers,
+    );
   },
 };

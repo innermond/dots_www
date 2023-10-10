@@ -1,4 +1,9 @@
-import { useRouteData, RouteDefinition, Navigate, useNavigate } from '@solidjs/router';
+import {
+  useRouteData,
+  RouteDefinition,
+  Navigate,
+  useNavigate,
+} from '@solidjs/router';
 import type { Component, JSX } from 'solid-js';
 import {
   Suspense,
@@ -13,7 +18,7 @@ import { Alert } from '@suid/material';
 import Progress, { isRunning } from '../components/Progress';
 import { setLoading } from '../components/Loading';
 import { Dynamic } from 'solid-js/web';
-import {HttpError} from '../lib/api';
+import { HttpError } from '../lib/api';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
@@ -30,12 +35,11 @@ function TokenData() {
   return token;
 }
 
-
 const AlertOrLogin = (err: Error | HttpError): JSX.Element => {
   console.log('route', err);
   if (err instanceof HttpError) {
     if (err.response.status === 401) {
-      return <Navigate href="/login" />
+      return <Navigate href="/login" />;
     }
   }
   return <Alert severity="error">{err.message}</Alert>;
