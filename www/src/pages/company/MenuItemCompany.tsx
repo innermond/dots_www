@@ -52,7 +52,6 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
       return;
     }
     navigate(`/company/${id}`);
-    //setTimeout(() => setOpen(false), 0);
   };
 
   createEffect(() => {
@@ -69,11 +68,8 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     }
   })
 
+  // this derivated signal is run only on ready side, see JSX bellow
   const companies = () => {
-    if (props.data.state !== 'ready') {
-      return [];
-    }
-
     const info: any = props.data();
     // TODO
     if (info instanceof Error) {
