@@ -1,5 +1,6 @@
 import type { Component, JSX } from 'solid-js';
 import {
+  Alert,
   Box,
   AppBar,
   Toolbar,
@@ -25,15 +26,19 @@ import MenuIcon from '@suid/icons-material/Menu';
 import Logout from '@suid/icons-material/Logout';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import { useNavigate, Outlet, useLocation } from '@solidjs/router';
+import { toast } from 'solid-toast';
 
 import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
-import MenuItemCompany from '../company/MenuItemCompany';
+import MenuItemSubmenu from '../../components/MenuItemSubmenu';
+import { CompanyData } from '../../pages/company/types';
 import { company } from '../../lib/api';
 
 import appstate from '../../lib/app';
 import { setLoading } from '../../components/Loading';
 const { currentPageTitle, setCurrentPageTitle } = appstate;
+
+type DataCompanies = { data: CompanyData[]; n: number };
 
 const drawerWidth: number = 240;
 
@@ -69,6 +74,62 @@ const Dashboard: Component = () => {
   };
 
   const [companyRes] = createResource(company.all);
+  const companies = createMemo(() => {
+    // guard
+    if (!['ready', 'errored'].includes(companyRes.state)) {
+      return;
+    }
+
+    const info: any = companyRes();
+    const isObject =
+      info instanceof Object && !Array.isArray(info) && info !== null;
+    if (!isObject) {
+      toast.custom(
+        <Alert severity="error">{'cannot read data companies'}</Alert>,
+      );
+      return [new Error('reading error')];
+    }
+    const companiesFromJSON: DataCompanies = { data: [], n: 0 };
+    const errorparsing = [];
+    try {
+      companiesFromJSON.n = 0 + info['n'];
+      for (let c of info['data']) {
+        const id = Number(c['id']);
+        let cfromjson: any = {
+          id: isNaN(id) ? undefined : id,
+          longname: c['longname'],
+          rn: c['rn'],
+          tin: c['tin'],
+        };
+        const kk = Object.keys(cfromjson);
+        const kkstrong = kk.filter(k => (cfromjson as any)[k] !== undefined);
+        if (kk.length !== kkstrong.length) {
+          cfromjson = new Error(cfromjson?.longname ?? 'error reading data');
+          errorparsing.push(cfromjson.message);
+        }
+        companiesFromJSON.data.push(cfromjson as any);
+      }
+      companiesFromJSON.n = isNaN(companiesFromJSON.n)
+        ? companiesFromJSON.data.length
+        : companiesFromJSON.n;
+    } catch (err) {
+      // TODO
+      return [];
+    } finally {
+      if (errorparsing.length) {
+        console.log(errorparsing);
+        const errors = errorparsing.map(err => <p>{err}</p>);
+        toast.custom(<Alert severity="error">{errors}</Alert>);
+      }
+    }
+
+    const { data, n } = companiesFromJSON;
+    const cc = n ? data : [];
+    const withoutempty = cc.filter(
+      (c: any) => !(Object.keys(c).length === 0 && c.constructor === Object),
+    );
+    return withoutempty;
+  });
 
   createEffect(() => {
     setLoading(companyRes.loading);
@@ -180,8 +241,7 @@ const Dashboard: Component = () => {
       <List component="nav">
         <ListItems />
         <Divider />
-        <MenuItemCompany data={companyRes} />
-        <Divider />
+        <MenuItemSubmenu headtext="Companies" titlekey="longname" state={companyRes.state} data={companies()} />
         <ListItemButton onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
