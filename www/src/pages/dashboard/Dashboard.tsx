@@ -74,6 +74,7 @@ const Dashboard: Component = () => {
   };
 
   const [companyRes] = createResource(company.all);
+  // TODO adapted for errored case
   const companies = createMemo(() => {
     // guard
     if (!['ready', 'errored'].includes(companyRes.state)) {
