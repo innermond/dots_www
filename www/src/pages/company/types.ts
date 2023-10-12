@@ -6,13 +6,21 @@ type CompanyData = {
 };
 
 function isCompanyData(d: any): d is CompanyData {
-  return (d instanceof Error) || ((typeof d?.id === 'number') && (typeof d?.longname === 'string') && (typeof d?.rn === 'string') && (typeof d?.tin === 'string'));
+  return (
+    d instanceof Error ||
+    (typeof d?.id === 'number' &&
+      typeof d?.longname === 'string' &&
+      typeof d?.rn === 'string' &&
+      typeof d?.tin === 'string')
+  );
 }
 
 type DataCompanies = { data: (CompanyData | Error)[]; n: number };
 
 function isDataCompanies(d: any): d is DataCompanies {
-  return typeof d === 'object' && typeof d?.n === 'number' && isCompanyData(d?.data);
+  return (
+    typeof d === 'object' && typeof d?.n === 'number' && isCompanyData(d?.data)
+  );
 }
 
 const companyZero = {
@@ -23,4 +31,4 @@ const companyZero = {
 };
 
 export type { CompanyData, DataCompanies };
-export {isCompanyData, isDataCompanies, companyZero};
+export { isCompanyData, isDataCompanies, companyZero };

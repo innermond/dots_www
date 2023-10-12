@@ -77,11 +77,12 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
   //  so we need to guard
   const companies = createMemo(() => {
     // guard
-    if ( ! ['ready', 'errored'].includes(props.data.state)) {
+    if (!['ready', 'errored'].includes(props.data.state)) {
       return;
     }
 
-    const info: any = props.data.state === 'errored' ? props.data.error : props.data();
+    const info: any =
+      props.data.state === 'errored' ? props.data.error : props.data();
     const isObject =
       info instanceof Object && !Array.isArray(info) && info !== null;
     if (!isObject) {

@@ -8,7 +8,7 @@ import {
   Match,
   createEffect,
 } from 'solid-js';
-import { Dynamic } from "solid-js/web";
+import { Dynamic } from 'solid-js/web';
 
 import LabelIcon from '@suid/icons-material/Label';
 import ExpandLessIcon from '@suid/icons-material/ExpandLess';
@@ -32,15 +32,15 @@ import { ApiError } from '../lib/api';
 type DataMenuItemSubmenu<T> = Array<Error | T> | Error | undefined;
 
 type PropsMenuItemSubmenu<T> = {
-  icon?: typeof SvgIcon,
-  headtext: string, 
-  data?: DataMenuItemSubmenu<T>,
-  state: Resource<T>['state'],
-  idkey?: string,
-  titlekey?: string,
+  icon?: typeof SvgIcon;
+  headtext: string;
+  data?: DataMenuItemSubmenu<T>;
+  state: Resource<T>['state'];
+  idkey?: string;
+  titlekey?: string;
 };
 
-function MenuItemSubmenu<T>( props: PropsMenuItemSubmenu<T> ): JSX.Element {
+function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const [open, setOpen] = createSignal(false);
   const navigate = useNavigate();
 
@@ -80,7 +80,11 @@ function MenuItemSubmenu<T>( props: PropsMenuItemSubmenu<T> ): JSX.Element {
   const opener: JSX.Element = (
     <ListItemButton onClick={handleListClick}>
       <ListItemIcon>
-        <Dynamic component={icon} color={props.state === 'errored' ? 'error' : 'inherit'} fontSize="small" />
+        <Dynamic
+          component={icon}
+          color={props.state === 'errored' ? 'error' : 'inherit'}
+          fontSize="small"
+        />
       </ListItemIcon>
       <ListItemText primary={props.headtext} />
       {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -103,7 +107,7 @@ function MenuItemSubmenu<T>( props: PropsMenuItemSubmenu<T> ): JSX.Element {
       {opener}
       <Show when={open()}>
         <Switch>
-          <Match when={props.state === "pending"}>
+          <Match when={props.state === 'pending'}>
             <Progress padding="0.5rem" size="1rem" height="auto" />
           </Match>
           <Match when={props.state === 'errored'}>{errored()}</Match>
@@ -138,6 +142,6 @@ function MenuItemSubmenu<T>( props: PropsMenuItemSubmenu<T> ): JSX.Element {
       </Show>
     </>
   );
-};
+}
 
 export default MenuItemSubmenu;
