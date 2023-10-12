@@ -18,9 +18,18 @@ function isCompanyData(d: any): d is CompanyData {
 type DataCompanies = { data: (CompanyData | Error)[]; n: number };
 
 function isDataCompanies(d: any): d is DataCompanies {
-  return (
-    typeof d === 'object' && typeof d?.n === 'number' && isCompanyData(d?.data)
-  );
+  const seemsOk = typeof d === 'object' && typeof d?.n === 'number' && Array.isArray(d?.data);
+  if (!seemsOk) {
+    return false;
+  }
+  // check data
+  for (const c of d.data) {
+    if (!isCompanyData(c)) {
+      return false
+    }
+  }
+
+  return true;
 }
 
 const companyZero = {
