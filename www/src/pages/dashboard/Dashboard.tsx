@@ -75,7 +75,8 @@ const Dashboard: Component = () => {
     navigate('/login');
   };
 
-  const [companyRes] = createResource(company.all);
+  const [companyRes, {refetch}] = createResource(company.all);
+
   // TODO adapted for errored case
   const companies = createMemo(() => {
     // guard
@@ -264,7 +265,7 @@ const Dashboard: Component = () => {
         </IconButton>
       </Toolbar>
       <Divider sx={{ my: 1 }} />
-      <List component="nav">
+      <List component="nav" on:refetchCompany={() => refetch()} >
         <ListItems />
         <Divider />
         <MenuItemSubmenu

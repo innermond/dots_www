@@ -15,6 +15,7 @@ import ExpandLessIcon from '@suid/icons-material/ExpandLess';
 import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 import ErrorIcon from '@suid/icons-material/Error';
+import RefreshIcon from '@suid/icons-material/Refresh';
 import {
   List,
   ListItemIcon,
@@ -22,6 +23,7 @@ import {
   ListItemText,
   Alert,
   SvgIcon,
+  IconButton,
 } from '@suid/material';
 import  {SvgIconTypeMap} from '@suid/material/SvgIcon';
 import { useNavigate } from '@solidjs/router';
@@ -93,15 +95,26 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
       {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
     </ListItemButton>
   );
+  
+  const handleRefresh = (evt: Event) => {
+    console.log(evt);
+    const e = new CustomEvent("refetchCompany", {bubbles: true });
+    evt.currentTarget?.dispatchEvent(e);
+  };
 
-  const errored: (hint?: string, color?: SvgIconColor) => JSX.Element = (hint = 'not loaded...', color = 'error') => (
+  const errored: (hint?: string, color?: SvgIconColor) => JSX.Element = (hint = 'not loaded...', color = 'error') => {
+
+  return (
     <ListItemButton>
       <ListItemIcon>
         <ErrorIcon fontSize="small" color={color} />
       </ListItemIcon>
       <ListItemText secondary={hint} />
+      <IconButton onClick={handleRefresh} color="primary" aria-label="refresh entire list">
+        <RefreshIcon />
+      </IconButton>
     </ListItemButton>
-  );
+  )};
 
   const noSubmenu: JSX.Element = errored('no company...', 'warning');
 
@@ -113,7 +126,11 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
           <Match when={props.state === 'pending'}>
             <Progress padding="0.5rem" size="1rem" height="auto" />
           </Match>
-          <Match when={props.state === 'errored'}>{errored()}</Match>
+          <Match when={props.state === 'errored'}>
+            <List disablePadding dense={true}>
+              {errored()}
+            </List>
+          </Match>
           <Match when={props.state == 'ready'}>
             <List disablePadding dense={true}>
               <For each={props.data as any} fallback={noSubmenu}>
