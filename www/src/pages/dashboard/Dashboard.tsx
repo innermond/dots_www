@@ -32,7 +32,7 @@ import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
 import MenuItemSubmenu from '../../components/MenuItemSubmenu';
 import type { DataCompanies } from '../../pages/company/types';
-import { isCompanyData } from '../../pages/company/types';
+import { isCompanyData, isDataCompanies } from '../../pages/company/types';
 import { ApiError, company } from '../../lib/api';
 
 import appstate from '../../lib/app';
@@ -83,7 +83,8 @@ const Dashboard: Component = () => {
       return;
     }
 
-    const info: DataCompanies | ErrorResource = companyRes.error ?? companyRes();
+    const info: DataCompanies | ErrorResource =
+      companyRes.error ?? companyRes();
     // check most brutal error
     const isObject =
       info instanceof Object && !Array.isArray(info) && info !== null;
@@ -94,19 +95,16 @@ const Dashboard: Component = () => {
       return [new Error('reading error')];
     }
 
-    // error from server  
+    // error from server
     if (info instanceof ApiError) {
       if (info.response.status === 401) {
         throw info;
       }
-      toast.custom(
-        <Alert severity="error">{info.message}</Alert>,
-      );
+      toast.custom(<Alert severity="error">{info.message}</Alert>);
       // let it flow down
-    } else if (info instanceof Error) {// error from client
-      toast.custom(
-        <Alert severity="error">{info.message}</Alert>,
-      );
+    } else if (info instanceof Error) {
+      // error from client
+      toast.custom(<Alert severity="error">{info.message}</Alert>);
       // cut it here
       return;
     }
@@ -114,7 +112,11 @@ const Dashboard: Component = () => {
     const companiesFromJSON: DataCompanies = { data: [], n: 0 };
     const errorparsing = [];
     try {
-      companiesFromJSON.n = 0 + info['n'];
+      if (! isDataCompanies(info)) {
+        toast.custom(<Alert severity="error">{'received list\'s companies may be unreadable'}</Alert>);
+      }
+
+      companiesFromJSON.n = 0 + (info as DataCompanies)['n'];
       for (let c of info['data']) {
         if (isCompanyData(c)) {
           companiesFromJSON.data.push(c);
@@ -129,7 +131,9 @@ const Dashboard: Component = () => {
         : companiesFromJSON.n;
     } catch (err: any) {
       toast.custom(
-        <Alert severity="error">{err?.message ?? 'unexpected error occured'}</Alert>,
+        <Alert severity="error">
+          {err?.message ?? 'unexpected error occured'}
+        </Alert>,
       );
       return [];
     } finally {
@@ -257,7 +261,12 @@ const Dashboard: Component = () => {
       <List component="nav">
         <ListItems />
         <Divider />
-        <MenuItemSubmenu headtext="Companies" titlekey="longname" state={companyRes.state} data={companies()} />
+        <MenuItemSubmenu
+          headtext="Companies"
+          titlekey="longname"
+          state={companyRes.state}
+          data={companies()}
+        />
         <ListItemButton onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
