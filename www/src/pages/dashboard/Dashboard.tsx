@@ -75,7 +75,7 @@ const Dashboard: Component = () => {
     navigate('/login');
   };
 
-  const [companyRes, {refetch}] = createResource(company.all);
+  const [companyRes, { refetch }] = createResource(company.all);
 
   // TODO adapted for errored case
   const companies = createMemo(() => {
@@ -113,8 +113,12 @@ const Dashboard: Component = () => {
     const companiesFromJSON: DataCompanies = { data: [], n: 0 };
     const errorparsing = [];
     try {
-      if (! isDataCompanies(info)) {
-        toast.custom(<Alert severity="error">{'received list\'s companies may have errors'}</Alert>);
+      if (!isDataCompanies(info)) {
+        toast.custom(
+          <Alert severity="error">
+            {"received list's companies may have errors"}
+          </Alert>,
+        );
       }
 
       companiesFromJSON.n = 0 + (info as DataCompanies)['n'];
@@ -265,7 +269,7 @@ const Dashboard: Component = () => {
         </IconButton>
       </Toolbar>
       <Divider sx={{ my: 1 }} />
-      <List component="nav" on:refetchCompany={() => refetch()} >
+      <List component="nav" on:refetchCompany={() => refetch()}>
         <ListItems />
         <Divider />
         <MenuItemSubmenu

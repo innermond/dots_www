@@ -25,7 +25,7 @@ import {
   SvgIcon,
   IconButton,
 } from '@suid/material';
-import  {SvgIconTypeMap} from '@suid/material/SvgIcon';
+import { SvgIconTypeMap } from '@suid/material/SvgIcon';
 import { useNavigate } from '@solidjs/router';
 import { toast } from 'solid-toast';
 
@@ -95,26 +95,33 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
       {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
     </ListItemButton>
   );
-  
+
   const handleRefresh = (evt: Event) => {
     console.log(evt);
-    const e = new CustomEvent("refetchCompany", {bubbles: true });
+    const e = new CustomEvent('refetchCompany', { bubbles: true });
     evt.currentTarget?.dispatchEvent(e);
   };
 
-  const errored: (hint?: string, color?: SvgIconColor) => JSX.Element = (hint = 'not loaded...', color = 'error') => {
-
-  return (
-    <ListItemButton>
-      <ListItemIcon>
-        <ErrorIcon fontSize="small" color={color} />
-      </ListItemIcon>
-      <ListItemText secondary={hint} />
-      <IconButton onClick={handleRefresh} color="primary" aria-label="refresh entire list">
-        <RefreshIcon />
-      </IconButton>
-    </ListItemButton>
-  )};
+  const errored: (hint?: string, color?: SvgIconColor) => JSX.Element = (
+    hint = 'not loaded...',
+    color = 'error',
+  ) => {
+    return (
+      <ListItemButton>
+        <ListItemIcon>
+          <ErrorIcon fontSize="small" color={color} />
+        </ListItemIcon>
+        <ListItemText secondary={hint} />
+        <IconButton
+          onClick={handleRefresh}
+          color="primary"
+          aria-label="refresh entire list"
+        >
+          <RefreshIcon />
+        </IconButton>
+      </ListItemButton>
+    );
+  };
 
   const noSubmenu: JSX.Element = errored('no company...', 'warning');
 
