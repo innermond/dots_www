@@ -166,7 +166,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
       <Show when={open()}>
         <Switch>
           <Match when={props.data.loading}>
-            <Progress size="1rem" height="auto" />
+            <Progress padding="0.5rem" size="1rem" height="auto" />
           </Match>
           <Match when={props.data.state === 'errored'}>{errored()}</Match>
           <Match when={props.data.state == 'ready'}>

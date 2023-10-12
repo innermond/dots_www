@@ -5,6 +5,7 @@ import { CircularProgressProps } from '@suid/material/CircularProgress';
 type PropsOutput = CircularProgressProps & {
   notifyIsRunning?: boolean;
   height?: string;
+  padding?: string;
 };
 
 const [isRunning, setIsRunning] = createSignal<boolean>();
@@ -23,6 +24,7 @@ const Progress = (props: PropsOutput): JSX.Element => {
         alignItems: 'center',
         justifyContent: 'center',
         height: props.height || '100vh',
+        padding: props.padding || '0',
       }}
     >
       <CircularProgress {...circularProgressProps} />
