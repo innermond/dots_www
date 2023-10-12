@@ -113,11 +113,17 @@ const Dashboard: Component = () => {
     const errorparsing = [];
     try {
       if (! isDataCompanies(info)) {
-        toast.custom(<Alert severity="error">{'received list\'s companies may be unreadable'}</Alert>);
+        toast.custom(<Alert severity="error">{'received list\'s companies may have errors'}</Alert>);
       }
 
       companiesFromJSON.n = 0 + (info as DataCompanies)['n'];
-      for (let c of info['data']) {
+      // paranoid here: check info.data
+      let inf = info?.data ?? [];
+      // ensure only real arrays - avoid array-like object like a string
+      if (!Array.isArray(inf)) {
+        inf = [];
+      }
+      for (let c of inf) {
         if (isCompanyData(c)) {
           companiesFromJSON.data.push(c);
         } else {

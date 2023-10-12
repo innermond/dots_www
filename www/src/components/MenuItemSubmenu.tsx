@@ -23,6 +23,7 @@ import {
   Alert,
   SvgIcon,
 } from '@suid/material';
+import  {SvgIconTypeMap} from '@suid/material/SvgIcon';
 import { useNavigate } from '@solidjs/router';
 import { toast } from 'solid-toast';
 
@@ -39,6 +40,8 @@ type PropsMenuItemSubmenu<T> = {
   idkey?: string;
   titlekey?: string;
 };
+
+type SvgIconColor = SvgIconTypeMap['selfProps']['color'];
 
 function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const [open, setOpen] = createSignal(false);
@@ -91,16 +94,16 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
     </ListItemButton>
   );
 
-  const errored: (hint?: string) => JSX.Element = (hint = 'not loaded...') => (
+  const errored: (hint?: string, color?: SvgIconColor) => JSX.Element = (hint = 'not loaded...', color = 'error') => (
     <ListItemButton>
       <ListItemIcon>
-        <ErrorIcon fontSize="small" color="error" />
+        <ErrorIcon fontSize="small" color={color} />
       </ListItemIcon>
       <ListItemText secondary={hint} />
     </ListItemButton>
   );
 
-  const noSubmenu: JSX.Element = errored('no company...');
+  const noSubmenu: JSX.Element = errored('no company...', 'warning');
 
   return (
     <>
