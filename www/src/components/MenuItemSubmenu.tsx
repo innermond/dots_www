@@ -27,7 +27,7 @@ import { useNavigate } from '@solidjs/router';
 import { toast } from 'solid-toast';
 
 import Progress from './Progress';
-import { HttpError } from '../lib/api';
+import { ApiError } from '../lib/api';
 
 type DataMenuItemSubmenu<T> = Array<Error | T> | Error | undefined;
 
@@ -67,7 +67,7 @@ function MenuItemSubmenu<T>( props: PropsMenuItemSubmenu<T> ): JSX.Element {
     }
     const err = props.data as Error;
     if (err) {
-      if (err instanceof HttpError) {
+      if (err instanceof ApiError) {
         if (err.response.status === 401) {
           throw err;
         }

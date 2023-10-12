@@ -27,7 +27,7 @@ import { toast } from 'solid-toast';
 
 import { CompanyData } from './types';
 import Progress from '../../components/Progress';
-import { HttpError } from '../../lib/api';
+import { ApiError } from '../../lib/api';
 
 type DataMenuItemCompany = Resource<Error | JSON>;
 
@@ -59,7 +59,7 @@ const MenuItemCompany: Component<PropsMenuItemCompany> = (
     console.log('menuitem', props.data.state);
     const err = props.data.error;
     if (err) {
-      if (err instanceof HttpError) {
+      if (err instanceof ApiError) {
         if (err.response.status === 401) {
           throw err;
         }

@@ -1,12 +1,12 @@
 const API = 'http://api.dots.volt.com/v1';
 
-export class HttpError extends Error {
+export class ApiError extends Error {
   response: Response;
   data: any;
 
   constructor(message: string, response: Response, data?: any) {
     super(message);
-    this.name = 'HttpError';
+    this.name = 'ApiError';
     this.response = response;
     this.data = data;
   }
@@ -55,7 +55,7 @@ async function send<T>(
     if (!response.ok) {
       const message = json?.error ?? 'we got error';
       const data = json?.data;
-      const httperr = new HttpError(`${hint}: ${message}`, response, data);
+      const httperr = new ApiError(`${hint}: ${message}`, response, data);
       throw httperr;
     }
     return json;

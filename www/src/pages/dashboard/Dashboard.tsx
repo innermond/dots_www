@@ -25,20 +25,22 @@ import {
 import MenuIcon from '@suid/icons-material/Menu';
 import Logout from '@suid/icons-material/Logout';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
-import { useNavigate, Outlet, useLocation } from '@solidjs/router';
+import { useNavigate, useLocation, Outlet } from '@solidjs/router';
 import { toast } from 'solid-toast';
 
 import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
 import MenuItemSubmenu from '../../components/MenuItemSubmenu';
-import { CompanyData } from '../../pages/company/types';
-import { company } from '../../lib/api';
+import type { DataCompanies } from '../../pages/company/types';
+import { isCompanyData } from '../../pages/company/types';
+import { ApiError, company } from '../../lib/api';
 
 import appstate from '../../lib/app';
 import { setLoading } from '../../components/Loading';
-const { currentPageTitle, setCurrentPageTitle } = appstate;
 
-type DataCompanies = { data: CompanyData[]; n: number };
+type ErrorResource = ApiError | Error;
+
+const { currentPageTitle, setCurrentPageTitle } = appstate;
 
 const drawerWidth: number = 240;
 
@@ -81,7 +83,8 @@ const Dashboard: Component = () => {
       return;
     }
 
-    const info: any = companyRes();
+    const info: DataCompanies | ErrorResource = companyRes.error ?? companyRes();
+    // check most brutal error
     const isObject =
       info instanceof Object && !Array.isArray(info) && info !== null;
     if (!isObject) {
@@ -90,35 +93,47 @@ const Dashboard: Component = () => {
       );
       return [new Error('reading error')];
     }
+
+    // error from server  
+    if (info instanceof ApiError) {
+      if (info.response.status === 401) {
+        throw info;
+      }
+      toast.custom(
+        <Alert severity="error">{info.message}</Alert>,
+      );
+      // let it flow down
+    } else if (info instanceof Error) {// error from client
+      toast.custom(
+        <Alert severity="error">{info.message}</Alert>,
+      );
+      // cut it here
+      return;
+    }
+
     const companiesFromJSON: DataCompanies = { data: [], n: 0 };
     const errorparsing = [];
     try {
       companiesFromJSON.n = 0 + info['n'];
       for (let c of info['data']) {
-        const id = Number(c['id']);
-        let cfromjson: any = {
-          id: isNaN(id) ? undefined : id,
-          longname: c['longname'],
-          rn: c['rn'],
-          tin: c['tin'],
-        };
-        const kk = Object.keys(cfromjson);
-        const kkstrong = kk.filter(k => (cfromjson as any)[k] !== undefined);
-        if (kk.length !== kkstrong.length) {
-          cfromjson = new Error(cfromjson?.longname ?? 'error reading data');
-          errorparsing.push(cfromjson.message);
+        if (isCompanyData(c)) {
+          companiesFromJSON.data.push(c);
+        } else {
+          const msg = 'error reading data';
+          companiesFromJSON.data.push(new Error(msg));
+          errorparsing.push(msg);
         }
-        companiesFromJSON.data.push(cfromjson as any);
       }
       companiesFromJSON.n = isNaN(companiesFromJSON.n)
         ? companiesFromJSON.data.length
         : companiesFromJSON.n;
-    } catch (err) {
-      // TODO
+    } catch (err: any) {
+      toast.custom(
+        <Alert severity="error">{err?.message ?? 'unexpected error occured'}</Alert>,
+      );
       return [];
     } finally {
       if (errorparsing.length) {
-        console.log(errorparsing);
         const errors = errorparsing.map(err => <p>{err}</p>);
         toast.custom(<Alert severity="error">{errors}</Alert>);
       }

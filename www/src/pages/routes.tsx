@@ -18,7 +18,7 @@ import { Alert } from '@suid/material';
 import Progress, { isRunning } from '../components/Progress';
 import { setLoading } from '../components/Loading';
 import { Dynamic } from 'solid-js/web';
-import { HttpError } from '../lib/api';
+import { ApiError } from '../lib/api';
 
 const LoginForm = lazy(() => import('./login'));
 const Dashboard = lazy(() => import('./dashboard'));
@@ -35,9 +35,9 @@ function TokenData() {
   return token;
 }
 
-const AlertOrLogin = (err: Error | HttpError): JSX.Element => {
+const AlertOrLogin = (err: Error | ApiError): JSX.Element => {
   console.log('route', err);
-  if (err instanceof HttpError) {
+  if (err instanceof ApiError) {
     if (err.response.status === 401) {
       return <Navigate href="/login" />;
     }
