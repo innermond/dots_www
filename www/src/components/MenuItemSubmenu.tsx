@@ -6,7 +6,6 @@ import {
   Switch,
   Resource,
   Match,
-  createEffect,
 } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 
@@ -21,7 +20,6 @@ import {
   ListItemIcon,
   ListItemButton,
   ListItemText,
-  Alert,
   SvgIcon,
   IconButton,
 } from '@suid/material';
@@ -30,7 +28,6 @@ import { useNavigate } from '@solidjs/router';
 import { toast } from 'solid-toast';
 
 import Progress from './Progress';
-import { ApiError } from '../lib/api';
 
 type DataMenuItemSubmenu<T> = Array<Error | T> | Error | undefined;
 
@@ -99,6 +96,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
         <ListItemText secondary={hint} />
         <IconButton
           onClick={refresh}
+          size="small"
           color="primary"
           aria-label="refresh entire list"
         >
