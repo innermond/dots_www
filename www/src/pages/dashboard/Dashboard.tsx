@@ -269,7 +269,7 @@ const Dashboard: Component = () => {
         </IconButton>
       </Toolbar>
       <Divider sx={{ my: 1 }} />
-      <List component="nav" on:refetchCompany={() => refetch()}>
+      <List component="nav">
         <ListItems />
         <Divider />
         <MenuItemSubmenu
@@ -277,6 +277,7 @@ const Dashboard: Component = () => {
           titlekey="longname"
           state={companyRes.state}
           data={companies()}
+          refresh={refetch}
         />
         <ListItemButton onClick={handleLogout}>
           <ListItemIcon>

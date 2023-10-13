@@ -1,3 +1,5 @@
+import {ApiError} from '../../lib/api';
+
 type CompanyData = {
   id: number;
   longname: string;
@@ -7,7 +9,7 @@ type CompanyData = {
 
 function isCompanyData(d: any): d is CompanyData {
   return (
-    d instanceof Error ||
+    d instanceof Error  ||
     (typeof d?.id === 'number' &&
       typeof d?.longname === 'string' &&
       typeof d?.rn === 'string' &&
@@ -18,6 +20,10 @@ function isCompanyData(d: any): d is CompanyData {
 type DataCompanies = { data: (CompanyData | Error)[]; n: number };
 
 function isDataCompanies(d: any): d is DataCompanies {
+  if (d instanceof ApiError) {
+    return true;
+  }
+
   const seemsOk =
     typeof d === 'object' && typeof d?.n === 'number' && Array.isArray(d?.data);
   if (!seemsOk) {
