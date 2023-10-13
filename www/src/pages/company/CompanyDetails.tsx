@@ -1,26 +1,40 @@
-import { onMount, onCleanup, createResource } from 'solid-js';
+import { onMount, onCleanup, createResource, createEffect } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import { useParams } from '@solidjs/router';
 
+import { company } from '../../lib/api';
 import appstate from '../../lib/app';
 const { currentCompany, setCurrentPageTitle } = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {
   const params = useParams();
 
-  const delay = () => {
-    return new Promise(resolve => {
-      const timespan = 100;
-      setTimeout(() => resolve(timespan), timespan);
-    });
+  const [companyRes] = createResource(()=>params.id, company.one);
+  const data = (): string => {
+    console.log(companyRes.state);
+    if (companyRes.state === 'errored') {
+      return companyRes.error?.message;
+    }
+    const inf = companyRes();
+    if (! inf) {
+      return 'nothing yet...';
+    }
+    return ''+inf;
   };
 
-  const [time] = createResource(delay);
+  createEffect(() => {
+    if (companyRes.state === 'ready') {
+      console.log(JSON.stringify(companyRes()));
+      updateTitle();
+    }
+  });
 
-  onMount(() => {
+  const updateTitle = () => {
     const n = currentCompany().longname || 'Company';
     setCurrentPageTitle(n);
-  });
+  };
+ 
+  onMount(updateTitle);
 
   onCleanup(() => {
     console.log('CompanyDetails cleaned up');
@@ -29,7 +43,8 @@ const CompanyDetails: Component = (): JSX.Element => {
   return (
     <p>
       {params.id}
-      {time() as string} {'CompanyDetails component works!'}
+      {data()}
+      {'CompanyDetails component works!'}
     </p>
   );
 };
