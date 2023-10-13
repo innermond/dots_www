@@ -99,7 +99,7 @@ export const company = {
   },
   one: function (id: string): Promise<JSON | Error> {
     const q = new URLSearchParams();
-    q.set("id", id);
+    q.append("id", id);
     const qstr = q.toString();
 
     const headers = {
