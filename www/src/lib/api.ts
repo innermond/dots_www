@@ -38,7 +38,13 @@ async function send<T>(
     devsleep: (window as any)?.devsleep ?? '',
   };
   const qp = new URLSearchParams(dev);
-  for (let [k, v] of qp.entries()) {
+  // use Array.from to make a static copy of qp.entries() in order to delete from qp
+  // otherwise, using directly qp.entries() and deleting from qp will "skip" steps
+  // as qp.entries() - the iterator - is tied intimately with qp and any deletion from qp
+  // alter iteration offered by qp.entries()
+  // practically by deleting from qp you shorten the loop while looping
+  const qpe = Array.from(qp.entries());
+  for (let [k, v] of qpe) {
     if (v === '') {
       qp.delete(k);
     }
