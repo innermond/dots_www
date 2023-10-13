@@ -98,6 +98,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
 
   const handleRefresh = (evt: Event) => {
     console.log(evt);
+    evt.stopPropagation();
     const e = new CustomEvent('refetchCompany', { bubbles: true });
     evt.currentTarget?.dispatchEvent(e);
   };
@@ -130,7 +131,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
       {opener}
       <Show when={open()}>
         <Switch>
-          <Match when={props.state === 'pending'}>
+          <Match when={['pending', 'refreshing'].includes(props.state)}>
             <Progress padding="0.5rem" size="1rem" height="auto" />
           </Match>
           <Match when={props.state === 'errored'}>

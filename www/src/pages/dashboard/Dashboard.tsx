@@ -132,7 +132,7 @@ const Dashboard: Component = () => {
         if (isCompanyData(c)) {
           companiesFromJSON.data.push(c);
         } else {
-          const msg = 'error reading data';
+          const msg = 'fail to read this';
           companiesFromJSON.data.push(new Error(msg));
           errorparsing.push(msg);
         }
