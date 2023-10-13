@@ -163,7 +163,7 @@ const Dashboard: Component = () => {
   });
 
   createEffect(() => {
-    setLoading(companyRes.loading);
+    setLoading(['pending', 'refreshing'].includes(companyRes.state));
   });
 
   const appbar: JSX.Element = (
