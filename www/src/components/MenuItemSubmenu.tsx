@@ -24,8 +24,6 @@ import {
   IconButton,
 } from '@suid/material';
 import { SvgIconTypeMap } from '@suid/material/SvgIcon';
-import { useNavigate } from '@solidjs/router';
-import { toast } from 'solid-toast';
 
 import Progress from './Progress';
 
@@ -36,39 +34,30 @@ type PropsMenuItemSubmenu<T> = {
   headtext: string;
   data?: DataMenuItemSubmenu<T>;
   state: Resource<T>['state'];
-  idkey?: string;
   titlekey?: string;
-  refresh?: Function;
+  action?: NonNullable<Function>;
 };
 
 type SvgIconColor = SvgIconTypeMap['selfProps']['color'];
 
 function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const [open, setOpen] = createSignal(false);
-  const navigate = useNavigate();
 
   const handleListClick = (evt: Event) => {
     evt.stopPropagation();
     setOpen((prev: boolean) => !prev);
   };
 
-  const idkey = props?.idkey ?? 'id';
   const titlekey = props?.titlekey ?? 'name';
   const icon = props?.icon ?? LabelIcon;
-  const refresh = (evt: Event) => {
-    evt.stopPropagation();
-    toast.remove();
 
-    const fn = props?.refresh ?? (() => {});
-    fn();
-  }
-
-  const handleSubmenuClick = (id: number) => {
-    if (!id) {
+  const handleSubmenuClick = (e: unknown) => {
+    if (!e) {
       return;
     }
-    navigate(`/company/${id}`);
-  };
+    if (! props.action) return;
+    props.action(e);
+  }
 
   const opener: JSX.Element = (
     <ListItemButton onClick={handleListClick}>
@@ -87,7 +76,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const handleRefresh = (evt: Event) => {
     console.log(evt);
     evt.stopPropagation();
-    const e = new CustomEvent('refetchcompany', { bubbles: true });
+    const e = new CustomEvent('refetchCompany', { bubbles: true });
     evt.currentTarget?.dispatchEvent(e);
   };
 
@@ -102,7 +91,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
         </ListItemIcon>
         <ListItemText secondary={hint} />
         <IconButton
-          onClick={refresh}
+          onClick={handleRefresh}
           size="small"
           color="primary"
           aria-label="refresh entire list"
@@ -135,7 +124,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
                   return c instanceof Error ? (
                     errored(c.message)
                   ) : (
-                    <ListItemButton onClick={[handleSubmenuClick, c[idkey]]}>
+                    <ListItemButton onClick={[handleSubmenuClick, c]}>
                       <ListItemText
                         secondary={c[titlekey]}
                         sx={{ ml: '.5em' }}

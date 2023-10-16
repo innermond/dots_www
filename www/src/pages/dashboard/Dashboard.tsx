@@ -32,7 +32,7 @@ import { toast } from 'solid-toast';
 import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
 import MenuItemSubmenu from '@/components/MenuItemSubmenu';
-import type { DataCompanies } from '@/pages/company/types';
+import type { CompanyData, DataCompanies } from '@/pages/company/types';
 import { isCompanyData, isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 
@@ -42,7 +42,7 @@ import { setLoading } from '@/components/Loading';
 declare module "solid-js" {
   namespace JSX {
     interface CustomEvents {
-      "refetchcompany": CustomEvent;
+      "refetchCompany": CustomEvent;
     }
   }
 }
@@ -96,7 +96,22 @@ const Dashboard: Component = () => {
     );
   };
 
+  const submenuAction = (e: unknown) => {
+    if ( ! isCompanyData(e)) {
+      toasting('data we got do no represent a company');
+      return;
+    }
+    navigate(`/company/${(e as CompanyData).id}`);
+  }
+
   const [companiesRes, { refetch }] = createResource(company.all);
+
+  const refetchCompany = (evt: Event) => {
+    evt.stopPropagation();
+    toast.remove();
+
+    refetch();
+  }
 
   // TODO adapted for errored case
   const companies = createMemo(() => {
@@ -281,7 +296,7 @@ const Dashboard: Component = () => {
         </IconButton>
       </Toolbar>
       <Divider sx={{ my: 1 }} />
-      <List component="nav" on:refetchcompany={() => refetch()}>
+      <List component="nav" on:refetchCompany={refetchCompany}>
         <ListItems />
         <Divider />
         <MenuItemSubmenu
@@ -289,7 +304,7 @@ const Dashboard: Component = () => {
           titlekey="longname"
           state={companiesRes.state}
           data={companies()}
-          refresh={refetch}
+          action={submenuAction}
         />
         <ListItemButton onClick={handleLogout}>
           <ListItemIcon>
