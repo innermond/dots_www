@@ -50,9 +50,13 @@ async function send<T>(
     }
   }
   const q = qp.toString();
+  let endpoint = API + url; 
+  if (!!q) {
+    endpoint += `?${q}`;
+  }
 
   try {
-    const response: Response = await fetch(API + url + `?${q}`, opts);
+    const response: Response = await fetch(endpoint, opts);
     let json = await response.json();
     // TODO use din dev data
     if ((window as any)?.devjson) {
@@ -81,7 +85,7 @@ export function login(data: LoginParams): Promise<JSON | Error> {
 
 const key = 'dots.tok';
 export const company = {
-  all: function (run: boolean): Promise<JSON | Error> {
+  all: function (): Promise<JSON | Error> {
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
     };
@@ -89,6 +93,22 @@ export const company = {
       'loading companies',
       'GET',
       '/companies',
+      undefined,
+      headers,
+    );
+  },
+  one: function (id: string): Promise<JSON | Error> {
+    const q = new URLSearchParams();
+    q.append("id", id);
+    const qstr = q.toString();
+
+    const headers = {
+      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
+    };
+    return send<undefined>(
+      'loading company',
+      'GET',
+      `/companies?${qstr}`,
       undefined,
       headers,
     );

@@ -16,6 +16,7 @@ import {
   ListItemButton,
   ListItemText,
 } from '@suid/material';
+import  { AlertColor } from '@suid/material/Alert/AlertProps';
 import {
   createEffect,
   createMemo,
@@ -71,8 +72,10 @@ const Dashboard: Component = () => {
   const location = useLocation();
   const pathname = createMemo(() => location.pathname);
   createEffect(() => {
-    const title = getPathTitleMap().get(pathname() ?? 'DOTS');
-    setCurrentPageTitle(title);
+    const title = getPathTitleMap().get(pathname());
+    if (title !== undefined) {
+      setCurrentPageTitle(title);
+    }
   });
 
   const navigate = useNavigate();
@@ -83,24 +86,32 @@ const Dashboard: Component = () => {
     navigate('/login');
   };
 
-  const [companyRes, { refetch }] = createResource(company.all);
+  const toasting = (message: string | JSX.Element, severity?: AlertColor) => {
+    if (!!severity) {
+      severity = 'info';
+    }
+      
+    toast.custom(
+      (t) => <Alert onClick={() => toast.dismiss(t.id)} severity={severity}>{message}</Alert>,
+    );
+  };
+
+  const [companiesRes, { refetch }] = createResource(company.all);
 
   // TODO adapted for errored case
   const companies = createMemo(() => {
     // guard
-    if (!['ready', 'errored'].includes(companyRes.state)) {
+    if (!['ready', 'errored'].includes(companiesRes.state)) {
       return;
     }
 
     const info: DataCompanies | ErrorResource =
-      companyRes.error ?? companyRes();
+      companiesRes.error ?? companiesRes();
     // check most brutal error
     const isObject =
       info instanceof Object && !Array.isArray(info) && info !== null;
     if (!isObject) {
-      toast.custom(
-        <Alert severity="error">{'cannot read data companies'}</Alert>,
-      );
+      toasting('cannot read data companies', 'error');
       return [new Error('reading error')];
     }
 
@@ -109,11 +120,11 @@ const Dashboard: Component = () => {
       if (info.response.status === 401) {
         throw info;
       }
-      toast.custom(<Alert severity="error">{info.message}</Alert>);
+      toasting(info.message, 'error');
       // let it flow down
     } else if (info instanceof Error) {
       // error from client
-      toast.custom(<Alert severity="error">{info.message}</Alert>);
+      toasting(info.message, 'error');
       // cut it here
       return;
     }
@@ -122,11 +133,7 @@ const Dashboard: Component = () => {
     const errorparsing = [];
     try {
       if (!isDataCompanies(info)) {
-        toast.custom(
-          <Alert severity="error">
-            {"received list's companies may have errors"}
-          </Alert>,
-        );
+        toasting("received list's companies may have errors",'warning');
       }
 
       companiesFromJSON.n = 0 + (info as DataCompanies)['n'];
@@ -149,16 +156,12 @@ const Dashboard: Component = () => {
         ? companiesFromJSON.data.length
         : companiesFromJSON.n;
     } catch (err: any) {
-      toast.custom(
-        <Alert severity="error">
-          {err?.message ?? 'unexpected error occured'}
-        </Alert>,
-      );
+      toasting(err?.message ?? 'unexpected error occured','error');
       return [];
     } finally {
       if (errorparsing.length) {
         const errors = errorparsing.map(err => <p>{err}</p>);
-        toast.custom(<Alert severity="error">{errors}</Alert>);
+        toasting(errors, 'error');
       }
     }
 
@@ -171,7 +174,8 @@ const Dashboard: Component = () => {
   });
 
   createEffect(() => {
-    setLoading(['pending', 'refreshing'].includes(companyRes.state));
+    const states = open() ? ['pending'] : ['pending', 'refreshing'];
+    setLoading(states.includes(companiesRes.state));
   });
 
   const appbar: JSX.Element = (
@@ -283,8 +287,9 @@ const Dashboard: Component = () => {
         <MenuItemSubmenu
           headtext="Companies"
           titlekey="longname"
-          state={companyRes.state}
+          state={companiesRes.state}
           data={companies()}
+          refresh={refetch}
         />
         <ListItemButton onClick={handleLogout}>
           <ListItemIcon>

@@ -6,7 +6,6 @@ import {
   Switch,
   Resource,
   Match,
-  createEffect,
 } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 
@@ -21,7 +20,6 @@ import {
   ListItemIcon,
   ListItemButton,
   ListItemText,
-  Alert,
   SvgIcon,
   IconButton,
 } from '@suid/material';
@@ -30,7 +28,6 @@ import { useNavigate } from '@solidjs/router';
 import { toast } from 'solid-toast';
 
 import Progress from './Progress';
-import { ApiError } from '../lib/api';
 
 type DataMenuItemSubmenu<T> = Array<Error | T> | Error | undefined;
 
@@ -41,6 +38,7 @@ type PropsMenuItemSubmenu<T> = {
   state: Resource<T>['state'];
   idkey?: string;
   titlekey?: string;
+  refresh?: Function;
 };
 
 type SvgIconColor = SvgIconTypeMap['selfProps']['color'];
@@ -57,6 +55,13 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const idkey = props?.idkey ?? 'id';
   const titlekey = props?.titlekey ?? 'name';
   const icon = props?.icon ?? LabelIcon;
+  const refresh = (evt: Event) => {
+    evt.stopPropagation();
+    toast.remove();
+
+    const fn = props?.refresh ?? (() => {});
+    fn();
+  }
 
   const handleSubmenuClick = (id: number) => {
     if (!id) {
@@ -64,23 +69,6 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
     }
     navigate(`/company/${id}`);
   };
-
-  createEffect(() => {
-    console.log('menuitem', props.state);
-    if (props.state !== 'errored') {
-      return;
-    }
-    const err = props.data as Error;
-    if (err) {
-      if (err instanceof ApiError) {
-        if (err.response.status === 401) {
-          throw err;
-        }
-      }
-      console.log('catched', err);
-      toast.custom(<Alert severity="error">{err.message}</Alert>);
-    }
-  });
 
   const opener: JSX.Element = (
     <ListItemButton onClick={handleListClick}>
@@ -114,7 +102,8 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
         </ListItemIcon>
         <ListItemText secondary={hint} />
         <IconButton
-          onClick={handleRefresh}
+          onClick={refresh}
+          size="small"
           color="primary"
           aria-label="refresh entire list"
         >
