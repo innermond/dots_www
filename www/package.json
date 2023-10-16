@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.8.6",
     "prettier": "^3.0.3",
     "sass": "^1.66.1",
     "solid-devtools": "^0.27.3",
