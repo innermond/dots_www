@@ -16,7 +16,7 @@ import {
   ListItemButton,
   ListItemText,
 } from '@suid/material';
-import  { AlertColor } from '@suid/material/Alert/AlertProps';
+import { AlertColor } from '@suid/material/Alert/AlertProps';
 import {
   createEffect,
   createMemo,
@@ -39,10 +39,10 @@ import { ApiError, company } from '@/lib/api';
 import appstate from '@/lib/app';
 import { setLoading } from '@/components/Loading';
 
-declare module "solid-js" {
+declare module 'solid-js' {
   namespace JSX {
     interface CustomEvents {
-      "refetchCompany": CustomEvent;
+      refetchCompany: CustomEvent;
     }
   }
 }
@@ -90,19 +90,21 @@ const Dashboard: Component = () => {
     if (!!severity) {
       severity = 'info';
     }
-      
-    toast.custom(
-      (t) => <Alert onClick={() => toast.dismiss(t.id)} severity={severity}>{message}</Alert>,
-    );
+
+    toast.custom(t => (
+      <Alert onClick={() => toast.dismiss(t.id)} severity={severity}>
+        {message}
+      </Alert>
+    ));
   };
 
   const submenuAction = (e: unknown) => {
-    if ( ! isCompanyData(e)) {
+    if (!isCompanyData(e)) {
       toasting('data we got do no represent a company');
       return;
     }
     navigate(`/company/${(e as CompanyData).id}`);
-  }
+  };
 
   const [companiesRes, { refetch }] = createResource(company.all);
 
@@ -111,7 +113,7 @@ const Dashboard: Component = () => {
     toast.remove();
 
     refetch();
-  }
+  };
 
   // TODO adapted for errored case
   const companies = createMemo(() => {
@@ -148,7 +150,7 @@ const Dashboard: Component = () => {
     const errorparsing = [];
     try {
       if (!isDataCompanies(info)) {
-        toasting("received list's companies may have errors",'warning');
+        toasting("received list's companies may have errors", 'warning');
       }
 
       companiesFromJSON.n = 0 + (info as DataCompanies)['n'];
@@ -171,7 +173,7 @@ const Dashboard: Component = () => {
         ? companiesFromJSON.data.length
         : companiesFromJSON.n;
     } catch (err: any) {
-      toasting(err?.message ?? 'unexpected error occured','error');
+      toasting(err?.message ?? 'unexpected error occured', 'error');
       return [];
     } finally {
       if (errorparsing.length) {

@@ -50,7 +50,7 @@ async function send<T>(
     }
   }
   const q = qp.toString();
-  let endpoint = API + url; 
+  let endpoint = API + url;
   if (!!q) {
     endpoint += `?${q}`;
   }
@@ -99,7 +99,7 @@ export const company = {
   },
   one: function (id: string): Promise<JSON | Error> {
     const q = new URLSearchParams();
-    q.append("id", id);
+    q.append('id', id);
     const qstr = q.toString();
 
     const headers = {

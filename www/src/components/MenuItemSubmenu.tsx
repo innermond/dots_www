@@ -55,9 +55,9 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
     if (!e) {
       return;
     }
-    if (! props.action) return;
+    if (!props.action) return;
     props.action(e);
-  }
+  };
 
   const opener: JSX.Element = (
     <ListItemButton onClick={handleListClick}>

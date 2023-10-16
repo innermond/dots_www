@@ -9,17 +9,17 @@ const { currentCompany, setCurrentPageTitle } = appstate;
 const CompanyDetails: Component = (): JSX.Element => {
   const params = useParams();
 
-  const [companyRes] = createResource(()=>params.id, company.one);
+  const [companyRes] = createResource(() => params.id, company.one);
   const data = (): string => {
     console.log(companyRes.state);
     if (companyRes.state === 'errored') {
       return companyRes.error?.message;
     }
     const inf = companyRes();
-    if (! inf) {
+    if (!inf) {
       return 'nothing yet...';
     }
-    return ''+inf;
+    return '' + inf;
   };
 
   createEffect(() => {
@@ -33,7 +33,7 @@ const CompanyDetails: Component = (): JSX.Element => {
     const n = currentCompany().longname || 'Company';
     setCurrentPageTitle(n);
   };
- 
+
   onMount(updateTitle);
 
   onCleanup(() => {
