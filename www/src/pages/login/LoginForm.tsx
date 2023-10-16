@@ -17,9 +17,9 @@ import {
 import LockOutlinedIcon from '@suid/icons-material/LockOutlined';
 import { toast } from 'solid-toast';
 
-import { login } from '../../lib/api';
-import { setLoading } from '../../components/Loading';
-import type { Validable, Validators, MessagesMap } from '../../lib/form';
+import { login } from '@/lib/api';
+import { setLoading } from '@/components/Loading';
+import type { Validable, Validators, MessagesMap } from '@/lib/form';
 import {
   required,
   minlen,
@@ -27,8 +27,8 @@ import {
   likeemail,
   checkpass,
   validate,
-} from '../../lib/form';
-import HelperTextMultiline from '../../components/HelperTextMultiline';
+} from '@/lib/form';
+import HelperTextMultiline from '@/components/HelperTextMultiline';
 import { useNavigate } from '@solidjs/router';
 
 async function fetchLoginData(e: Event) {

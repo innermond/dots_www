@@ -2,8 +2,8 @@ import { onMount, onCleanup, createResource, createEffect } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import { useParams } from '@solidjs/router';
 
-import { company } from '../../lib/api';
-import appstate from '../../lib/app';
+import { company } from '@/lib/api';
+import appstate from '@/lib/app';
 const { currentCompany, setCurrentPageTitle } = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {

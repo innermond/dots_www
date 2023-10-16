@@ -18,9 +18,9 @@ import {
 } from '@suid/material';
 import { A } from '@solidjs/router';
 
-import { company } from '../../lib/api';
+import { company } from '@/lib/api';
 
-import appstate from '../../lib/app';
+import appstate from '@/lib/app';
 const { setCurrentCompany } = appstate;
 const Company: Component = (): JSX.Element => {
   const [change, setChange] = createSignal(false);
