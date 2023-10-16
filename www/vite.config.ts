@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { fileURLToPath, URL } from 'node:url'
+import * as path from 'path'
 import solidPlugin from 'vite-plugin-solid';
 // import devtools from 'solid-devtools/vite';
 
@@ -14,8 +14,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      "@": path.resolve(__dirname, "./src/"),
+    },
   },
   server: {
     port: 3000,
