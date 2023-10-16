@@ -31,13 +31,13 @@ import { toast } from 'solid-toast';
 
 import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
-import MenuItemSubmenu from '@components/MenuItemSubmenu';
-import type { DataCompanies } from '../../pages/company/types';
-import { isCompanyData, isDataCompanies } from '../../pages/company/types';
-import { ApiError, company } from '../../lib/api';
+import MenuItemSubmenu from '@/components/MenuItemSubmenu';
+import type { DataCompanies } from '@/pages/company/types';
+import { isCompanyData, isDataCompanies } from '@/pages/company/types';
+import { ApiError, company } from '@/lib/api';
 
-import appstate from '../../lib/app';
-import { setLoading } from '../../components/Loading';
+import appstate from '@/lib/app';
+import { setLoading } from '@/components/Loading';
 
 declare module "solid-js" {
   namespace JSX {
