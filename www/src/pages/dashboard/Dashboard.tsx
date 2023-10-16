@@ -38,6 +38,14 @@ import { ApiError, company } from '../../lib/api';
 import appstate from '../../lib/app';
 import { setLoading } from '../../components/Loading';
 
+declare module "solid-js" {
+  namespace JSX {
+    interface CustomEvents {
+      "refetchcompany": CustomEvent;
+    }
+  }
+}
+
 type ErrorResource = ApiError | Error;
 
 const { currentPageTitle, setCurrentPageTitle } = appstate;
@@ -269,7 +277,7 @@ const Dashboard: Component = () => {
         </IconButton>
       </Toolbar>
       <Divider sx={{ my: 1 }} />
-      <List component="nav" on:refetchCompany={() => refetch()}>
+      <List component="nav" on:refetchcompany={() => refetch()}>
         <ListItems />
         <Divider />
         <MenuItemSubmenu

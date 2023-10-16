@@ -99,7 +99,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const handleRefresh = (evt: Event) => {
     console.log(evt);
     evt.stopPropagation();
-    const e = new CustomEvent('refetchCompany', { bubbles: true });
+    const e = new CustomEvent('refetchcompany', { bubbles: true });
     evt.currentTarget?.dispatchEvent(e);
   };
 
