@@ -39,12 +39,17 @@ function isDataCompanies(d: any): d is DataCompanies {
   return true;
 }
 
-const companyZero = {
+const companyZero: CompanyData = {
   id: 0,
   longname: '',
   rn: '',
   tin: '',
 };
 
+const companiesZero: DataCompanies = {
+  data: [],
+  n: 0,
+};
+
 export type { CompanyData, DataCompanies };
-export { isCompanyData, isDataCompanies, companyZero };
+export { isCompanyData, isDataCompanies, companyZero, companiesZero };
