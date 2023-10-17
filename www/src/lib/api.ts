@@ -1,3 +1,5 @@
+import {DataCompanies, isDataCompanies} from "@/pages/company/types";
+
 const API = 'http://api.dots.volt.com/v1';
 
 export class ApiError extends Error {
@@ -97,7 +99,7 @@ export const company = {
       headers,
     );
   },
-  one: function (id: string): Promise<JSON | Error> {
+  one: async function (id: string): Promise<DataCompanies | Error> {
     const q = new URLSearchParams();
     q.append('id', id);
     const qstr = q.toString();
@@ -105,12 +107,18 @@ export const company = {
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
     };
-    return send<undefined>(
+    const json = await send<undefined>(
       'loading company',
       'GET',
       `/companies?${qstr}`,
       undefined,
       headers,
     );
+
+    if (isDataCompanies(json)) {
+      return json;  
+    }
+
+    return new Error('unexpected data from server');
   },
 };
