@@ -1,4 +1,4 @@
-import {DataCompanies, isDataCompanies} from "@/pages/company/types";
+import { DataCompanies, isDataCompanies } from '@/pages/company/types';
 
 const API = 'http://api.dots.volt.com/v1';
 
@@ -116,7 +116,7 @@ export const company = {
     );
 
     if (isDataCompanies(json)) {
-      return json;  
+      return json;
     }
 
     return new Error('unexpected data from server');

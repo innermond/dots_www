@@ -1,4 +1,10 @@
-import { onMount, onCleanup, createResource, createEffect, createMemo } from 'solid-js';
+import {
+  onMount,
+  onCleanup,
+  createResource,
+  createEffect,
+  createMemo,
+} from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import { useParams } from '@solidjs/router';
 
@@ -25,7 +31,7 @@ const CompanyDetails: Component = (): JSX.Element => {
 
   createEffect(() => {
     if (!data()) return;
-    
+
     if (!isDataCompanies(data())) {
       toasting('data we got do no represent a company');
       return;
@@ -36,8 +42,8 @@ const CompanyDetails: Component = (): JSX.Element => {
       toasting('received empty data company', 'warning');
       return;
     }
-    
-    const info: CompanyData | Error = dcc.data[0];  
+
+    const info: CompanyData | Error = dcc.data[0];
     // error from server
     if (info instanceof ApiError) {
       if (info.response.status === 401) {
