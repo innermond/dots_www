@@ -1,32 +1,61 @@
-import { onMount, onCleanup, createResource, createEffect } from 'solid-js';
+import { onMount, onCleanup, createResource, createEffect, createMemo } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import { useParams } from '@solidjs/router';
 
-import { company } from '@/lib/api';
+import type { CompanyData, DataCompanies } from '@/pages/company/types';
+import { isDataCompanies } from '@/pages/company/types';
+import { ApiError, company } from '@/lib/api';
+import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
-const { currentCompany, setCurrentPageTitle } = appstate;
+const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {
   const params = useParams();
-
   const [companyRes] = createResource(() => params.id, company.one);
-  const data = (): string => {
-    console.log(companyRes.state);
+  const data = createMemo((): DataCompanies | Error | undefined => {
     if (companyRes.state === 'errored') {
-      return companyRes.error?.message;
+      return companyRes.error;
     }
-    const inf = companyRes();
-    if (!inf) {
-      return 'nothing yet...';
+
+    if (companyRes.state === 'ready') {
+      const inf = companyRes();
+      return inf;
     }
-    return '' + inf;
-  };
+  });
 
   createEffect(() => {
-    if (companyRes.state === 'ready') {
-      console.log(JSON.stringify(companyRes()));
-      updateTitle();
+    if (!data()) return;
+    
+    if (!isDataCompanies(data())) {
+      toasting('data we got do no represent a company');
+      return;
     }
+
+    const dcc = data() as DataCompanies;
+    if (dcc.n === 0) {
+      toasting('received empty data company', 'warning');
+      return;
+    }
+    
+    const info: CompanyData | Error = dcc.data[0];  
+    // error from server
+    if (info instanceof ApiError) {
+      if (info.response.status === 401) {
+        throw info;
+      }
+      toasting(info.message, 'error');
+      // cut it here
+      return;
+    } else if (info instanceof Error) {
+      // error from client
+      toasting(info.message, 'error');
+      // cut it here
+      return;
+    }
+
+    // all ok
+    setCurrentCompany(info);
+    updateTitle();
   });
 
   const updateTitle = () => {
@@ -43,7 +72,6 @@ const CompanyDetails: Component = (): JSX.Element => {
   return (
     <p>
       {params.id}
-      {data()}
       {'CompanyDetails component works!'}
     </p>
   );

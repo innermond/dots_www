@@ -1,6 +1,5 @@
 import type { Component, JSX } from 'solid-js';
 import {
-  Alert,
   Box,
   AppBar,
   Toolbar,
@@ -16,7 +15,6 @@ import {
   ListItemButton,
   ListItemText,
 } from '@suid/material';
-import { AlertColor } from '@suid/material/Alert/AlertProps';
 import {
   createEffect,
   createMemo,
@@ -27,7 +25,6 @@ import MenuIcon from '@suid/icons-material/Menu';
 import Logout from '@suid/icons-material/Logout';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import { useNavigate, useLocation, Outlet } from '@solidjs/router';
-import { toast } from 'solid-toast';
 
 import ListItems from './ListItems';
 import { getPathTitleMap } from './items';
@@ -38,6 +35,7 @@ import { ApiError, company } from '@/lib/api';
 
 import appstate from '@/lib/app';
 import { setLoading } from '@/components/Loading';
+import toasting from '@/lib/toast';
 
 declare module 'solid-js' {
   namespace JSX {
@@ -86,18 +84,6 @@ const Dashboard: Component = () => {
     navigate('/login');
   };
 
-  const toasting = (message: string | JSX.Element, severity?: AlertColor) => {
-    if (!!severity) {
-      severity = 'info';
-    }
-
-    toast.custom(t => (
-      <Alert onClick={() => toast.dismiss(t.id)} severity={severity}>
-        {message}
-      </Alert>
-    ));
-  };
-
   const submenuAction = (e: unknown) => {
     if (!isCompanyData(e)) {
       toasting('data we got do no represent a company');
@@ -110,7 +96,7 @@ const Dashboard: Component = () => {
 
   const refetchCompany = (evt: Event) => {
     evt.stopPropagation();
-    toast.remove();
+    toasting.remove();
 
     refetch();
   };
