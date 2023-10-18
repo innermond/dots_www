@@ -86,20 +86,25 @@ export function login(data: LoginParams): Promise<JSON | Error> {
 }
 
 const key = 'dots.tok';
-export const company = {
-  all: function (): Promise<JSON | Error> {
+
+class APICompany {
+  @returnCheckedJSONorError(isDataCompanies)
+  all(): Promise<JSON | Error> {
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
     };
-    return send<undefined>(
+    const json = send<undefined>(
       'loading companies',
       'GET',
       '/companies',
       undefined,
       headers,
     );
-  },
-  one: async function (id: string): Promise<DataCompanies | Error> {
+
+    return json;
+  }
+
+  async one (id: string): Promise<DataCompanies | Error> {
     const q = new URLSearchParams();
     q.append('id', id);
     const qstr = q.toString();
@@ -114,11 +119,38 @@ export const company = {
       undefined,
       headers,
     );
-
+/*
     if (isDataCompanies(json)) {
       return json;
     }
 
-    return new Error('unexpected data from server');
-  },
+    return new Error('unexpected data from server');*/
+    return verifyJSONorError<DataCompanies>(isDataCompanies, json);
+  }
 };
+
+export const company = new APICompany();
+
+function verifyJSONorError<T>(validator: Function, json: unknown): T | Error {
+    if (validator(json)) {
+      return json as T;
+    }
+
+    return new Error('unexpected data from server');
+
+} 
+
+function returnCheckedJSONorError<V extends Function>(validator: V) {
+  return function(target: any, key: string, descriptor: PropertyDescriptor) {
+    const fn = target[key];
+    if (typeof fn !== 'function') return descriptor;
+
+    descriptor.value = async function() {
+      const result = await fn.apply(this, arguments);
+      if (validator(result)) return result;
+      return new Error('unexpected data from server');
+    }
+
+    return descriptor;
+  }
+}
