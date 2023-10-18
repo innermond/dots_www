@@ -10,11 +10,16 @@ type CompanyData = {
 function isCompanyData(d: unknown): d is CompanyData {
   return (
     d instanceof Error ||
-    ( !!d && typeof d === 'object' &&
-      'id' in d && typeof d.id === 'number' &&
-      'longname' in d && typeof d.longname === 'string' &&
-      'rn' in d && typeof d.rn === 'string' &&
-      'tin' in d && typeof d.tin === 'string')
+    (!!d &&
+      typeof d === 'object' &&
+      'id' in d &&
+      typeof d.id === 'number' &&
+      'longname' in d &&
+      typeof d.longname === 'string' &&
+      'rn' in d &&
+      typeof d.rn === 'string' &&
+      'tin' in d &&
+      typeof d.tin === 'string')
   );
 }
 
@@ -26,10 +31,12 @@ function isDataCompanies(d: unknown): d is DataCompanies {
   }
 
   const seemsOk =
-    !!d && 
-    typeof d === 'object' && 
-    'n' in d && typeof d?.n === 'number' &&
-    'data' in d && Array.isArray(d?.data);
+    !!d &&
+    typeof d === 'object' &&
+    'n' in d &&
+    typeof d?.n === 'number' &&
+    'data' in d &&
+    Array.isArray(d?.data);
   if (!seemsOk) {
     return false;
   }

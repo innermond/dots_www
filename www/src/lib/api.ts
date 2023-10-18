@@ -88,7 +88,6 @@ export function login(data: LoginParams): Promise<JSON | Error> {
 const key = 'dots.tok';
 
 class APICompany {
-
   async all(): Promise<DataCompanies | Error> {
     const headers = {
       Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
@@ -104,7 +103,7 @@ class APICompany {
     return verifiedJSONorError<DataCompanies>(isDataCompanies, json);
   }
 
-  async one (id: string): Promise<DataCompanies | Error> {
+  async one(id: string): Promise<DataCompanies | Error> {
     const q = new URLSearchParams();
     q.append('id', id);
     const qstr = q.toString();
@@ -122,14 +121,17 @@ class APICompany {
 
     return verifiedJSONorError<DataCompanies>(isDataCompanies, json);
   }
-};
+}
 
 export const company = new APICompany();
 Object.freeze(company);
 
-function verifiedJSONorError<T>(validator: (json: unknown) => json is T, json: unknown): T | Error {
+function verifiedJSONorError<T>(
+  validator: (json: unknown) => json is T,
+  json: unknown,
+): T | Error {
   if (validator(json)) {
     return json;
   }
   return new Error('unexpected data from server');
-} 
+}
