@@ -7,30 +7,34 @@ type CompanyData = {
   tin: string;
 };
 
-function isCompanyData(d: any): d is CompanyData {
+function isCompanyData(d: unknown): d is CompanyData {
   return (
     d instanceof Error ||
-    (typeof d?.id === 'number' &&
-      typeof d?.longname === 'string' &&
-      typeof d?.rn === 'string' &&
-      typeof d?.tin === 'string')
+    ( !!d && typeof d === 'object' &&
+      'id' in d && typeof d.id === 'number' &&
+      'longname' in d && typeof d.longname === 'string' &&
+      'rn' in d && typeof d.rn === 'string' &&
+      'tin' in d && typeof d.tin === 'string')
   );
 }
 
 type DataCompanies = { data: (CompanyData | Error)[]; n: number };
 
-function isDataCompanies(d: any): d is DataCompanies {
+function isDataCompanies(d: unknown): d is DataCompanies {
   if (d instanceof ApiError) {
     return true;
   }
 
   const seemsOk =
-    typeof d === 'object' && typeof d?.n === 'number' && Array.isArray(d?.data);
+    !!d && 
+    typeof d === 'object' && 
+    'n' in d && typeof d?.n === 'number' &&
+    'data' in d && Array.isArray(d?.data);
   if (!seemsOk) {
     return false;
   }
   // check data
-  for (const c of d.data) {
+  for (const c of d.data as any) {
     if (!isCompanyData(c)) {
       return false;
     }
