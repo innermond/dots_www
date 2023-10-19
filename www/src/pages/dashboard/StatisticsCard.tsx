@@ -1,9 +1,10 @@
 import { Box, Chip, Grid, Stack, Typography } from '@suid/material';
 import MainCard from '@/components/MainCard';
 
-import { mergeProps, Show } from 'solid-js';
+import { mergeProps, Show, createMemo } from 'solid-js';
 import type { Component } from 'solid-js';
-import {TrendingDown, TrendingUp} from '@suid/icons-material';
+import TrendingUp from '@suid/icons-material/TrendingUp';
+import TrendingDown from '@suid/icons-material/TrendingDown';
 import {ChipTypeMap} from '@suid/material/Chip';
 
 type CardColor = ChipTypeMap['selfProps']['color'];
@@ -18,7 +19,9 @@ const defaultPropsStatisticsCard= {
 
 const StatisticsCard: Component<PropsStatisticsCard> = (props) => {
   
-  //props = mergeProps(defaultPropsStatisticsCard, props);
+  props = mergeProps(defaultPropsStatisticsCard, props);
+
+  const colorByIsLoss = createMemo(() => props.isLoss ? 'warning' : props.color);
 
   return (
   <MainCard contentSX={{ p: 2.25 }}>
@@ -35,8 +38,8 @@ const StatisticsCard: Component<PropsStatisticsCard> = (props) => {
         <Show when={props.percentage}>
           <Grid item>
             <Chip
-              variant="filled"
-              color={props.color}
+              variant="outlined"
+              color={colorByIsLoss()}
               icon={
                 <Show
                   when={props.isLoss}
@@ -47,7 +50,6 @@ const StatisticsCard: Component<PropsStatisticsCard> = (props) => {
               }
               label={`${props.percentage}%`}
               sx={{ ml: 1.25, pl: 1 }}
-              size="small"
             />
           </Grid>
         </Show>
@@ -56,7 +58,7 @@ const StatisticsCard: Component<PropsStatisticsCard> = (props) => {
     <Box sx={{ pt: 2.25 }}>
       <Typography variant="caption" color="textSecondary">
         You made an extra{' '}
-        <Typography component="span" variant="caption" sx={{ color: `${props.color || 'primary'}.main` }}>
+        <Typography component="span" variant="caption" sx={{ color: `${colorByIsLoss()}.main` }}>
           {props.extra}
         </Typography>{' '}
         this year

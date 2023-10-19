@@ -1,4 +1,4 @@
-import { splitProps } from "solid-js";
+import { splitProps, mergeProps } from "solid-js";
 import type { Component, JSX, ParentComponent } from 'solid-js';
 import { Show } from 'solid-js';
 
@@ -22,9 +22,16 @@ type PropsMainCard = Partial<
   }
 >;
 
+const defaultPropsMainCard : PropsMainCard = {
+  border: true,
+  content: true,
+  sx: {backgroundColor: '#fff', borderColor: '#ddd'},
+};
+
   const MainCard: ParentComponent<PropsMainCard> = (
     (props) => {
     const theme = useTheme();
+    props = mergeProps(defaultPropsMainCard, props);
     const [, others] = splitProps(props, ['border', 'content', 'contentSX', 'elevation', 'secondary', 'sx', 'title']);
 
     return (

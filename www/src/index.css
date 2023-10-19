@@ -1,10 +1,8 @@
 :root {
-  --bg: silver;
-  --fg: black;
+  --bg: #f7f7f7;
 }
 
 /* elements */
 body {
-  background-color: var(--bg);
-  color: var(--fg);
+  background-color: var(--bg) !important;
 }

@@ -182,8 +182,8 @@ const Dashboard: Component = () => {
   });
 
   const appbar: JSX.Element = (
-    <AppBar position="absolute">
-      <Toolbar sx={{ pr: '24px' }}>
+    <AppBar position="relative">
+      <Toolbar sx={{ height: 'auto' }}>
         <IconButton
           size="large"
           edge="start"
@@ -201,7 +201,7 @@ const Dashboard: Component = () => {
           title={currentPageTitle()}
           sx={{ flexGrow: 1, textTransform: 'capitalize' }}
         >
-          {currentPageTitle()}
+          {currentPageTitle() ?? '...'}
         </Typography>
         <IconButton color="inherit" size="large" onclick={handleMenuProfile}>
           <Avatar
@@ -305,16 +305,16 @@ const Dashboard: Component = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {appbar}
       {drawer}
       <Box
         sx={{
-          width: '100vw',
-          height: '100vh',
+          width: '100%',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'start',
           justifyContent: 'center',
+          p: { xs: 2, sm: 3 },
         }}
       >
         <Outlet />
