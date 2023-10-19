@@ -13,6 +13,10 @@ import { isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
+import MainCard from '@/components/MainCard';
+import {Grid, Typography} from '@suid/material';
+import StatisticsCard from '../dashboard/StatisticsCard';
+
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {
@@ -76,10 +80,16 @@ const CompanyDetails: Component = (): JSX.Element => {
   });
 
   return (
-    <p>
-      {params.id}
-      {'CompanyDetails component works!'}
-    </p>
+ <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+      {/* row 1 */}
+      <Grid item xs={12} sx={{ mb: -2.25 }}>
+        <Typography variant="h5">Dashboard</Typography>
+      </Grid>
+      <Grid item xs={12} sm={6} md={4} lg={3}>
+        <StatisticsCard title="Total Page Views" count="4,42,236" percentage={59.3} extra="35,000" />
+      </Grid>
+</Grid>
+
   );
 };
 
