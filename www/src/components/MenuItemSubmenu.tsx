@@ -2,6 +2,7 @@ import {
   JSX,
   Show,
   createSignal,
+  createEffect,
   For,
   Switch,
   Resource,
@@ -16,6 +17,7 @@ import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 import ErrorIcon from '@suid/icons-material/Error';
 import RefreshIcon from '@suid/icons-material/Refresh';
 import {
+  Box,
   List,
   ListItemIcon,
   ListItemButton,
@@ -104,6 +106,15 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
 
   const noSubmenu: JSX.Element = errored('no company...', 'warning');
 
+  let companiesSubmenuRef: HTMLDivElement | undefined;
+  let companiesListRef: HTMLUListElement | undefined;
+
+  createEffect(() => {
+    if (open()) {
+      companiesSubmenuRef!.style.height = getComputedStyle(companiesListRef!).height;
+    }
+  });
+
   return (
     <>
       {opener}
@@ -118,7 +129,8 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
             </List>
           </Match>
           <Match when={props.state == 'ready'}>
-            <List disablePadding dense={true}>
+            <Box ref={companiesSubmenuRef} sx={{height: 0, overflow: 'hidden', transition: 'height .5s ease'}}>
+            <List ref={companiesListRef} disablePadding dense={true}>
               <For each={props.data as any} fallback={noSubmenu}>
                 {(c: any) => {
                   return c instanceof Error ? (
@@ -143,6 +155,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
                 }}
               </For>
             </List>
+            </Box>
           </Match>
         </Switch>
       </Show>
