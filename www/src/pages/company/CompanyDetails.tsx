@@ -13,7 +13,7 @@ import { isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
-import {Grid, Typography} from '@suid/material';
+import { Grid, Typography } from '@suid/material';
 import StatisticsCard from '../dashboard/StatisticsCard';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
@@ -79,21 +79,36 @@ const CompanyDetails: Component = (): JSX.Element => {
   });
 
   return (
- <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       <Grid item xs={12} sx={{ mb: -2.25 }}>
         <Typography variant="h5">Counters</Typography>
       </Grid>
       <Grid item xs={12} sm={6} md={4} lg={3}>
-        <StatisticsCard isLoss={true} title="Total Deeds" count="4,42,236" percentage={59.3} extra="35,000" />
+        <StatisticsCard
+          isLoss={true}
+          title="Total Deeds"
+          count="4,42,236"
+          percentage={59.3}
+          extra="35,000"
+        />
       </Grid>
       <Grid item xs={12} sm={6} md={4} lg={3}>
-        <StatisticsCard title="Total Entries" count="4,42,236" percentage={59.3} extra="35,000" />
+        <StatisticsCard
+          title="Total Entries"
+          count="4,42,236"
+          percentage={59.3}
+          extra="35,000"
+        />
       </Grid>
       <Grid item xs={12} sm={6} md={4} lg={3}>
-        <StatisticsCard title="Total Entry Types" count="4,42,236" percentage={59.3} extra="35,000" />
+        <StatisticsCard
+          title="Total Entry Types"
+          count="4,42,236"
+          percentage={59.3}
+          extra="35,000"
+        />
       </Grid>
-</Grid>
-
+    </Grid>
   );
 };
 

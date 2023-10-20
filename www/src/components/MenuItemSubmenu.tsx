@@ -112,11 +112,15 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   let itemsSubmenuRef: HTMLDivElement | undefined;
   let itemsListRef: HTMLUListElement | undefined;
 
-  const contractAnimation = {height: 0, overflow: 'hidden', transition: 'height .3s ease'};
+  const contractAnimation = {
+    height: 0,
+    overflow: 'hidden',
+    transition: 'height .3s ease',
+  };
   const contract = (evt: Event) => {
     if (itemsSubmenuRef !== evt.target) return;
     if (itemsSubmenuRef.clientHeight === 0) setAnimationDone(true);
-  }
+  };
 
   onMount(() => {
     document.addEventListener('transitionend', contract);
@@ -127,8 +131,14 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
     if (open()) {
       setAnimationDone(false);
       // gives time for submenu to be attached
-      // as drawer is temporary and builds/removes its content  
-      setTimeout(() => itemsSubmenuRef!.style.height = getComputedStyle(itemsListRef!).height, 0);
+      // as drawer is temporary and builds/removes its content
+      setTimeout(
+        () =>
+          (itemsSubmenuRef!.style.height = getComputedStyle(
+            itemsListRef!,
+          ).height),
+        0,
+      );
     } else {
       if (itemsSubmenuRef?.isConnected) {
         itemsSubmenuRef.style.height = '0px';
@@ -151,31 +161,31 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
           </Match>
           <Match when={props.state == 'ready'}>
             <Box ref={itemsSubmenuRef} sx={contractAnimation}>
-            <List ref={itemsListRef} disablePadding dense={true}>
-              <For each={props.data as any} fallback={noSubmenu}>
-                {(d: unknown) => {
-                  return d instanceof Error ? (
-                    errored(d.message)
-                  ) : (
-                    <ListItemButton onClick={[handleSubmenuClick, d]}>
-                      <ListItemText
-                        secondary={(d as any)[titlekey]}
-                        sx={{ ml: '.5em' }}
-                      />
-                      <ListItemIcon
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          minWidth: 'auto',
-                        }}
-                      >
-                        <ChevronRightIcon fontSize="small" />
-                      </ListItemIcon>
-                    </ListItemButton>
-                  );
-                }}
-              </For>
-            </List>
+              <List ref={itemsListRef} disablePadding dense={true}>
+                <For each={props.data as any} fallback={noSubmenu}>
+                  {(d: unknown) => {
+                    return d instanceof Error ? (
+                      errored(d.message)
+                    ) : (
+                      <ListItemButton onClick={[handleSubmenuClick, d]}>
+                        <ListItemText
+                          secondary={(d as any)[titlekey]}
+                          sx={{ ml: '.5em' }}
+                        />
+                        <ListItemIcon
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            minWidth: 'auto',
+                          }}
+                        >
+                          <ChevronRightIcon fontSize="small" />
+                        </ListItemIcon>
+                      </ListItemButton>
+                    );
+                  }}
+                </For>
+              </List>
             </Box>
           </Match>
         </Switch>

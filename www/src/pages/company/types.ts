@@ -67,4 +67,10 @@ const companiesZero: DataCompanies = {
 };
 
 export type { CompanyData, DataCompanies };
-export { isCompanyData, isKeyofCompanyData, isDataCompanies, companyZero, companiesZero };
+export {
+  isCompanyData,
+  isKeyofCompanyData,
+  isDataCompanies,
+  companyZero,
+  companiesZero,
+};
