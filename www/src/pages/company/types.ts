@@ -23,7 +23,7 @@ function isCompanyData(d: unknown): d is CompanyData {
   );
 }
 
-function isKeyofCompanyData(k: string, d: CompanyData): k is keyof CompanyData {
+function isKeyofCompanyData(k: string): k is keyof CompanyData {
   return ['id', 'longname', 'rn', 'tin'].includes(k);
 }
 

@@ -287,7 +287,7 @@ const Dashboard: Component = () => {
       <List component="nav" on:refetchItem={refetchCompany}>
         <ListItems />
         <Divider />
-        <MenuItemSubmenu
+        <MenuItemSubmenu<CompanyData>
           headtext="Companies"
           titlekey="longname"
           state={companiesRes.state}

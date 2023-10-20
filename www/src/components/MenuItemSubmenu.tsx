@@ -7,6 +7,8 @@ import {
   Switch,
   Resource,
   Match,
+  onMount,
+  onCleanup,
 } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 
@@ -26,6 +28,7 @@ import {
   IconButton,
 } from '@suid/material';
 import { SvgIconTypeMap } from '@suid/material/SvgIcon';
+import type { CompanyData } from '@/pages/company/types';
 
 import Progress from './Progress';
 
@@ -44,6 +47,7 @@ type SvgIconColor = SvgIconTypeMap['selfProps']['color'];
 
 function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const [open, setOpen] = createSignal(false);
+  const [animationDone, setAnimationDone] = createSignal(false);
 
   const handleListClick = (evt: Event) => {
     evt.stopPropagation();
@@ -76,7 +80,6 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   );
 
   const handleRefresh = (evt: Event) => {
-    console.log(evt);
     evt.stopPropagation();
     const e = new CustomEvent('refetchItem', { bubbles: true });
     evt.currentTarget?.dispatchEvent(e);
@@ -109,16 +112,34 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   let itemsSubmenuRef: HTMLDivElement | undefined;
   let itemsListRef: HTMLUListElement | undefined;
 
+  const contractAnimation = {height: 0, overflow: 'hidden', transition: 'height .3s ease'};
+  const contract = (evt: Event) => {
+    if (itemsSubmenuRef !== evt.target) return;
+    if (itemsSubmenuRef.clientHeight === 0) setAnimationDone(true);
+  }
+
+  onMount(() => {
+    document.addEventListener('transitionend', contract);
+    onCleanup(() => document.removeEventListener('transitionend', contract));
+  });
+
   createEffect(() => {
     if (open()) {
-      itemsSubmenuRef!.style.height = getComputedStyle(itemsListRef!).height;
+      setAnimationDone(false);
+      // gives time for submenu to be attached
+      // as drawer is temporary and builds/removes its content  
+      setTimeout(() => itemsSubmenuRef!.style.height = getComputedStyle(itemsListRef!).height, 0);
+    } else {
+      if (itemsSubmenuRef?.isConnected) {
+        itemsSubmenuRef.style.height = '0px';
+      }
     }
   });
 
   return (
     <>
       {opener}
-      <Show when={open()}>
+      <Show when={!animationDone()}>
         <Switch>
           <Match when={['pending', 'refreshing'].includes(props.state)}>
             <Progress padding="0.5rem" size="1rem" height="auto" />
@@ -129,17 +150,16 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
             </List>
           </Match>
           <Match when={props.state == 'ready'}>
-            <Box ref={itemsSubmenuRef} sx={{height: 0, overflow: 'hidden', transition: 'height .5s ease'}}>
+            <Box ref={itemsSubmenuRef} sx={contractAnimation}>
             <List ref={itemsListRef} disablePadding dense={true}>
               <For each={props.data as any} fallback={noSubmenu}>
-                {(c: unknown) => {
-                  return c instanceof Error ? (
-                    errored(c.message)
+                {(d: unknown) => {
+                  return d instanceof Error ? (
+                    errored(d.message)
                   ) : (
-                  <Show when={c as T}>
-                    <ListItemButton onClick={[handleSubmenuClick, c]}>
+                    <ListItemButton onClick={[handleSubmenuClick, d]}>
                       <ListItemText
-                        secondary={(c as T)[titlekey]}
+                        secondary={(d as any)[titlekey]}
                         sx={{ ml: '.5em' }}
                       />
                       <ListItemIcon
@@ -152,7 +172,6 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
                         <ChevronRightIcon fontSize="small" />
                       </ListItemIcon>
                     </ListItemButton>
-                  </Show>
                   );
                 }}
               </For>
