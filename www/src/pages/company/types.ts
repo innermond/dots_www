@@ -23,6 +23,10 @@ function isCompanyData(d: unknown): d is CompanyData {
   );
 }
 
+function isKeyofCompanyData(k: string, d: CompanyData): k is keyof CompanyData {
+  return ['id', 'longname', 'rn', 'tin'].includes(k);
+}
+
 type DataCompanies = { data: (CompanyData | Error)[]; n: number };
 
 function isDataCompanies(d: unknown): d is DataCompanies {
@@ -63,4 +67,4 @@ const companiesZero: DataCompanies = {
 };
 
 export type { CompanyData, DataCompanies };
-export { isCompanyData, isDataCompanies, companyZero, companiesZero };
+export { isCompanyData, isKeyofCompanyData, isDataCompanies, companyZero, companiesZero };

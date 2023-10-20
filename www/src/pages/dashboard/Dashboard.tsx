@@ -40,7 +40,7 @@ import toasting from '@/lib/toast';
 declare module 'solid-js' {
   namespace JSX {
     interface CustomEvents {
-      refetchCompany: CustomEvent;
+      refetchItem: CustomEvent;
     }
   }
 }
@@ -284,7 +284,7 @@ const Dashboard: Component = () => {
         </IconButton>
       </Toolbar>
       <Divider sx={{ my: 1 }} />
-      <List component="nav" on:refetchCompany={refetchCompany}>
+      <List component="nav" on:refetchItem={refetchCompany}>
         <ListItems />
         <Divider />
         <MenuItemSubmenu

@@ -36,7 +36,7 @@ type PropsMenuItemSubmenu<T> = {
   headtext: string;
   data?: DataMenuItemSubmenu<T>;
   state: Resource<T>['state'];
-  titlekey?: string;
+  titlekey?: keyof T;
   action?: NonNullable<Function>;
 };
 
@@ -78,7 +78,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const handleRefresh = (evt: Event) => {
     console.log(evt);
     evt.stopPropagation();
-    const e = new CustomEvent('refetchCompany', { bubbles: true });
+    const e = new CustomEvent('refetchItem', { bubbles: true });
     evt.currentTarget?.dispatchEvent(e);
   };
 
@@ -104,14 +104,14 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
     );
   };
 
-  const noSubmenu: JSX.Element = errored('no company...', 'warning');
+  const noSubmenu: JSX.Element = errored('no item...', 'warning');
 
-  let companiesSubmenuRef: HTMLDivElement | undefined;
-  let companiesListRef: HTMLUListElement | undefined;
+  let itemsSubmenuRef: HTMLDivElement | undefined;
+  let itemsListRef: HTMLUListElement | undefined;
 
   createEffect(() => {
     if (open()) {
-      companiesSubmenuRef!.style.height = getComputedStyle(companiesListRef!).height;
+      itemsSubmenuRef!.style.height = getComputedStyle(itemsListRef!).height;
     }
   });
 
@@ -129,16 +129,17 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
             </List>
           </Match>
           <Match when={props.state == 'ready'}>
-            <Box ref={companiesSubmenuRef} sx={{height: 0, overflow: 'hidden', transition: 'height .5s ease'}}>
-            <List ref={companiesListRef} disablePadding dense={true}>
+            <Box ref={itemsSubmenuRef} sx={{height: 0, overflow: 'hidden', transition: 'height .5s ease'}}>
+            <List ref={itemsListRef} disablePadding dense={true}>
               <For each={props.data as any} fallback={noSubmenu}>
-                {(c: any) => {
+                {(c: unknown) => {
                   return c instanceof Error ? (
                     errored(c.message)
                   ) : (
+                  <Show when={c as T}>
                     <ListItemButton onClick={[handleSubmenuClick, c]}>
                       <ListItemText
-                        secondary={c[titlekey]}
+                        secondary={(c as T)[titlekey]}
                         sx={{ ml: '.5em' }}
                       />
                       <ListItemIcon
@@ -151,6 +152,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
                         <ChevronRightIcon fontSize="small" />
                       </ListItemIcon>
                     </ListItemButton>
+                  </Show>
                   );
                 }}
               </For>
