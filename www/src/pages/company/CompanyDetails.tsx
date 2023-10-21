@@ -4,12 +4,13 @@ import {
   createResource,
   createEffect,
   createMemo,
+  Show,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import { useParams } from '@solidjs/router';
 
-import type { CompanyData, DataCompanies } from '@/pages/company/types';
-import { isDataCompanies } from '@/pages/company/types';
+import type { CompanyData, DataCompanyStats, DataCompanies, CompanyStatsData } from '@/pages/company/types';
+import { isCompanyStatsData, isDataCompanies, isDataCompanyStats } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
@@ -72,6 +73,38 @@ const CompanyDetails: Component = (): JSX.Element => {
     setCurrentPageTitle(n);
   };
 
+  const [statsRes] = createResource(() => params.id, company.stats);
+  const stats = createMemo((): DataCompanyStats | Error | undefined => {
+    if (statsRes.state === 'errored') {
+      return statsRes.error;
+    }
+
+    if (statsRes.state === 'ready') {
+      const inf = statsRes();
+      return inf;
+    }
+  });
+
+  createEffect(() => {
+    if (!stats()) return;
+
+    // error from server
+    if (stats() instanceof ApiError) {
+      const err = stats() as ApiError;
+      if (err.response.status === 401) {
+        throw err;
+      }
+      toasting(err.message, 'error');
+      // cut it here
+      return;
+    } else if (stats() instanceof Error) {
+      // error from client
+      toasting((stats() as Error).message, 'error');
+      // cut it here
+      return;
+    }
+  });
+
   onMount(updateTitle);
 
   onCleanup(() => {
@@ -79,6 +112,7 @@ const CompanyDetails: Component = (): JSX.Element => {
   });
 
   return (
+  <Show when={statsRes.state === 'ready'} fallback={'loading...'}>
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       <Grid item xs={12} sx={{ mb: -2.25 }}>
         <Typography variant="h5">Counters</Typography>
@@ -87,7 +121,7 @@ const CompanyDetails: Component = (): JSX.Element => {
         <StatisticsCard
           isLoss={true}
           title="Total Deeds"
-          count="4,42,236"
+          count={''+(stats() as DataCompanyStats).data.countDeeds}
           percentage={59.3}
           extra="35,000"
         />
@@ -95,7 +129,7 @@ const CompanyDetails: Component = (): JSX.Element => {
       <Grid item xs={12} sm={6} md={4} lg={3}>
         <StatisticsCard
           title="Total Entries"
-          count="4,42,236"
+          count={''+(stats() as DataCompanyStats).data.countEntries}
           percentage={59.3}
           extra="35,000"
         />
@@ -103,12 +137,13 @@ const CompanyDetails: Component = (): JSX.Element => {
       <Grid item xs={12} sm={6} md={4} lg={3}>
         <StatisticsCard
           title="Total Entry Types"
-          count="4,42,236"
+          count={''+(stats() as DataCompanyStats).data.countEntryTypes}
           percentage={59.3}
           extra="35,000"
         />
       </Grid>
     </Grid>
+  </Show>
   );
 };
 

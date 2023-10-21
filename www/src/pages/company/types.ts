@@ -7,6 +7,8 @@ type CompanyData = {
   tin: string;
 };
 
+type DataCompanies = { data: (CompanyData | Error)[]; n: number };
+
 function isCompanyData(d: unknown): d is CompanyData {
   return (
     d instanceof Error ||
@@ -26,8 +28,6 @@ function isCompanyData(d: unknown): d is CompanyData {
 function isKeyofCompanyData(k: string): k is keyof CompanyData {
   return ['id', 'longname', 'rn', 'tin'].includes(k);
 }
-
-type DataCompanies = { data: (CompanyData | Error)[]; n: number };
 
 function isDataCompanies(d: unknown): d is DataCompanies {
   if (d instanceof ApiError) {
@@ -54,6 +54,52 @@ function isDataCompanies(d: unknown): d is DataCompanies {
   return true;
 }
 
+type CompanyStatsData= {
+  countCompanies: number,
+  countDeeds: number,
+  countEntries: number,
+  countEntryTypes: number,
+};
+
+type DataCompanyStats = { data: CompanyStatsData; n: number };
+
+function isCompanyStatsData(d: unknown): d is CompanyStatsData {
+  if (!d || typeof d !== 'object') return false;
+  if (d instanceof Error) {
+    return true;
+  }
+  
+  return (
+      'count_companies' in d &&
+      typeof d.count_companies === 'number' &&
+      'count_entries' in d &&
+      typeof d.count_entries === 'number' &&
+      'count_entry_types' in d &&
+      typeof d.count_entry_types === 'number' &&
+      'count_deeds' in d &&
+      typeof d.count_deeds === 'number'
+  );
+}
+
+function isDataCompanyStats(d: unknown): d is DataCompanyStats {
+  if (d instanceof ApiError) {
+    return true;
+  }
+
+  const seemsOk =
+    !!d &&
+    typeof d === 'object' &&
+    'n' in d &&
+    typeof d?.n === 'number' &&
+    'data' in d &&
+    isCompanyStatsData(d?.data);
+  if (!seemsOk) {
+    return false;
+  }
+
+  return true;
+}
+
 const companyZero: CompanyData = {
   id: 0,
   longname: '',
@@ -66,11 +112,13 @@ const companiesZero: DataCompanies = {
   n: 0,
 };
 
-export type { CompanyData, DataCompanies };
+export type { CompanyData, DataCompanies, CompanyStatsData, DataCompanyStats };
 export {
   isCompanyData,
   isKeyofCompanyData,
   isDataCompanies,
+  isCompanyStatsData,
+  isDataCompanyStats,
   companyZero,
   companiesZero,
 };

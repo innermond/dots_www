@@ -28,7 +28,6 @@ import {
   IconButton,
 } from '@suid/material';
 import { SvgIconTypeMap } from '@suid/material/SvgIcon';
-import type { CompanyData } from '@/pages/company/types';
 
 import Progress from './Progress';
 
