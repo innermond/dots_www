@@ -5,16 +5,17 @@ import {
   createEffect,
   createMemo,
   Show,
+  For,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import { useParams } from '@solidjs/router';
 
-import type { CompanyData, DataCompanyStats, DataCompanies, CompanyStatsData } from '@/pages/company/types';
-import { isCompanyStatsData, isDataCompanies, isDataCompanyStats } from '@/pages/company/types';
+import type { CompanyData, DataCompanyStats, DataCompanies, CompanyDepletionData, DataCompanyDepletion } from '@/pages/company/types';
+import { isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
-import { Grid, Typography } from '@suid/material';
+import { Grid, Typography, Divider } from '@suid/material';
 import StatisticsCard from '../dashboard/StatisticsCard';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
@@ -105,6 +106,38 @@ const CompanyDetails: Component = (): JSX.Element => {
     }
   });
 
+  const [depletionRes] = createResource(() => params.id, company.depletion);
+  const depletion = createMemo((): DataCompanyDepletion | Error | undefined => {
+    if (depletionRes.state === 'errored') {
+      return depletionRes.error;
+    }
+
+    if (depletionRes.state === 'ready') {
+      const inf = depletionRes();
+      return inf;
+    }
+  });
+
+  createEffect(() => {
+    if (!depletion()) return;
+
+    // error from server
+    if (depletion() instanceof ApiError) {
+      const err = depletion() as ApiError;
+      if (err.response.status === 401) {
+        throw err;
+      }
+      toasting(err.message, 'error');
+      // cut it here
+      return;
+    } else if (depletion() instanceof Error) {
+      // error from client
+      toasting((depletion() as Error).message, 'error');
+      // cut it here
+      return;
+    }
+  });
+
   onMount(updateTitle);
 
   onCleanup(() => {
@@ -112,6 +145,7 @@ const CompanyDetails: Component = (): JSX.Element => {
   });
 
   return (
+  <>
   <Show when={statsRes.state === 'ready'} fallback={'loading...'}>
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       <Grid item xs={12} sx={{ mb: -2.25 }}>
@@ -144,6 +178,23 @@ const CompanyDetails: Component = (): JSX.Element => {
       </Grid>
     </Grid>
   </Show>
+  <Show when={depletionRes.state === 'ready'} fallback={'loading...'}>
+    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+      <Grid item xs={12} sx={{ mb: -2.25 }}>
+        <Typography variant="h5">Depletion</Typography>
+      </Grid>
+      <For each={(depletion() as DataCompanyDepletion).data}>{(d: CompanyDepletionData) => {
+      return <Grid item xs={12} sm={6} md={4} lg={3}>
+        <StatisticsCard
+          isLoss={true}
+          title="Total Deeds"
+          count={d.code}
+        />
+      </Grid>}}
+      </For>
+    </Grid>
+  </Show>
+  </>
   );
 };
 

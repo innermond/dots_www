@@ -1,4 +1,4 @@
-import { DataCompanies, DataCompanyStats, isDataCompanies, isDataCompanyStats } from '@/pages/company/types';
+import { DataCompanies, DataCompanyStats, isDataCompanies, isDataCompanyStats, DataCompanyDepletion, isDataCompanyDepletion } from '@/pages/company/types';
 
 const API = 'http://api.dots.volt.com/v1';
 
@@ -145,6 +145,30 @@ class APICompany {
 
     return convertKeysToCamelCase(verifiedOrError) as DataCompanyStats;
   }
+
+  async depletion(id: string): Promise<DataCompanyDepletion | Error> {
+    const q = new URLSearchParams();
+    q.append('id', id);
+    const qstr = q.toString();
+
+    const headers = {
+      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
+    };
+    const json = await send<undefined>(
+      'getting depletion for company',
+      'GET',
+      `/companies/depletion?${qstr}`,
+      undefined,
+      headers,
+    );
+
+    const verifiedOrError =  verifiedJSONorError<DataCompanyDepletion>(isDataCompanyDepletion, json);
+    if (verifiedOrError instanceof Error) {
+      return verifiedOrError;
+    }
+
+    return convertKeysToCamelCase(verifiedOrError) as DataCompanyDepletion;
+  }
 }
 
 export const company = new APICompany();
@@ -167,7 +191,7 @@ type CamelCaseKey<S extends string> =
 
 type CamelCase<T> = T extends object
   ? {
-      [K in keyof T as CamelCase<string & K>]: CamelCase<T[K]>;
+      [K in keyof T as CamelCaseKey<string & K>]: CamelCase<T[K]>;
     }
   : T;
 

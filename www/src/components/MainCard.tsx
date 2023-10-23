@@ -1,5 +1,5 @@
 import { splitProps, mergeProps } from 'solid-js';
-import type { Component, JSX, ParentComponent } from 'solid-js';
+import type { ParentComponent } from 'solid-js';
 import { Show } from 'solid-js';
 
 import {
@@ -30,6 +30,7 @@ const defaultPropsMainCard: PropsMainCard = {
   border: true,
   content: true,
   sx: { backgroundColor: '#fff', borderColor: '#ddd' },
+  contentSX: { p: 2.25 },
 };
 
 const MainCard: ParentComponent<PropsMainCard> = props => {

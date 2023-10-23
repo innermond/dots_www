@@ -30,7 +30,7 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
   );
 
   return (
-    <MainCard contentSX={{ p: 2.25 }}>
+    <MainCard>
       <Stack spacing={0.5}>
         <Typography variant="h6" color="textSecondary">
           {props.title}
