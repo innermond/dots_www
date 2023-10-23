@@ -54,12 +54,12 @@ function isDataCompanies(d: unknown): d is DataCompanies {
   return true;
 }
 
-type CompanyDepletionData= {
-  entryTypeId: number,
-  code: string,
-  description: string,
-  quantityInitial: number,
-  quantityDrained: number,
+type CompanyDepletionData = {
+  entryTypeId: number;
+  code: string;
+  description: string;
+  quantityInitial: number;
+  quantityDrained: number;
 };
 
 function isCompanyDepletionData(d: unknown): d is CompanyDepletionData {
@@ -67,19 +67,19 @@ function isCompanyDepletionData(d: unknown): d is CompanyDepletionData {
   if (d instanceof Error) {
     return true;
   }
-  
-  const compulsory = (
-      'entry_type_id' in d &&
-      typeof d.entry_type_id === 'number' &&
-      'code' in d &&
-      typeof d.code === 'string' &&
-      'quantity_initial' in d &&
-      typeof d.quantity_initial === 'number' &&
-      'quantity_drained' in d &&
-      typeof d.quantity_drained === 'number'
-  );
 
-  const optional = 'description' in d ? typeof d.description === 'string' : true;
+  const compulsory =
+    'entry_type_id' in d &&
+    typeof d.entry_type_id === 'number' &&
+    'code' in d &&
+    typeof d.code === 'string' &&
+    'quantity_initial' in d &&
+    typeof d.quantity_initial === 'number' &&
+    'quantity_drained' in d &&
+    typeof d.quantity_drained === 'number';
+
+  const optional =
+    'description' in d ? typeof d.description === 'string' : true;
 
   return compulsory && optional;
 }
@@ -96,8 +96,9 @@ function isDataCompanyDepletion(d: unknown): d is DataCompanyDepletion {
     typeof d === 'object' &&
     'n' in d &&
     typeof d?.n === 'number' &&
-    'data' in d && 
-    Array.isArray(d.data) && (d.data.length > 0) &&
+    'data' in d &&
+    Array.isArray(d.data) &&
+    d.data.length > 0 &&
     d.data.every(isCompanyDepletionData);
   if (!seemsOk) {
     return false;
@@ -106,11 +107,11 @@ function isDataCompanyDepletion(d: unknown): d is DataCompanyDepletion {
   return true;
 }
 
-type CompanyStatsData= {
-  countCompanies: number,
-  countDeeds: number,
-  countEntries: number,
-  countEntryTypes: number,
+type CompanyStatsData = {
+  countCompanies: number;
+  countDeeds: number;
+  countEntries: number;
+  countEntryTypes: number;
 };
 
 type DataCompanyStats = { data: CompanyStatsData; n: number };
@@ -120,16 +121,16 @@ function isCompanyStatsData(d: unknown): d is CompanyStatsData {
   if (d instanceof Error) {
     return true;
   }
-  
+
   return (
-      'count_companies' in d &&
-      typeof d.count_companies === 'number' &&
-      'count_entries' in d &&
-      typeof d.count_entries === 'number' &&
-      'count_entry_types' in d &&
-      typeof d.count_entry_types === 'number' &&
-      'count_deeds' in d &&
-      typeof d.count_deeds === 'number'
+    'count_companies' in d &&
+    typeof d.count_companies === 'number' &&
+    'count_entries' in d &&
+    typeof d.count_entries === 'number' &&
+    'count_entry_types' in d &&
+    typeof d.count_entry_types === 'number' &&
+    'count_deeds' in d &&
+    typeof d.count_deeds === 'number'
   );
 }
 
@@ -164,7 +165,14 @@ const companiesZero: DataCompanies = {
   n: 0,
 };
 
-export type { CompanyData, DataCompanies, CompanyStatsData, DataCompanyStats, CompanyDepletionData, DataCompanyDepletion };
+export type {
+  CompanyData,
+  DataCompanies,
+  CompanyStatsData,
+  DataCompanyStats,
+  CompanyDepletionData,
+  DataCompanyDepletion,
+};
 export {
   isCompanyData,
   isKeyofCompanyData,

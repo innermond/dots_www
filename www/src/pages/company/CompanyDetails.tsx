@@ -10,7 +10,13 @@ import {
 import type { Component, JSX } from 'solid-js';
 import { useParams } from '@solidjs/router';
 
-import type { CompanyData, DataCompanyStats, DataCompanies, CompanyDepletionData, DataCompanyDepletion } from '@/pages/company/types';
+import type {
+  CompanyData,
+  DataCompanyStats,
+  DataCompanies,
+  CompanyDepletionData,
+  DataCompanyDepletion,
+} from '@/pages/company/types';
 import { isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
@@ -145,56 +151,60 @@ const CompanyDetails: Component = (): JSX.Element => {
   });
 
   return (
-  <>
-  <Show when={statsRes.state === 'ready'} fallback={'loading...'}>
-    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      <Grid item xs={12} sx={{ mb: -2.25 }}>
-        <Typography variant="h5">Counters</Typography>
-      </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <StatisticsCard
-          isLoss={true}
-          title="Total Deeds"
-          count={''+(stats() as DataCompanyStats).data.countDeeds}
-          percentage={59.3}
-          extra="35,000"
-        />
-      </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <StatisticsCard
-          title="Total Entries"
-          count={''+(stats() as DataCompanyStats).data.countEntries}
-          percentage={59.3}
-          extra="35,000"
-        />
-      </Grid>
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <StatisticsCard
-          title="Total Entry Types"
-          count={''+(stats() as DataCompanyStats).data.countEntryTypes}
-          percentage={59.3}
-          extra="35,000"
-        />
-      </Grid>
-    </Grid>
-  </Show>
-  <Show when={depletionRes.state === 'ready'} fallback={'loading...'}>
-    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      <Grid item xs={12} sx={{ mb: -2.25 }}>
-        <Typography variant="h5">Depletion</Typography>
-      </Grid>
-      <For each={(depletion() as DataCompanyDepletion).data}>{(d: CompanyDepletionData) => {
-      return <Grid item xs={12} sm={6} md={4} lg={3}>
-        <StatisticsCard
-          isLoss={true}
-          title="Total Deeds"
-          count={d.code}
-        />
-      </Grid>}}
-      </For>
-    </Grid>
-  </Show>
-  </>
+    <>
+      <Show when={statsRes.state === 'ready'} fallback={'loading...'}>
+        <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+          <Grid item xs={12} sx={{ mb: -2.25 }}>
+            <Typography variant="h5">Counters</Typography>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <StatisticsCard
+              isLoss={true}
+              title="Total Deeds"
+              count={'' + (stats() as DataCompanyStats).data.countDeeds}
+              percentage={59.3}
+              extra="35,000"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <StatisticsCard
+              title="Total Entries"
+              count={'' + (stats() as DataCompanyStats).data.countEntries}
+              percentage={59.3}
+              extra="35,000"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} lg={3}>
+            <StatisticsCard
+              title="Total Entry Types"
+              count={'' + (stats() as DataCompanyStats).data.countEntryTypes}
+              percentage={59.3}
+              extra="35,000"
+            />
+          </Grid>
+        </Grid>
+      </Show>
+      <Show when={depletionRes.state === 'ready'} fallback={'loading...'}>
+        <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+          <Grid item xs={12} sx={{ mb: -2.25 }}>
+            <Typography variant="h5">Depletion</Typography>
+          </Grid>
+          <For each={(depletion() as DataCompanyDepletion).data}>
+            {(d: CompanyDepletionData) => {
+              return (
+                <Grid item xs={12} sm={6} md={4} lg={3}>
+                  <StatisticsCard
+                    isLoss={true}
+                    title="Total Deeds"
+                    count={d.code}
+                  />
+                </Grid>
+              );
+            }}
+          </For>
+        </Grid>
+      </Show>
+    </>
   );
 };
 

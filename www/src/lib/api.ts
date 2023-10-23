@@ -1,4 +1,11 @@
-import { DataCompanies, DataCompanyStats, isDataCompanies, isDataCompanyStats, DataCompanyDepletion, isDataCompanyDepletion } from '@/pages/company/types';
+import {
+  DataCompanies,
+  DataCompanyStats,
+  isDataCompanies,
+  isDataCompanyStats,
+  DataCompanyDepletion,
+  isDataCompanyDepletion,
+} from '@/pages/company/types';
 
 const API = 'http://api.dots.volt.com/v1';
 
@@ -138,7 +145,10 @@ class APICompany {
       headers,
     );
 
-    const verifiedOrError =  verifiedJSONorError<DataCompanyStats>(isDataCompanyStats, json);
+    const verifiedOrError = verifiedJSONorError<DataCompanyStats>(
+      isDataCompanyStats,
+      json,
+    );
     if (verifiedOrError instanceof Error) {
       return verifiedOrError;
     }
@@ -162,7 +172,10 @@ class APICompany {
       headers,
     );
 
-    const verifiedOrError =  verifiedJSONorError<DataCompanyDepletion>(isDataCompanyDepletion, json);
+    const verifiedOrError = verifiedJSONorError<DataCompanyDepletion>(
+      isDataCompanyDepletion,
+      json,
+    );
     if (verifiedOrError instanceof Error) {
       return verifiedOrError;
     }
@@ -174,7 +187,7 @@ class APICompany {
 export const company = new APICompany();
 Object.freeze(company);
 
-function verifiedJSONorError<T> (
+function verifiedJSONorError<T>(
   validator: (json: unknown) => json is T,
   json: unknown,
 ): T | Error {
@@ -184,10 +197,9 @@ function verifiedJSONorError<T> (
   return new Error('unexpected data from server');
 }
 
-type CamelCaseKey<S extends string> =
-  S extends `${infer First}_${infer Rest}`
-    ? `${First}${Capitalize<CamelCaseKey<Rest>>}`
-    : S;
+type CamelCaseKey<S extends string> = S extends `${infer First}_${infer Rest}`
+  ? `${First}${Capitalize<CamelCaseKey<Rest>>}`
+  : S;
 
 type CamelCase<T> = T extends object
   ? {
@@ -198,16 +210,23 @@ type CamelCase<T> = T extends object
 function convertKeysToCamelCase(data: unknown): CamelCase<typeof data> {
   if (Array.isArray(data)) {
     return data.map((item: unknown) => convertKeysToCamelCase(item));
-  } else if (data !== null && typeof data === 'object' && Object.keys(data).length) {
+  } else if (
+    data !== null &&
+    typeof data === 'object' &&
+    Object.keys(data).length
+  ) {
     const camelCaseData = {} as any; // added any to notify typescript compiler that any props can/will be added
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
-        const camelCaseKey = key.replace(/_(\w)/g, (_, match) => match.toUpperCase());
-        camelCaseData[camelCaseKey] = convertKeysToCamelCase((data as any)[key as keyof typeof data]);
+        const camelCaseKey = key.replace(/_(\w)/g, (_, match) =>
+          match.toUpperCase(),
+        );
+        camelCaseData[camelCaseKey] = convertKeysToCamelCase(
+          (data as any)[key as keyof typeof data],
+        );
       }
     }
     return camelCaseData;
   }
   return data;
 }
-
