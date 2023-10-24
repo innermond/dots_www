@@ -2,15 +2,15 @@ import {
   Box,
   Chip,
   Grid,
-  PropTypes,
   Stack,
   SvgIcon,
   Typography,
 } from '@suid/material';
 import MainCard from '@/components/MainCard';
 
-import { mergeProps, Show, createMemo } from 'solid-js';
-import type { Component, ComponentProps } from 'solid-js';
+import { mergeProps, Show, createMemo, lazy } from 'solid-js';
+import { Dynamic } from 'solid-js/web';
+import type { Component } from 'solid-js';
 import TrendingUp from '@suid/icons-material/TrendingUp';
 import TrendingDown from '@suid/icons-material/TrendingDown';
 import { SxProps } from '@suid/system';
@@ -23,7 +23,7 @@ type PropsStatisticsCard = Partial<{
   title: string;
   count: string;
   percentage: number;
-  icon: typeof SvgIcon;
+  icon?: typeof SvgIcon | string;
   isLoss: boolean;
   extra: any;
 }>;
@@ -38,8 +38,23 @@ const ellipsisStyle: SxProps = {
   textOverflow: 'ellipsis',
 };
 
+const loadIcon: any = (iconstr: string) => {
+  return lazy(() => import(`/node_modules/@suid/icons-material/${iconstr}.jsx`));
+};
+
 const StatisticsCard: Component<PropsStatisticsCard> = props => {
   props = mergeProps(defaultPropsStatisticsCard, props);
+
+  const otherIcon = ():typeof SvgIcon | null  => {
+    if (typeof props?.icon === 'string') {
+      return loadIcon(props.icon)
+    } else if (!!props?.icon) {
+      return props.icon;
+    }
+    return null;
+  };
+
+  const dynIcon = otherIcon();
 
   const colorByIsLoss = createMemo(() =>
     props.isLoss ? 'warning' : props.color,
@@ -70,9 +85,9 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
                 icon={
                   <Show
                     when={props.isLoss}
-                    fallback={<TrendingUp style={{ color: 'inherit' }} />}
+                    fallback={dynIcon ? <Dynamic component={dynIcon} />: <TrendingUp style={{ color: 'inherit' }} />}
                   >
-                    <TrendingDown style={{ color: 'inherit' }} />
+                    {dynIcon ? <Dynamic component={dynIcon} /> : <TrendingDown style={{ color: 'inherit' }} />}
                   </Show>
                 }
                 label={`${props.percentage}%`}

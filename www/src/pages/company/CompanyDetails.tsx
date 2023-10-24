@@ -21,8 +21,9 @@ import { isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
-import { Grid, Typography, Divider } from '@suid/material';
+import { Grid, Typography } from '@suid/material';
 import StatisticsCard from '../dashboard/StatisticsCard';
+import Progress from '@/components/Progress';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
 
@@ -152,7 +153,7 @@ const CompanyDetails: Component = (): JSX.Element => {
 
   return (
     <>
-      <Show when={statsRes.state === 'ready'} fallback={'loading...'}>
+      <Show when={statsRes.state === 'ready'} fallback={<Progress />}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Counters</Typography>
@@ -184,7 +185,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
         </Grid>
       </Show>
-      <Show when={depletionRes.state === 'ready'} fallback={'loading...'}>
+      <Show when={depletionRes.state === 'ready'} fallback={<Progress />}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Depletion</Typography>
@@ -204,6 +205,7 @@ const CompanyDetails: Component = (): JSX.Element => {
                     title={d.code}
                     count={'' + (d.quantityInitial - d.quantityDrained)}
                     percentage={remained}
+                    icon="HorizontalSplit"
                   />
                 </Grid>
               );
