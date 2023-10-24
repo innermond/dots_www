@@ -189,14 +189,17 @@ const CompanyDetails: Component = (): JSX.Element => {
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Depletion</Typography>
           </Grid>
-          <For each={(depletion() as DataCompanyDepletion).data}>
+          <For each={(depletion() as DataCompanyDepletion).data} fallback={<EmptyStatisticsCard />}>
             {(d: CompanyDepletionData) => {
+              const remained = (1-d.quantityDrained/d.quantityInitial)*100;
+              const isLoss = remained < 0.1;
               return (
                 <Grid item xs={12} sm={6} md={4} lg={3}>
                   <StatisticsCard
-                    isLoss={true}
-                    title="Total Deeds"
-                    count={d.code}
+                    isLoss={isLoss}
+                    title={d.code}
+                    count={''+(d.quantityInitial - d.quantityDrained)}
+                    percentage={remained}
                   />
                 </Grid>
               );
@@ -207,5 +210,17 @@ const CompanyDetails: Component = (): JSX.Element => {
     </>
   );
 };
+
+const EmptyStatisticsCard: Component = (): JSX.Element => {
+  return (
+    <Grid item xs={12} sm={6} md={4} lg={3}>
+      <StatisticsCard
+        isLoss={false}
+        title=""
+        count="0"
+        percentage={0}
+      />
+    </Grid>
+)};
 
 export default CompanyDetails;
