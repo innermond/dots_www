@@ -103,10 +103,13 @@ function isDataCompanyDepletion(d: unknown): d is DataCompanyDepletion {
   if (!seemsOk) {
     return false;
   }
- 
+
   // empty case of DataCompanyDepletion
-  if ((d as DataCompanyDepletion).n === 0 && (d as DataCompanyDepletion).data.length === 0) {
-    return true; 
+  if (
+    (d as DataCompanyDepletion).n === 0 &&
+    (d as DataCompanyDepletion).data.length === 0
+  ) {
+    return true;
   }
 
   // check data to be CompanyDepletionData

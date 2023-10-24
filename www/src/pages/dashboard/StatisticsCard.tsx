@@ -1,4 +1,12 @@
-import { Box, Chip, Grid, PropTypes, Stack, SvgIcon, Typography } from '@suid/material';
+import {
+  Box,
+  Chip,
+  Grid,
+  PropTypes,
+  Stack,
+  SvgIcon,
+  Typography,
+} from '@suid/material';
 import MainCard from '@/components/MainCard';
 
 import { mergeProps, Show, createMemo } from 'solid-js';
@@ -15,7 +23,7 @@ type PropsStatisticsCard = Partial<{
   title: string;
   count: string;
   percentage: number;
-  icon:  typeof SvgIcon;
+  icon: typeof SvgIcon;
   isLoss: boolean;
   extra: any;
 }>;
@@ -40,7 +48,12 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
   return (
     <MainCard>
       <Stack spacing={0.5}>
-        <Typography variant="h6" color="textSecondary" title={props.title} sx={ellipsisStyle}>
+        <Typography
+          variant="h6"
+          color="textSecondary"
+          title={props.title}
+          sx={ellipsisStyle}
+        >
           {props.title}
         </Typography>
         <Grid container alignItems="center">
