@@ -84,22 +84,35 @@ function isCompanyDepletionData(d: unknown): d is CompanyDepletionData {
   return compulsory && optional;
 }
 
-type DataCompanyDepletion = { data: CompanyDepletionData; n: number };
+type DataCompanyDepletion = { data: CompanyDepletionData[]; n: number };
 
 function isDataCompanyDepletion(d: unknown): d is DataCompanyDepletion {
   if (d instanceof ApiError) {
     return true;
   }
 
+  // check general shape of DataCompanyDepletion
   let seemsOk =
     !!d &&
     typeof d === 'object' &&
     'n' in d &&
     typeof d?.n === 'number' &&
     'data' in d &&
-    Array.isArray(d.data) &&
-    d.data.length > 0 &&
-    d.data.every(isCompanyDepletionData);
+    Array.isArray(d.data);
+
+  if (!seemsOk) {
+    return false;
+  }
+ 
+  // empty case of DataCompanyDepletion
+  if ((d as DataCompanyDepletion).n === 0 && (d as DataCompanyDepletion).data.length === 0) {
+    return true; 
+  }
+
+  // check data to be CompanyDepletionData
+  seemsOk =
+    (d as DataCompanyDepletion).data.length > 0 &&
+    (d as DataCompanyDepletion).data.every(isCompanyDepletionData);
   if (!seemsOk) {
     return false;
   }
