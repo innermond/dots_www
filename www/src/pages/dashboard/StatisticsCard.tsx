@@ -1,10 +1,11 @@
-import { Box, Chip, Grid, Stack, Typography } from '@suid/material';
+import { Box, Chip, Grid, PropTypes, Stack, SvgIcon, Typography } from '@suid/material';
 import MainCard from '@/components/MainCard';
 
 import { mergeProps, Show, createMemo } from 'solid-js';
-import type { Component } from 'solid-js';
+import type { Component, ComponentProps } from 'solid-js';
 import TrendingUp from '@suid/icons-material/TrendingUp';
 import TrendingDown from '@suid/icons-material/TrendingDown';
+import { SxProps } from '@suid/system';
 import { ChipTypeMap } from '@suid/material/Chip';
 
 type CardColor = ChipTypeMap['selfProps']['color'];
@@ -14,12 +15,19 @@ type PropsStatisticsCard = Partial<{
   title: string;
   count: string;
   percentage: number;
+  icon:  typeof SvgIcon;
   isLoss: boolean;
   extra: any;
 }>;
 
 const defaultPropsStatisticsCard = {
   color: 'primary' as CardColor,
+};
+
+const ellipsisStyle: SxProps = {
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
 };
 
 const StatisticsCard: Component<PropsStatisticsCard> = props => {
@@ -32,7 +40,7 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
   return (
     <MainCard>
       <Stack spacing={0.5}>
-        <Typography variant="h6" color="textSecondary">
+        <Typography variant="h6" color="textSecondary" title={props.title} sx={ellipsisStyle}>
           {props.title}
         </Typography>
         <Grid container alignItems="center">
@@ -45,7 +53,7 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
             <Grid item>
               <Chip
                 variant="outlined"
-                color={colorByIsLoss()}
+                color={props.color ?? colorByIsLoss()}
                 icon={
                   <Show
                     when={props.isLoss}
@@ -61,19 +69,21 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
           </Show>
         </Grid>
       </Stack>
-      <Box sx={{ pt: 2.25 }}>
-        <Typography variant="caption" color="textSecondary">
-          You made an extra{' '}
-          <Typography
-            component="span"
-            variant="caption"
-            sx={{ color: `${colorByIsLoss()}.main` }}
-          >
-            {props.extra}
-          </Typography>{' '}
-          this year
-        </Typography>
-      </Box>
+      <Show when={props.extra}>
+        <Box sx={{ pt: 2.25 }}>
+          <Typography variant="caption" color="textSecondary">
+            You made an extra{' '}
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{ color: `${colorByIsLoss()}.main` }}
+            >
+              {props.extra}
+            </Typography>{' '}
+            this year
+          </Typography>
+        </Box>
+      </Show>
     </MainCard>
   );
 };
