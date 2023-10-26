@@ -18,10 +18,10 @@ import { ChipTypeMap } from '@suid/material/Chip';
 
 type CardColor = ChipTypeMap['selfProps']['color'];
 
-type PropsStatisticsCard = Partial<{
+export type PropsStatisticsCard = Partial<{
   color: CardColor;
   title: string;
-  count: string;
+  count: number;
   percentage: number;
   icon?: typeof SvgIcon | string;
   isLoss: boolean;
@@ -73,16 +73,18 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
           {props.title}
         </Typography>
         <Grid container alignItems="center">
-          <Grid item>
-            <Typography variant="h4" color="inherit">
-              {props.count}
-            </Typography>
-          </Grid>
+          <Show when={props.count}>
+            <Grid item>
+              <Typography variant="h4" color="inherit">
+                {(props.count)!.toFixed(2)}
+              </Typography>
+            </Grid>
+          </Show>
           <Show when={props.percentage}>
             <Grid item>
               <Chip
                 variant="outlined"
-                color={props.color ?? colorByIsLoss()}
+                color={colorByIsLoss()}
                 icon={
                   <Show
                     when={props.isLoss}
@@ -91,7 +93,7 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
                     {dynIcon ? <Dynamic component={dynIcon} /> : <TrendingDown style={{ color: 'inherit' }} />}
                   </Show>
                 }
-                label={`${props.percentage}%`}
+                label={`${(props.percentage)!.toFixed(2)}%`}
                 sx={{ ml: 1.25, pl: 1 }}
               />
             </Grid>

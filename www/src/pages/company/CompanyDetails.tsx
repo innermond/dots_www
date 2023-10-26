@@ -22,7 +22,7 @@ import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
 import { Grid, Typography } from '@suid/material';
-import StatisticsCard from '../dashboard/StatisticsCard';
+import StatisticsCard, {PropsStatisticsCard} from '../dashboard/StatisticsCard';
 import Progress from '@/components/Progress';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
@@ -162,7 +162,7 @@ const CompanyDetails: Component = (): JSX.Element => {
             <StatisticsCard
               isLoss={true}
               title="Total Deeds"
-              count={'' + (stats() as DataCompanyStats).data.countDeeds}
+              count={(stats() as DataCompanyStats).data.countDeeds}
               percentage={59.3}
               extra="35,000"
             />
@@ -170,7 +170,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <StatisticsCard
               title="Total Entries"
-              count={'' + (stats() as DataCompanyStats).data.countEntries}
+              count={(stats() as DataCompanyStats).data.countEntries}
               percentage={59.3}
               extra="35,000"
             />
@@ -178,7 +178,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <StatisticsCard
               title="Total Entry Types"
-              count={'' + (stats() as DataCompanyStats).data.countEntryTypes}
+              count={(stats() as DataCompanyStats).data.countEntryTypes}
               percentage={59.3}
               extra="35,000"
             />
@@ -192,7 +192,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
           <For
             each={(depletion() as DataCompanyDepletion).data}
-            fallback={<EmptyStatisticsCard />}
+            fallback={<EmptyStatisticsCard title="all entries are enough" />}
           >
             {(d: CompanyDepletionData) => {
               const remained =
@@ -203,7 +203,7 @@ const CompanyDetails: Component = (): JSX.Element => {
                   <StatisticsCard
                     isLoss={isLoss}
                     title={d.code}
-                    count={'' + (d.quantityInitial - d.quantityDrained)}
+                    count={(d.quantityInitial - d.quantityDrained)}
                     percentage={remained}
                     icon="HorizontalSplit"
                   />
@@ -217,10 +217,10 @@ const CompanyDetails: Component = (): JSX.Element => {
   );
 };
 
-const EmptyStatisticsCard: Component = (): JSX.Element => {
+const EmptyStatisticsCard: Component<PropsStatisticsCard> = (props): JSX.Element => {
   return (
     <Grid item xs={12} sm={6} md={4} lg={3}>
-      <StatisticsCard isLoss={false} title="" count="0" percentage={0} />
+      <StatisticsCard isLoss={false} title={props.title??''} />
     </Grid>
   );
 };
