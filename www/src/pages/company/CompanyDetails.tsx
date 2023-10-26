@@ -21,7 +21,8 @@ import { isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
-import { Grid, Typography } from '@suid/material';
+import { Grid, Typography, Button } from '@suid/material';
+import AddIcon from '@suid/icons-material/Add';
 import StatisticsCard, {PropsStatisticsCard} from '../dashboard/StatisticsCard';
 import Progress from '@/components/Progress';
 
@@ -163,25 +164,31 @@ const CompanyDetails: Component = (): JSX.Element => {
               isLoss={true}
               title="Total Deeds"
               count={(stats() as DataCompanyStats).data.countDeeds}
-              percentage={59.3}
-              extra="35,000"
-            />
+            >
+              <Button variant="outlined" startIcon={<AddIcon />}>
+                Add New Deed
+              </Button>
+            </StatisticsCard>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <StatisticsCard
               title="Total Entries"
               count={(stats() as DataCompanyStats).data.countEntries}
-              percentage={59.3}
-              extra="35,000"
-            />
+            >
+              <Button variant="outlined" startIcon={<AddIcon />}>
+                Add New Entry
+              </Button>
+            </StatisticsCard>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <StatisticsCard
               title="Total Entry Types"
               count={(stats() as DataCompanyStats).data.countEntryTypes}
-              percentage={59.3}
-              extra="35,000"
-            />
+            >
+              <Button variant="outlined" startIcon={<AddIcon />}>
+                Add New entry Type
+              </Button>
+            </StatisticsCard>
           </Grid>
         </Grid>
       </Show>

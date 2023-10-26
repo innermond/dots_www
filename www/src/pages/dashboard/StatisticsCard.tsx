@@ -10,7 +10,7 @@ import MainCard from '@/components/MainCard';
 
 import { mergeProps, Show, createMemo, lazy } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import type { Component } from 'solid-js';
+import type { ParentComponent } from 'solid-js';
 import TrendingUp from '@suid/icons-material/TrendingUp';
 import TrendingDown from '@suid/icons-material/TrendingDown';
 import { SxProps } from '@suid/system';
@@ -25,7 +25,6 @@ export type PropsStatisticsCard = Partial<{
   percentage: number;
   icon?: typeof SvgIcon | string;
   isLoss: boolean;
-  extra: any;
 }>;
 
 const defaultPropsStatisticsCard = {
@@ -36,14 +35,13 @@ const ellipsisStyle: SxProps = {
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textOverflow: 'ellipsis',
-  fontSize: '1rem',
 };
 
 const loadIcon: any = (iconstr: string) => {
   return lazy(() => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`));
 };
 
-const StatisticsCard: Component<PropsStatisticsCard> = props => {
+const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
   props = mergeProps(defaultPropsStatisticsCard, props);
 
   const otherIcon = ():typeof SvgIcon | null  => {
@@ -100,19 +98,9 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
           </Show>
         </Grid>
       </Stack>
-      <Show when={props.extra}>
+      <Show when={props.children}>
         <Box sx={{ pt: 2.25 }}>
-          <Typography variant="caption" color="textSecondary">
-            You made an extra{' '}
-            <Typography
-              component="span"
-              variant="caption"
-              sx={{ color: `${colorByIsLoss()}.main` }}
-            >
-              {props.extra}
-            </Typography>{' '}
-            this year
-          </Typography>
+          {props.children}
         </Box>
       </Show>
     </MainCard>
