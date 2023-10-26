@@ -21,6 +21,7 @@
     "vite-plugin-solid": "^2.7.0"
   },
   "dependencies": {
+    "@ant-design/colors": "^7.0.0",
     "@fontsource/roboto": "^5.0.8",
     "@solidjs/router": "^0.8.3",
     "@suid/icons-material": "^0.6.9",
