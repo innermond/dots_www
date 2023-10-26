@@ -312,8 +312,10 @@ const Dashboard: Component = () => {
         sx={{
           width: '100%',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'start',
           justifyContent: 'center',
+          rowGap: '3rem',
           p: { xs: 2, sm: 3 },
         }}
       >

@@ -36,10 +36,11 @@ const ellipsisStyle: SxProps = {
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textOverflow: 'ellipsis',
+  fontSize: '1rem',
 };
 
 const loadIcon: any = (iconstr: string) => {
-  return lazy(() => import(`/node_modules/@suid/icons-material/${iconstr}.jsx`));
+  return lazy(() => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`));
 };
 
 const StatisticsCard: Component<PropsStatisticsCard> = props => {
@@ -65,7 +66,7 @@ const StatisticsCard: Component<PropsStatisticsCard> = props => {
       <Stack spacing={0.5}>
         <Typography
           variant="h6"
-          color="textSecondary"
+          color="text.secondary"
           title={props.title}
           sx={ellipsisStyle}
         >
