@@ -39,7 +39,9 @@ const ellipsisStyle: SxProps = {
 };
 
 const loadIcon: any = (iconstr: string) => {
-  return lazy(() => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`));
+  return lazy(
+    () => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`),
+  );
 };
 
 const theme = useTheme();
@@ -47,9 +49,9 @@ const theme = useTheme();
 const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
   props = mergeProps(defaultPropsStatisticsCard, props);
 
-  const otherIcon = ():typeof SvgIcon | null  => {
+  const otherIcon = (): typeof SvgIcon | null => {
     if (typeof props?.icon === 'string') {
-      return loadIcon(props.icon)
+      return loadIcon(props.icon);
     } else if (!!props?.icon) {
       return props.icon;
     }
@@ -64,7 +66,7 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
 
   return (
     <MainCard>
-        <Grid container justifyContent="space-between" alignItems="center">
+      <Grid container justifyContent="space-between" alignItems="center">
         <Typography
           variant="h6"
           color="text.secondary"
@@ -73,11 +75,11 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
         >
           {props.title}
         </Typography>
-<Stack direction="row">
+        <Stack direction="row">
           <Show when={props.count}>
             <Grid item>
               <Typography variant="h4" color="inherit">
-                {(props.count)}
+                {props.count}
               </Typography>
             </Grid>
           </Show>
@@ -89,22 +91,30 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
                 icon={
                   <Show
                     when={props.isLoss}
-                    fallback={dynIcon ? <Dynamic component={dynIcon} />: <TrendingUp style={{ color: 'inherit' }} />}
+                    fallback={
+                      dynIcon ? (
+                        <Dynamic component={dynIcon} />
+                      ) : (
+                        <TrendingUp style={{ color: 'inherit' }} />
+                      )
+                    }
                   >
-                    {dynIcon ? <Dynamic component={dynIcon} /> : <TrendingDown style={{ color: 'inherit' }} />}
+                    {dynIcon ? (
+                      <Dynamic component={dynIcon} />
+                    ) : (
+                      <TrendingDown style={{ color: 'inherit' }} />
+                    )}
                   </Show>
                 }
-                label={`${(props.percentage)!.toFixed(2)}%`}
+                label={`${props.percentage!.toFixed(2)}%`}
                 sx={{ ml: theme.spacing(1) }}
               />
             </Grid>
           </Show>
-</Stack>
-        </Grid>
+        </Stack>
+      </Grid>
       <Show when={props.children}>
-        <Box sx={{ pt: 2.25 }}>
-          {props.children}
-        </Box>
+        <Box sx={{ pt: 2.25 }}>{props.children}</Box>
       </Show>
     </MainCard>
   );

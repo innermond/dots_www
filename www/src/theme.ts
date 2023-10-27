@@ -11,5 +11,3 @@ export const defaultTheme = createTheme({
     mode: 'dark',
   },
 });*/
-
-

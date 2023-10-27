@@ -24,7 +24,9 @@ import appstate from '@/lib/app';
 import { Grid, Typography, Button, Divider, Stack } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import ListIcon from '@suid/icons-material/List';
-import StatisticsCard, {PropsStatisticsCard} from '../dashboard/StatisticsCard';
+import StatisticsCard, {
+  PropsStatisticsCard,
+} from '../dashboard/StatisticsCard';
 import Progress from '@/components/Progress';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
@@ -170,7 +172,7 @@ const CompanyDetails: Component = (): JSX.Element => {
                 Add New
               </Button>
               <Button variant="outlined" startIcon={<ListIcon />}>
-               List 
+                List
               </Button>
             </StatisticsCard>
           </Grid>
@@ -179,28 +181,33 @@ const CompanyDetails: Component = (): JSX.Element => {
               title="Total Entries"
               count={(stats() as DataCompanyStats).data.countEntries.toFixed(0)}
             >
-<Divider />
-<Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Button variant="text" size="small" startIcon={<AddIcon />}>
-                Add New
-              </Button>
-              <Button variant="text" size="large" startIcon={<ListIcon />}>
-               List 
-              </Button>
-
-</Stack>
+              <Divider />
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Button variant="text" size="small" startIcon={<AddIcon />}>
+                  Add New
+                </Button>
+                <Button variant="text" size="large" startIcon={<ListIcon />}>
+                  List
+                </Button>
+              </Stack>
             </StatisticsCard>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <StatisticsCard
               title="Total Entry Types"
-              count={(stats() as DataCompanyStats).data.countEntryTypes.toFixed(0)}
+              count={(stats() as DataCompanyStats).data.countEntryTypes.toFixed(
+                0,
+              )}
             >
               <Button variant="text" size="small" startIcon={<AddIcon />}>
                 Add New
               </Button>
               <Button variant="outlined" size="medium" startIcon={<ListIcon />}>
-               List 
+                List
               </Button>
             </StatisticsCard>
           </Grid>
@@ -238,10 +245,12 @@ const CompanyDetails: Component = (): JSX.Element => {
   );
 };
 
-const EmptyStatisticsCard: Component<PropsStatisticsCard> = (props): JSX.Element => {
+const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
+  props,
+): JSX.Element => {
   return (
     <Grid item xs={12} sm={6} md={4} lg={3}>
-      <StatisticsCard isLoss={false} title={props.title??''} />
+      <StatisticsCard isLoss={false} title={props.title ?? ''} />
     </Grid>
   );
 };

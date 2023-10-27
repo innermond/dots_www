@@ -9,7 +9,7 @@ import ThemeOption from './theme-option';
 
 // ==============================|| DEFAULT THEME - PALETTE  ||============================== //
 
-const Palette = (mode) => {
+const Palette = mode => {
   const colors = presetPalettes;
 
   const greyPrimary = [
@@ -23,7 +23,7 @@ const Palette = (mode) => {
     '#595959',
     '#262626',
     '#141414',
-    '#000000'
+    '#000000',
   ];
   const greyAscent = ['#fafafa', '#bfbfbf', '#434343', '#1f1f1f'];
   const greyConstant = ['#fafafb', '#e6ebf1'];
@@ -37,23 +37,23 @@ const Palette = (mode) => {
       mode,
       common: {
         black: '#000',
-        white: '#fff'
+        white: '#fff',
       },
       ...paletteColor,
       text: {
         primary: paletteColor.grey[700],
         secondary: paletteColor.grey[500],
-        disabled: paletteColor.grey[400]
+        disabled: paletteColor.grey[400],
       },
       action: {
-        disabled: paletteColor.grey[300]
+        disabled: paletteColor.grey[300],
       },
       divider: paletteColor.grey[200],
       background: {
         paper: paletteColor.grey[0],
-        default: paletteColor.grey.A50
-      }
-    }
+        default: paletteColor.grey.A50,
+      },
+    },
   });
 };
 
