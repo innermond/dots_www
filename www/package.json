@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@suid/vite-plugin": "^0.1.5",
     "@types/node": "^20.8.6",
     "prettier": "^3.0.3",
     "sass": "^1.66.1",
@@ -26,7 +27,6 @@
     "@solidjs/router": "^0.8.3",
     "@suid/icons-material": "^0.6.9",
     "@suid/material": "^0.14.2",
-    "@suid/vite-plugin": "^0.1.4",
     "solid-js": "^1.7.6",
     "solid-toast": "^0.5.0"
   }
