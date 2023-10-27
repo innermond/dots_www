@@ -252,7 +252,12 @@ const Actions: Component<PropsActions> = (props): JSX.Element => {
       alignItems="center"
       flexWrap="wrap"
     >
-      <Button variant="text" size="small" startIcon={<AddIcon />} onClick={props.action}>
+      <Button
+        variant="text"
+        size="small"
+        startIcon={<AddIcon />}
+        onClick={props.action}
+      >
         Add New
       </Button>
       <Button

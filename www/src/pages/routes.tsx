@@ -1,8 +1,4 @@
-import {
-  useRouteData,
-  RouteDefinition,
-  Navigate,
-} from '@solidjs/router';
+import { useRouteData, RouteDefinition, Navigate } from '@solidjs/router';
 import type { Component, JSX } from 'solid-js';
 import {
   Suspense,
