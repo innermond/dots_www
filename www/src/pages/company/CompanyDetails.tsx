@@ -105,7 +105,7 @@ const CompanyDetails: Component = (): JSX.Element => {
     // here stats() must return DataCompanyStats as it have been checked for the other
     // posible cases before ( and above in lib/api.ts)
     return (stats() as DataCompanyStats).data;
-  }
+  };
 
   createEffect(() => {
     if (!stats()) return;
@@ -176,19 +176,19 @@ const CompanyDetails: Component = (): JSX.Element => {
             <CountActionsCard
               title="Total Deeds"
               count={companyStats()?.countDeeds.toFixed(0)}
-             />
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entries"
               count={companyStats()?.countEntries.toFixed(0)}
-             />
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entry Types"
               count={companyStats()?.countEntryTypes.toFixed(0)}
-             />
+            />
           </Grid>
         </Grid>
       </Show>
@@ -235,42 +235,51 @@ const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
 };
 
 type PropsActions = {
-  isListDisabled?: boolean,
+  isListDisabled?: boolean;
 };
 
 const Actions: Component<PropsActions> = (props): JSX.Element => {
   return (
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            flexWrap="wrap"
-          >
-            <Button variant="text" size="small" startIcon={<AddIcon />}>
-              Add New
-            </Button>
-            <Button disabled={props?.isListDisabled} variant="text" size="large" startIcon={<ListIcon />}>
-              List
-            </Button>
-          </Stack>
-        )
-}
-
-
+    <Stack
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+      flexWrap="wrap"
+    >
+      <Button variant="text" size="small" startIcon={<AddIcon />}>
+        Add New
+      </Button>
+      <Button
+        disabled={props?.isListDisabled}
+        variant="text"
+        size="large"
+        startIcon={<ListIcon />}
+      >
+        List
+      </Button>
+    </Stack>
+  );
+};
 
 const isLoss = (s: string | undefined): boolean => {
-  const maybeNum = parseFloat(s+'');
+  const maybeNum = parseFloat(s + '');
   if (isNaN(maybeNum)) return true;
   return maybeNum <= 0;
-}
+};
 
-const CountActionsCard : Component<PropsStatisticsCard> = (props): JSX.Element => {
+const CountActionsCard: Component<PropsStatisticsCard> = (
+  props,
+): JSX.Element => {
   return (
-          <StatisticsCard title={props.title} count={props.count} isLoss={isLoss(props.count)} >
-            <Divider />
-            <Actions isListDisabled={isLoss(props.count)} />
-          </StatisticsCard>
-  )
-}
+    <StatisticsCard
+      title={props.title}
+      count={props.count}
+      isLoss={isLoss(props.count)}
+    >
+      <Divider />
+      <Actions isListDisabled={isLoss(props.count)} />
+    </StatisticsCard>
+  );
+};
 
 export default CompanyDetails;
