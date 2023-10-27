@@ -12,6 +12,7 @@ import { useParams } from '@solidjs/router';
 
 import type {
   CompanyData,
+  CompanyStatsData,
   DataCompanyStats,
   DataCompanies,
   CompanyDepletionData,
@@ -97,6 +98,15 @@ const CompanyDetails: Component = (): JSX.Element => {
     }
   });
 
+  const companyStats = (): CompanyStatsData | undefined => {
+    if (stats() instanceof Error || !stats()) {
+      return;
+    }
+    // here stats() must return DataCompanyStats as it have been checked for the other
+    // posible cases before ( and above in lib/api.ts)
+    return (stats() as DataCompanyStats).data;
+  }
+
   createEffect(() => {
     if (!stats()) return;
 
@@ -163,53 +173,22 @@ const CompanyDetails: Component = (): JSX.Element => {
             <Typography variant="h5">Counters</Typography>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
-            <StatisticsCard
-              isLoss={true}
+            <CountActionsCard
               title="Total Deeds"
-              count={(stats() as DataCompanyStats).data.countDeeds.toFixed(0)}
-            >
-              <Button variant="text" startIcon={<AddIcon />}>
-                Add New
-              </Button>
-              <Button variant="outlined" startIcon={<ListIcon />}>
-                List
-              </Button>
-            </StatisticsCard>
+              count={companyStats()?.countDeeds.toFixed(0)}
+             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
-            <StatisticsCard
+            <CountActionsCard
               title="Total Entries"
-              count={(stats() as DataCompanyStats).data.countEntries.toFixed(0)}
-            >
-              <Divider />
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Button variant="text" size="small" startIcon={<AddIcon />}>
-                  Add New
-                </Button>
-                <Button variant="text" size="large" startIcon={<ListIcon />}>
-                  List
-                </Button>
-              </Stack>
-            </StatisticsCard>
+              count={companyStats()?.countEntries.toFixed(0)}
+             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
-            <StatisticsCard
+            <CountActionsCard
               title="Total Entry Types"
-              count={(stats() as DataCompanyStats).data.countEntryTypes.toFixed(
-                0,
-              )}
-            >
-              <Button variant="text" size="small" startIcon={<AddIcon />}>
-                Add New
-              </Button>
-              <Button variant="outlined" size="medium" startIcon={<ListIcon />}>
-                List
-              </Button>
-            </StatisticsCard>
+              count={companyStats()?.countEntryTypes.toFixed(0)}
+             />
           </Grid>
         </Grid>
       </Show>
@@ -220,7 +199,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
           <For
             each={(depletion() as DataCompanyDepletion).data}
-            fallback={<EmptyStatisticsCard title="all entries are enough" />}
+            fallback={<EmptyStatisticsCard title="nothing to report" />}
           >
             {(d: CompanyDepletionData) => {
               const remained =
@@ -254,5 +233,44 @@ const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
     </Grid>
   );
 };
+
+type PropsActions = {
+  isListDisabled?: boolean,
+};
+
+const Actions: Component<PropsActions> = (props): JSX.Element => {
+  return (
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            flexWrap="wrap"
+          >
+            <Button variant="text" size="small" startIcon={<AddIcon />}>
+              Add New
+            </Button>
+            <Button disabled={props?.isListDisabled} variant="text" size="large" startIcon={<ListIcon />}>
+              List
+            </Button>
+          </Stack>
+        )
+}
+
+
+
+const isLoss = (s: string | undefined): boolean => {
+  const maybeNum = parseFloat(s+'');
+  if (isNaN(maybeNum)) return true;
+  return maybeNum <= 0;
+}
+
+const CountActionsCard : Component<PropsStatisticsCard> = (props): JSX.Element => {
+  return (
+          <StatisticsCard title={props.title} count={props.count} isLoss={isLoss(props.count)} >
+            <Divider />
+            <Actions isListDisabled={isLoss(props.count)} />
+          </StatisticsCard>
+  )
+}
 
 export default CompanyDetails;

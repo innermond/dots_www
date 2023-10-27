@@ -114,7 +114,7 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
         </Stack>
       </Grid>
       <Show when={props.children}>
-        <Box sx={{ pt: 2.25 }}>{props.children}</Box>
+        <Box>{props.children}</Box>
       </Show>
     </MainCard>
   );
