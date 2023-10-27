@@ -2,7 +2,6 @@ import {
   useRouteData,
   RouteDefinition,
   Navigate,
-  useNavigate,
 } from '@solidjs/router';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -25,6 +24,7 @@ const Dashboard = lazy(() => import('./dashboard'));
 const HelloDashboard = lazy(() => import('./HelloDashboard'));
 const Company = lazy(() => import('./company/Company'));
 const CompanyDetails = lazy(() => import('./company/CompanyDetails'));
+const DeedNew = lazy(() => import('./deed/DeedNew'));
 const NotFound = lazy(() => import('./404'));
 
 function TokenData() {
@@ -89,7 +89,8 @@ const routes: RouteDefinition[] = [
     children: [
       { path: '/', component: HelloDashboard },
       { path: '/company/:id', component: CompanyDetails },
-      { path: '/company', component: Company },
+      { path: '/companies', component: Company },
+      { path: '/deed', component: DeedNew },
     ],
   },
   { path: '/*', component: NotFound },

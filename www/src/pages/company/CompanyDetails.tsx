@@ -8,7 +8,7 @@ import {
   For,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
-import { useParams } from '@solidjs/router';
+import { useParams, useNavigate } from '@solidjs/router';
 
 import type {
   CompanyData,
@@ -165,6 +165,8 @@ const CompanyDetails: Component = (): JSX.Element => {
     console.log('CompanyDetails cleaned up');
   });
 
+  const navigate = useNavigate();
+
   return (
     <>
       <Show when={statsRes.state === 'ready'} fallback={<Progress />}>
@@ -176,18 +178,21 @@ const CompanyDetails: Component = (): JSX.Element => {
             <CountActionsCard
               title="Total Deeds"
               count={companyStats()?.countDeeds.toFixed(0)}
+              action={() => navigate('/deed')}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entries"
               count={companyStats()?.countEntries.toFixed(0)}
+              action={() => navigate('/deed')}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entry Types"
               count={companyStats()?.countEntryTypes.toFixed(0)}
+              action={() => navigate('/deed')}
             />
           </Grid>
         </Grid>
@@ -236,6 +241,7 @@ const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
 
 type PropsActions = {
   isListDisabled?: boolean;
+  action: Function & JSX.EventHandler<HTMLButtonElement, MouseEvent>;
 };
 
 const Actions: Component<PropsActions> = (props): JSX.Element => {
@@ -246,7 +252,7 @@ const Actions: Component<PropsActions> = (props): JSX.Element => {
       alignItems="center"
       flexWrap="wrap"
     >
-      <Button variant="text" size="small" startIcon={<AddIcon />}>
+      <Button variant="text" size="small" startIcon={<AddIcon />} onClick={props.action}>
         Add New
       </Button>
       <Button
@@ -267,7 +273,7 @@ const isLoss = (s: string | undefined): boolean => {
   return maybeNum <= 0;
 };
 
-const CountActionsCard: Component<PropsStatisticsCard> = (
+const CountActionsCard: Component<PropsStatisticsCard & PropsActions> = (
   props,
 ): JSX.Element => {
   return (
@@ -277,7 +283,7 @@ const CountActionsCard: Component<PropsStatisticsCard> = (
       isLoss={isLoss(props.count)}
     >
       <Divider />
-      <Actions isListDisabled={isLoss(props.count)} />
+      <Actions isListDisabled={isLoss(props.count)} action={props.action} />
     </StatisticsCard>
   );
 };

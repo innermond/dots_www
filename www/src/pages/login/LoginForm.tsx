@@ -119,7 +119,7 @@ const LoginForm: Component = (): JSX.Element => {
 
   let formRef: HTMLFormElement | null = null;
 
-  const key = 'dots.tok';
+  //const key = 'dots.tok';
   // TODO this is tricky
   /*if (!!sessionStorage.getItem(key)) {
     navigate('/');
