@@ -21,8 +21,9 @@ import { isDataCompanies } from '@/pages/company/types';
 import { ApiError, company } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
-import { Grid, Typography, Button } from '@suid/material';
+import { Grid, Typography, Button, Divider, Stack } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
+import ListIcon from '@suid/icons-material/List';
 import StatisticsCard, {PropsStatisticsCard} from '../dashboard/StatisticsCard';
 import Progress from '@/components/Progress';
 
@@ -163,30 +164,43 @@ const CompanyDetails: Component = (): JSX.Element => {
             <StatisticsCard
               isLoss={true}
               title="Total Deeds"
-              count={(stats() as DataCompanyStats).data.countDeeds}
+              count={(stats() as DataCompanyStats).data.countDeeds.toFixed(0)}
             >
-              <Button variant="outlined" startIcon={<AddIcon />}>
-                Add New Deed
+              <Button variant="text" startIcon={<AddIcon />}>
+                Add New
+              </Button>
+              <Button variant="outlined" startIcon={<ListIcon />}>
+               List 
               </Button>
             </StatisticsCard>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <StatisticsCard
               title="Total Entries"
-              count={(stats() as DataCompanyStats).data.countEntries}
+              count={(stats() as DataCompanyStats).data.countEntries.toFixed(0)}
             >
-              <Button variant="outlined" startIcon={<AddIcon />}>
-                Add New Entry
+<Divider />
+<Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Button variant="text" size="small" startIcon={<AddIcon />}>
+                Add New
               </Button>
+              <Button variant="text" size="large" startIcon={<ListIcon />}>
+               List 
+              </Button>
+
+</Stack>
             </StatisticsCard>
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <StatisticsCard
               title="Total Entry Types"
-              count={(stats() as DataCompanyStats).data.countEntryTypes}
+              count={(stats() as DataCompanyStats).data.countEntryTypes.toFixed(0)}
             >
-              <Button variant="outlined" startIcon={<AddIcon />}>
-                Add New entry Type
+              <Button variant="text" size="small" startIcon={<AddIcon />}>
+                Add New
+              </Button>
+              <Button variant="outlined" size="medium" startIcon={<ListIcon />}>
+               List 
               </Button>
             </StatisticsCard>
           </Grid>
@@ -210,7 +224,7 @@ const CompanyDetails: Component = (): JSX.Element => {
                   <StatisticsCard
                     isLoss={isLoss}
                     title={d.code}
-                    count={(d.quantityInitial - d.quantityDrained)}
+                    count={(d.quantityInitial - d.quantityDrained).toFixed(2)}
                     percentage={remained}
                     icon="HorizontalSplit"
                   />

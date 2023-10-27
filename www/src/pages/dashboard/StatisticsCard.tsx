@@ -5,6 +5,7 @@ import {
   Stack,
   SvgIcon,
   Typography,
+  useTheme,
 } from '@suid/material';
 import MainCard from '@/components/MainCard';
 
@@ -21,7 +22,7 @@ type CardColor = ChipTypeMap['selfProps']['color'];
 export type PropsStatisticsCard = Partial<{
   color: CardColor;
   title: string;
-  count: number;
+  count: string;
   percentage: number;
   icon?: typeof SvgIcon | string;
   isLoss: boolean;
@@ -40,6 +41,8 @@ const ellipsisStyle: SxProps = {
 const loadIcon: any = (iconstr: string) => {
   return lazy(() => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`));
 };
+
+const theme = useTheme();
 
 const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
   props = mergeProps(defaultPropsStatisticsCard, props);
@@ -61,7 +64,7 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
 
   return (
     <MainCard>
-      <Stack spacing={0.5}>
+        <Grid container justifyContent="space-between" alignItems="center">
         <Typography
           variant="h6"
           color="text.secondary"
@@ -70,18 +73,18 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
         >
           {props.title}
         </Typography>
-        <Grid container alignItems="center">
+<Stack direction="row">
           <Show when={props.count}>
             <Grid item>
               <Typography variant="h4" color="inherit">
-                {(props.count)!.toFixed(2)}
+                {(props.count)}
               </Typography>
             </Grid>
           </Show>
           <Show when={props.percentage}>
             <Grid item>
               <Chip
-                variant="outlined"
+                size="small"
                 color={colorByIsLoss()}
                 icon={
                   <Show
@@ -92,12 +95,12 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
                   </Show>
                 }
                 label={`${(props.percentage)!.toFixed(2)}%`}
-                sx={{ ml: 1.25, pl: 1 }}
+                sx={{ ml: theme.spacing(1) }}
               />
             </Grid>
           </Show>
+</Stack>
         </Grid>
-      </Stack>
       <Show when={props.children}>
         <Box sx={{ pt: 2.25 }}>
           {props.children}
