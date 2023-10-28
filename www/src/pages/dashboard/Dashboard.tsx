@@ -36,6 +36,7 @@ import { ApiError, company } from '@/lib/api';
 import appstate from '@/lib/app';
 import { setLoading } from '@/components/Loading';
 import toasting from '@/lib/toast';
+import Loading from '@/components/Loading';
 
 declare module 'solid-js' {
   namespace JSX {

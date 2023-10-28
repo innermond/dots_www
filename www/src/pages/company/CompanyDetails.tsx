@@ -28,7 +28,7 @@ import ListIcon from '@suid/icons-material/List';
 import StatisticsCard, {
   PropsStatisticsCard,
 } from '../dashboard/StatisticsCard';
-import Progress from '@/components/Progress';
+import Skeleton from '@suid/material/Skeleton';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
 
@@ -169,7 +169,7 @@ const CompanyDetails: Component = (): JSX.Element => {
 
   return (
     <>
-      <Show when={statsRes.state === 'ready'} fallback={<Progress />}>
+      <Show when={statsRes.state === 'ready'} fallback={<SkeletonCounts num={3} />}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Counters</Typography>
@@ -197,7 +197,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
         </Grid>
       </Show>
-      <Show when={depletionRes.state === 'ready'} fallback={<Progress />}>
+      <Show when={depletionRes.state === 'ready'} fallback={<SkeletonCounts num={3} />}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Depletion</Typography>
@@ -227,6 +227,13 @@ const CompanyDetails: Component = (): JSX.Element => {
       </Show>
     </>
   );
+};
+
+type PropsSkeletonCounts = {num: number};
+
+const SkeletonCounts: Component<PropsSkeletonCounts> = (props): JSX.Element => {
+  //return <For each={new Array(props.num)}>{_ => <Skeleton />}</For>
+  return <Skeleton />
 };
 
 const EmptyStatisticsCard: Component<PropsStatisticsCard> = (

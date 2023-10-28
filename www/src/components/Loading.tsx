@@ -1,14 +1,25 @@
 import { Box, LinearProgress, useTheme } from '@suid/material';
-import { Show, createSignal, createEffect } from 'solid-js';
+import { onMount, Show, createSignal, createEffect } from 'solid-js';
+import type { Component, JSX } from 'solid-js';
 import { useIsRouting } from '@solidjs/router';
 import { Backdrop } from '@suid/material';
 
 export const [loading, setLoading] = createSignal(false);
 
-export default function Loading() {
+type PropsLoading = {
+  open?: boolean
+};
+
+const Loading: Component<PropsLoading> = (props): JSX.Element => {
   const isRouting = useIsRouting();
   createEffect(() => {
     setLoading(isRouting());
+  });
+
+  onMount(() => {
+    if (props.open) {
+      setLoading(true);
+    }
   });
 
   const theme = useTheme();
@@ -29,3 +40,5 @@ export default function Loading() {
     </Show>
   );
 }
+
+export default Loading;

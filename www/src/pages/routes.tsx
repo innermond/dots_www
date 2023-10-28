@@ -47,7 +47,7 @@ const guard = (child: Component): Component => {
 
     return (
       <ErrorBoundary fallback={AlertOrLogin}>
-        <Switch fallback={<Progress />}>
+        <Switch>
           <Match when={!!token()}>{child}</Match>
           <Match when={token() === ''}>
             <Navigate href="/login" />
