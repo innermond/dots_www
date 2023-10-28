@@ -23,7 +23,8 @@ const Progress = (props: PropsOutput): JSX.Element => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        height: props.height || '100vh',
+        height: props.height || '100%',
+        width: '100%',
         padding: props.padding || '0',
       }}
     >

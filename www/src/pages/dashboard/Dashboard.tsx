@@ -182,7 +182,7 @@ const Dashboard: Component = () => {
   });
 
   const appbar: JSX.Element = (
-    <AppBar position="relative">
+    <AppBar position="static">
       <Toolbar sx={{ height: 'auto' }}>
         <IconButton
           size="large"
