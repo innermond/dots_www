@@ -70,7 +70,6 @@ const Dashboard: Component = () => {
   const location = useLocation();
   const pathname = createMemo(() => location.pathname);
   createEffect(() => {
-  console.log(state.currentCompany)
     const title = getPathTitleMap().get(pathname());
     if (title !== undefined) {
       setState("currentPageTitle", title);
@@ -90,6 +89,7 @@ const Dashboard: Component = () => {
       toasting('data we got do no represent a company');
       return;
     }
+    setState("currentPageTitle", '...');
     navigate(`/company/${(e as CompanyData).id}`);
   };
 

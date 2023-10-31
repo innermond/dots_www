@@ -11,12 +11,17 @@ import {
 import { useNavigate } from '@solidjs/router';
 
 import items from './items';
+import appstate from '@/lib/app';
 
 const listItem = (icon: any, text: string, path: string): JSX.Element => {
   const navigate = useNavigate();
+  const [, setState] = appstate;
 
   return (
-    <ListItemButton onClick={() => navigate(path)}>
+    <ListItemButton onClick={() => {
+      setState("currentPageTitle", "...");
+      navigate(path);
+    }}>
       <ListItemIcon>
         <Show when={true}>{icon}</Show>
       </ListItemIcon>

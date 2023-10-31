@@ -1,5 +1,4 @@
 import {
-  onMount,
   onCleanup,
   createResource,
   createEffect,
@@ -30,7 +29,7 @@ import StatisticsCard, {
 } from '../dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
 
-const [ state, setState ] = appstate;
+const [ , setState ] = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {
   const params = useParams();
@@ -76,15 +75,10 @@ const CompanyDetails: Component = (): JSX.Element => {
       return;
     }
 
-    // all ok
     setState("currentCompany", info);
-    updateTitle();
+    setState("currentPageTitle", info?.longname ?? '...');
   });
 
-  const updateTitle = () => {
-    const n = state.currentCompany.longname || 'Company';
-    setState("currentPageTitle", n);
-  };
 
   const [statsRes] = createResource(() => params.id, company.stats);
   const stats = createMemo((): DataCompanyStats | Error | undefined => {
@@ -158,8 +152,6 @@ const CompanyDetails: Component = (): JSX.Element => {
       return;
     }
   });
-
-  onMount(updateTitle);
 
   onCleanup(() => {
     console.log('CompanyDetails cleaned up');
