@@ -7,25 +7,14 @@ import { Backdrop } from '@suid/material';
 export const [loading, setLoading] = createSignal(false);
 
 type PropsLoading = {
-  open?: boolean
+  open: boolean
 };
 
 const Loading: Component<PropsLoading> = (props): JSX.Element => {
-  const isRouting = useIsRouting();
-  createEffect(() => {
-    setLoading(isRouting());
-  });
-
-  onMount(() => {
-    if (props.open) {
-      setLoading(true);
-    }
-  });
-
   const theme = useTheme();
 
   return (
-    <Show when={loading()}>
+    <Show when={props?.open}>
       <Box
         sx={{
           width: '100%',
@@ -36,7 +25,7 @@ const Loading: Component<PropsLoading> = (props): JSX.Element => {
       >
         <LinearProgress variant="indeterminate" />
       </Box>
-      <Backdrop open={loading()}></Backdrop>
+      <Backdrop open={props?.open}></Backdrop>
     </Show>
   );
 }

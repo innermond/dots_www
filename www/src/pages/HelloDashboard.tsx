@@ -1,3 +1,4 @@
+import Loading from '@/components/Loading';
 import {
   onMount,
   type Component,
@@ -11,7 +12,7 @@ const HelloDashboard: Component = (): JSX.Element => {
 
   const delay = () => {
     return new Promise(resolve => {
-      const timespan = 100;
+      const timespan = 200;
       setTimeout(() => resolve(timespan), timespan);
     });
   };
@@ -27,9 +28,12 @@ const HelloDashboard: Component = (): JSX.Element => {
   });
 
   return (
+    <>
+    {!time() && <Loading open={true} />}
     <p>
       {time() as string} {'HelloDashboard component works!'}
     </p>
+    </>
   );
 };
 

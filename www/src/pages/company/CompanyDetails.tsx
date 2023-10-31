@@ -29,6 +29,7 @@ import StatisticsCard, {
   PropsStatisticsCard,
 } from '../dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
+import Loading from '@/components/Loading';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
 
@@ -167,9 +168,15 @@ const CompanyDetails: Component = (): JSX.Element => {
 
   const navigate = useNavigate();
 
+  const isLoading = () => {
+    const is = (statsRes.state !== 'ready' || depletionRes.state !== 'ready');
+    return is;
+  }
+
   return (
     <>
-      <Show when={statsRes.state === 'ready'} fallback={<SkeletonCounts num={3} />}>
+      {isLoading() && <Loading open={true} />}
+      <Show when={statsRes.state === 'ready'} >
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Counters</Typography>
@@ -197,7 +204,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
         </Grid>
       </Show>
-      <Show when={depletionRes.state === 'ready'} fallback={<SkeletonCounts num={3} />}>
+      <Show when={depletionRes.state === 'ready'} >
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Depletion</Typography>
@@ -232,8 +239,7 @@ const CompanyDetails: Component = (): JSX.Element => {
 type PropsSkeletonCounts = {num: number};
 
 const SkeletonCounts: Component<PropsSkeletonCounts> = (props): JSX.Element => {
-  //return <For each={new Array(props.num)}>{_ => <Skeleton />}</For>
-  return <Skeleton />
+  return <For each={new Array(props.num)}>{_ => <Skeleton />}</For>
 };
 
 const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
