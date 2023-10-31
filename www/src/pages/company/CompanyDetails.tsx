@@ -29,7 +29,6 @@ import StatisticsCard, {
   PropsStatisticsCard,
 } from '../dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
-import Loading from '@/components/Loading';
 
 const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
 
@@ -175,8 +174,7 @@ const CompanyDetails: Component = (): JSX.Element => {
 
   return (
     <>
-      {isLoading() && <Loading open={true} />}
-      <Show when={statsRes.state === 'ready'}>
+      <Show when={statsRes.state === 'ready'} fallback={<SkeletonCounts  num={3} />}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Counters</Typography>
@@ -204,7 +202,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
         </Grid>
       </Show>
-      <Show when={depletionRes.state === 'ready'}>
+      <Show when={depletionRes.state === 'ready'} fallback={<SkeletonCounts num={3} height={"3rem"} />}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Depletion</Typography>
@@ -236,10 +234,22 @@ const CompanyDetails: Component = (): JSX.Element => {
   );
 };
 
-type PropsSkeletonCounts = { num: number };
+type PropsSkeletonCounts = { num: number, height?: string };
 
 const SkeletonCounts: Component<PropsSkeletonCounts> = (props): JSX.Element => {
-  return <For each={new Array(props.num)}>{_ => <Skeleton />}</For>;
+    return (
+        <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+          <Grid item xs={12} sx={{ mb: -2.25 }}>
+            <Skeleton width="10rem" variant="text" />
+          </Grid>
+          <For each={new Array(props.num)}>{_ => {
+            return (
+            <Grid item xs={12} sm={6} md={4} lg={3}>
+                <Skeleton width="100%"  height={props?.height ?? "7rem"} variant="rectangular" />
+            </Grid>
+            )}}
+          </For>
+        </Grid>)
 };
 
 const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
