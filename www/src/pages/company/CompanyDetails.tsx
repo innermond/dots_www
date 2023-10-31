@@ -169,14 +169,14 @@ const CompanyDetails: Component = (): JSX.Element => {
   const navigate = useNavigate();
 
   const isLoading = () => {
-    const is = (statsRes.state !== 'ready' || depletionRes.state !== 'ready');
+    const is = statsRes.state !== 'ready' || depletionRes.state !== 'ready';
     return is;
-  }
+  };
 
   return (
     <>
       {isLoading() && <Loading open={true} />}
-      <Show when={statsRes.state === 'ready'} >
+      <Show when={statsRes.state === 'ready'}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Counters</Typography>
@@ -204,7 +204,7 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
         </Grid>
       </Show>
-      <Show when={depletionRes.state === 'ready'} >
+      <Show when={depletionRes.state === 'ready'}>
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Depletion</Typography>
@@ -236,10 +236,10 @@ const CompanyDetails: Component = (): JSX.Element => {
   );
 };
 
-type PropsSkeletonCounts = {num: number};
+type PropsSkeletonCounts = { num: number };
 
 const SkeletonCounts: Component<PropsSkeletonCounts> = (props): JSX.Element => {
-  return <For each={new Array(props.num)}>{_ => <Skeleton />}</For>
+  return <For each={new Array(props.num)}>{_ => <Skeleton />}</For>;
 };
 
 const EmptyStatisticsCard: Component<PropsStatisticsCard> = (

@@ -14,7 +14,7 @@ const App: Component = (): JSX.Element => {
     <Router>
       <ThemeProvider theme={defaultTheme}>
         <CssBaseline />
-          <Routes />
+        <Routes />
         <Toaster />
       </ThemeProvider>
     </Router>

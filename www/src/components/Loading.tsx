@@ -7,7 +7,7 @@ import { Backdrop } from '@suid/material';
 export const [loading, setLoading] = createSignal(false);
 
 type PropsLoading = {
-  open: boolean
+  open: boolean;
 };
 
 const Loading: Component<PropsLoading> = (props): JSX.Element => {
@@ -28,6 +28,6 @@ const Loading: Component<PropsLoading> = (props): JSX.Element => {
       <Backdrop open={props?.open}></Backdrop>
     </Show>
   );
-}
+};
 
 export default Loading;

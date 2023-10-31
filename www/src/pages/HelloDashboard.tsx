@@ -29,10 +29,10 @@ const HelloDashboard: Component = (): JSX.Element => {
 
   return (
     <>
-    {!time() && <Loading open={true} />}
-    <p>
-      {time() as string} {'HelloDashboard component works!'}
-    </p>
+      {!time() && <Loading open={true} />}
+      <p>
+        {time() as string} {'HelloDashboard component works!'}
+      </p>
     </>
   );
 };
