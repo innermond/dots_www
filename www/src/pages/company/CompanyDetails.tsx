@@ -30,7 +30,7 @@ import StatisticsCard, {
 } from '../dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
 
-const { currentCompany, setCurrentCompany, setCurrentPageTitle } = appstate;
+const [ state, setState ] = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {
   const params = useParams();
@@ -77,13 +77,13 @@ const CompanyDetails: Component = (): JSX.Element => {
     }
 
     // all ok
-    setCurrentCompany(info);
+    setState("currentCompany", info);
     updateTitle();
   });
 
   const updateTitle = () => {
-    const n = currentCompany().longname || 'Company';
-    setCurrentPageTitle(n);
+    const n = state.currentCompany.longname || 'Company';
+    setState("currentPageTitle", n);
   };
 
   const [statsRes] = createResource(() => params.id, company.stats);
@@ -166,11 +166,6 @@ const CompanyDetails: Component = (): JSX.Element => {
   });
 
   const navigate = useNavigate();
-
-  const isLoading = () => {
-    const is = statsRes.state !== 'ready' || depletionRes.state !== 'ready';
-    return is;
-  };
 
   return (
     <>

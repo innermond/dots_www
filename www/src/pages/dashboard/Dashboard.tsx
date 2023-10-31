@@ -47,7 +47,7 @@ declare module 'solid-js' {
 
 type ErrorResource = ApiError | Error;
 
-const { currentPageTitle, setCurrentPageTitle } = appstate;
+const [ state, setState ] = appstate;
 
 const drawerWidth: number = 240;
 
@@ -70,9 +70,10 @@ const Dashboard: Component = () => {
   const location = useLocation();
   const pathname = createMemo(() => location.pathname);
   createEffect(() => {
+  console.log(state.currentCompany)
     const title = getPathTitleMap().get(pathname());
     if (title !== undefined) {
-      setCurrentPageTitle(title);
+      setState("currentPageTitle", title);
     }
   });
 
@@ -198,10 +199,10 @@ const Dashboard: Component = () => {
           component="h1"
           variant="h6"
           color="inherit"
-          title={currentPageTitle()}
+          title={state.currentPageTitle}
           sx={{ flexGrow: 1, textTransform: 'capitalize' }}
         >
-          {currentPageTitle() ?? '...'}
+          {state.currentPageTitle ?? '...'}
         </Typography>
         <IconButton color="inherit" size="large" onclick={handleMenuProfile}>
           <Avatar
