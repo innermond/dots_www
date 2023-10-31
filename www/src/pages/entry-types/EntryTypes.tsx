@@ -19,10 +19,12 @@ import {
 import { A } from '@solidjs/router';
 
 import { entryType } from '@/lib/api';
+import appstate from '@/lib/app';
 
 const EntryTypes: Component = (): JSX.Element => {
-  const [change, setChange] = createSignal(false);
-  const [result] = createResource(change, entryType.all);
+  const [, setState] = appstate;
+
+  const [result] = createResource(entryType.all);
   const entryTypes = () => {
     const info = result();
     if (info instanceof Error || !info) {
@@ -33,18 +35,8 @@ const EntryTypes: Component = (): JSX.Element => {
     return n ? data : [];
   };
 
-  setChange(true);
-
-  createEffect(() => {
-    console.log(result(), result.state);
-  });
-
   onMount(() => {
-    console.log('EntryType mounted');
-  });
-
-  onCleanup(() => {
-    console.log('EntryType cleaned up');
+    setState("currentPageTitle", "Entry types's list");
   });
 
   return (
