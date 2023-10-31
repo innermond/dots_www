@@ -7,6 +7,11 @@ import {
   isDataCompanyDepletion,
 } from '@/pages/company/types';
 
+import {
+  DataEntryTypes,
+  isDataEntryTypes,
+} from '@/pages/entry-types/types';
+
 const API = 'http://api.dots.volt.com/v1';
 
 export class ApiError extends Error {
@@ -184,8 +189,28 @@ class APICompany {
   }
 }
 
-export const company = new APICompany();
+class APIEntryType {
+  async all(): Promise<DataEntryTypes | Error> {
+    const headers = {
+      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
+    };
+    const json = await send<undefined>(
+      'loading entry types',
+      'GET',
+      '/entry-types',
+      undefined,
+      headers,
+    );
+
+    return verifiedJSONorError<DataEntryTypes>(isDataEntryTypes, json);
+  }
+}
+
+const company = new APICompany();
 Object.freeze(company);
+
+const entryType = new APIEntryType();
+Object.freeze(entryType);
 
 function verifiedJSONorError<T>(
   validator: (json: unknown) => json is T,
@@ -230,3 +255,5 @@ function convertKeysToCamelCase(data: unknown): CamelCase<typeof data> {
   }
   return data;
 }
+
+export {company, entryType};

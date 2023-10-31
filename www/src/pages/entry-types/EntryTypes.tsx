@@ -18,14 +18,12 @@ import {
 } from '@suid/material';
 import { A } from '@solidjs/router';
 
-import { company } from '@/lib/api';
+import { entryType } from '@/lib/api';
 
-import appstate from '@/lib/app';
-const [ , setState ] = appstate;
-const Company: Component = (): JSX.Element => {
+const EntryTypes: Component = (): JSX.Element => {
   const [change, setChange] = createSignal(false);
-  const [result] = createResource(change, company.all);
-  const companies = () => {
+  const [result] = createResource(change, entryType.all);
+  const entryTypes = () => {
     const info = result();
     if (info instanceof Error || !info) {
       return [];
@@ -42,11 +40,11 @@ const Company: Component = (): JSX.Element => {
   });
 
   onMount(() => {
-    console.log('Company mounted');
+    console.log('EntryType mounted');
   });
 
   onCleanup(() => {
-    console.log('Company cleaned up');
+    console.log('EntryType cleaned up');
   });
 
   return (
@@ -55,26 +53,26 @@ const Company: Component = (): JSX.Element => {
         <Table size="small" aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Long name</TableCell>
-              <TableCell align="right">RN</TableCell>
-              <TableCell align="right">TIN</TableCell>
+              <TableCell>Code</TableCell>
+              <TableCell align="right">Description</TableCell>
+              <TableCell align="right">Unit</TableCell>
               <TableCell align="right">Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {companies().map((c: any) => {
+            {entryTypes().map((c: any) => {
               return (
                 <TableRow
                   hover
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
-                    {c.longname}
+                    {c.code}
                   </TableCell>
-                  <TableCell align="right">{c.rn}</TableCell>
-                  <TableCell align="right">{c.tin}</TableCell>
+                  <TableCell align="right">{c.description}</TableCell>
+                  <TableCell align="right">{c.unit}</TableCell>
                   <TableCell align="right">
-                    <A onClick={() => setState("currentCompany", c)} href={'./' + c.id}>
+                    <A href={'./' + c.id}>
                       Go to
                     </A>
                   </TableCell>
@@ -88,4 +86,4 @@ const Company: Component = (): JSX.Element => {
   );
 };
 
-export default Company;
+export default EntryTypes;

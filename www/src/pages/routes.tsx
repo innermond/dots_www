@@ -20,7 +20,7 @@ const Dashboard = lazy(() => import('./dashboard'));
 const HelloDashboard = lazy(() => import('./HelloDashboard'));
 const Company = lazy(() => import('./company/Company'));
 const CompanyDetails = lazy(() => import('./company/CompanyDetails'));
-const DeedNew = lazy(() => import('./deed/DeedNew'));
+const EntryTypes = lazy(() => import('./entry-types/EntryTypes'));
 const NotFound = lazy(() => import('./404'));
 
 function TokenData() {
@@ -86,7 +86,7 @@ const routes: RouteDefinition[] = [
       { path: '/', component: HelloDashboard },
       { path: '/company/:id', component: CompanyDetails },
       { path: '/companies', component: Company },
-      { path: '/deed', component: DeedNew },
+      { path: '/entry-types', component: EntryTypes },
     ],
   },
   { path: '/*', component: NotFound },

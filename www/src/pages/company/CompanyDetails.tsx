@@ -170,21 +170,21 @@ const CompanyDetails: Component = (): JSX.Element => {
             <CountActionsCard
               title="Total Deeds"
               count={companyStats()?.countDeeds.toFixed(0)}
-              action={() => navigate('/deed')}
+              action={() => navigate('/deeds')}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entries"
               count={companyStats()?.countEntries.toFixed(0)}
-              action={() => navigate('/deed')}
+              action={() => navigate('/entries')}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entry Types"
               count={companyStats()?.countEntryTypes.toFixed(0)}
-              action={() => navigate('/deed')}
+              action={() => navigate('/entry-types')}
             />
           </Grid>
         </Grid>
