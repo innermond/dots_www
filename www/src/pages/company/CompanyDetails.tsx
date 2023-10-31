@@ -170,21 +170,24 @@ const CompanyDetails: Component = (): JSX.Element => {
             <CountActionsCard
               title="Total Deeds"
               count={companyStats()?.countDeeds.toFixed(0)}
-              action={() => navigate('/deeds')}
+              actionList={() => navigate('/deeds')}
+              actionNew={() => navigate('/deeds')}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entries"
               count={companyStats()?.countEntries.toFixed(0)}
-              action={() => navigate('/entries')}
+              actionList={() => navigate('/entries')}
+              actionNew={() => navigate('/deeds')}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={3}>
             <CountActionsCard
               title="Total Entry Types"
               count={companyStats()?.countEntryTypes.toFixed(0)}
-              action={() => navigate('/entry-types')}
+              actionList={() => navigate('/entry-types')}
+              actionNew={() => navigate('/deeds')}
             />
           </Grid>
         </Grid>
@@ -251,7 +254,8 @@ const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
 
 type PropsActions = {
   isListDisabled?: boolean;
-  action: Function & JSX.EventHandler<HTMLButtonElement, MouseEvent>;
+  actionNew: Function & JSX.EventHandler<HTMLButtonElement, MouseEvent>;
+  actionList: Function & JSX.EventHandler<HTMLButtonElement, MouseEvent>;
 };
 
 const Actions: Component<PropsActions> = (props): JSX.Element => {
@@ -266,7 +270,7 @@ const Actions: Component<PropsActions> = (props): JSX.Element => {
         variant="text"
         size="small"
         startIcon={<AddIcon />}
-        onClick={props.action}
+        onClick={props.actionNew}
       >
         Add New
       </Button>
@@ -275,6 +279,7 @@ const Actions: Component<PropsActions> = (props): JSX.Element => {
         variant="text"
         size="large"
         startIcon={<ListIcon />}
+        onClick={props.actionList}
       >
         List
       </Button>
@@ -298,7 +303,7 @@ const CountActionsCard: Component<PropsStatisticsCard & PropsActions> = (
       isLoss={isLoss(props.count)}
     >
       <Divider />
-      <Actions isListDisabled={isLoss(props.count)} action={props.action} />
+      <Actions isListDisabled={isLoss(props.count)} actionNew={props.actionNew} actionList={props.actionList} />
     </StatisticsCard>
   );
 };
