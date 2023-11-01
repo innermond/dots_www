@@ -1,10 +1,8 @@
 import {
   onMount,
-  onCleanup,
   createResource,
-  createSignal,
-  createEffect,
   Show,
+  For,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -20,12 +18,13 @@ import { A } from '@solidjs/router';
 
 import { entryType } from '@/lib/api';
 import appstate from '@/lib/app';
+import {EntryTypeData} from './types';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
 
   const [result] = createResource(entryType.all);
-  const entryTypes = () => {
+  const entryTypes = (): EntryTypeData[] => {
     const info = result();
     if (info instanceof Error || !info) {
       return [];
@@ -45,32 +44,34 @@ const EntryTypes: Component = (): JSX.Element => {
         <Table size="small" aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Code</TableCell>
-              <TableCell align="right">Description</TableCell>
-              <TableCell align="right">Unit</TableCell>
-              <TableCell align="right">Action</TableCell>
+              <TableCell component="th">Code</TableCell>
+              <TableCell component="th" align="right">Description</TableCell>
+              <TableCell component="th" align="right">Unit</TableCell>
+              <TableCell component="th" align="right">Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {entryTypes().map((c: any) => {
-              return (
-                <TableRow
-                  hover
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {c.code}
-                  </TableCell>
-                  <TableCell align="right">{c.description}</TableCell>
-                  <TableCell align="right">{c.unit}</TableCell>
-                  <TableCell align="right">
-                    <A href={'./' + c.id}>
-                      Go to
-                    </A>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            <For each={entryTypes()}>
+              {(c: EntryTypeData) => {
+                return (
+                  <TableRow
+                    hover
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell>
+                      {c.code}
+                    </TableCell>
+                    <TableCell align="right">{c.description}</TableCell>
+                    <TableCell align="right">{c.unit}</TableCell>
+                    <TableCell align="right">
+                      <A href={'./' + c.id}>
+                        Go to
+                      </A>
+                    </TableCell>
+                  </TableRow>
+                );
+              }}
+            </For>
           </TableBody>
         </Table>
       </TableContainer>
