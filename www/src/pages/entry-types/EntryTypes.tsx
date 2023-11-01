@@ -52,7 +52,6 @@ const EntryTypes: Component = (): JSX.Element => {
           <Button
             size="small"
             variant="contained"
-            disableElevation={true}
             startIcon={<AddIcon />}
           >
             Add Entry Type 

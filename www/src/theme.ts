@@ -49,6 +49,11 @@ const theme = createTheme({
         },
       },
     },
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+    },
   },
   typography,
   //palette: {mode: 'dark'},
