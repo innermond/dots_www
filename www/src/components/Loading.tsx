@@ -1,7 +1,6 @@
 import { Box, LinearProgress, useTheme } from '@suid/material';
-import { onMount, Show, createSignal, createEffect } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
-import { useIsRouting } from '@solidjs/router';
 import { Backdrop } from '@suid/material';
 
 export const [loading, setLoading] = createSignal(false);

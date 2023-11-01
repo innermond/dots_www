@@ -13,8 +13,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Checkbox,
+  Stack,
+  Button,
+  useTheme,
 } from '@suid/material';
 import { A } from '@solidjs/router';
+import AddIcon from '@suid/icons-material/Add';
 
 import { entryType } from '@/lib/api';
 import appstate from '@/lib/app';
@@ -37,13 +42,26 @@ const EntryTypes: Component = (): JSX.Element => {
   onMount(() => {
     setState("currentPageTitle", "Entry types's list");
   });
+ 
+  const theme = useTheme();
 
   return (
     <Show when={result.state === 'ready'}>
       <TableContainer component={Paper}>
+        <Stack direction="row" sx={{p: 1, display: 'flex', justifyContent: 'end', backgroundColor:theme.palette.grey[200] }}>
+          <Button
+            size="small"
+            variant="contained"
+            disableElevation={true}
+            startIcon={<AddIcon />}
+          >
+            Add Entry Type 
+          </Button>
+        </Stack>
         <Table size="small" aria-label="simple table">
           <TableHead>
-            <TableRow>
+            <TableRow hover>
+              <TableCell><Checkbox /></TableCell>
               <TableCell component="th">Code</TableCell>
               <TableCell component="th" align="right">Description</TableCell>
               <TableCell component="th" align="right">Unit</TableCell>
@@ -54,10 +72,8 @@ const EntryTypes: Component = (): JSX.Element => {
             <For each={entryTypes()}>
               {(c: EntryTypeData) => {
                 return (
-                  <TableRow
-                    hover
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
+                  <TableRow>
+                    <TableCell><Checkbox /></TableCell>
                     <TableCell>
                       {c.code}
                     </TableCell>
