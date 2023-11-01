@@ -75,7 +75,7 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
         >
           {props.title}
         </Typography>
-        <Stack direction="row">
+        <Stack direction="row" alignItems="center">
           <Show when={props.count}>
             <Grid item>
               <Typography variant="h4" color="inherit">
