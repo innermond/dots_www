@@ -4,10 +4,6 @@ import Palette from './palette';
 
 export const defaultTheme = createTheme({
   typography: Typography(`'Public Sans', sans-serif`),
-  palette: Palette('light', 'default'),
+  //palette: {mode: 'dark'},
+  palette: Palette('light'),
 });
-/*const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});*/
