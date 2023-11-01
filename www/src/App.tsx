@@ -4,7 +4,7 @@ import { CssBaseline } from '@suid/material';
 import { ThemeProvider } from '@suid/material/styles';
 import { Toaster } from 'solid-toast';
 
-import { defaultTheme } from './theme';
+import theme from './theme';
 import routes from '@/pages/routes';
 
 const App: Component = (): JSX.Element => {
@@ -12,7 +12,7 @@ const App: Component = (): JSX.Element => {
 
   return (
     <Router>
-      <ThemeProvider theme={defaultTheme}>
+      <ThemeProvider theme={theme}>
         <CssBaseline />
         <Routes />
         <Toaster />
