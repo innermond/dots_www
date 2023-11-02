@@ -29,7 +29,7 @@ import StatisticsCard, {
 } from '@/pages/dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
 
-const [ , setState ] = appstate;
+const [, setState] = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {
   const params = useParams();
@@ -75,10 +75,9 @@ const CompanyDetails: Component = (): JSX.Element => {
       return;
     }
 
-    setState("currentCompany", info);
-    setState("currentPageTitle", info?.longname ?? '...');
+    setState('currentCompany', info);
+    setState('currentPageTitle', info?.longname ?? '...');
   });
-
 
   const [statsRes] = createResource(() => params.id, company.stats);
   const stats = createMemo((): DataCompanyStats | Error | undefined => {
@@ -161,7 +160,10 @@ const CompanyDetails: Component = (): JSX.Element => {
 
   return (
     <>
-      <Show when={statsRes.state === 'ready'} fallback={<SkeletonCounts  num={3} />}>
+      <Show
+        when={statsRes.state === 'ready'}
+        fallback={<SkeletonCounts num={3} />}
+      >
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Counters</Typography>
@@ -192,7 +194,10 @@ const CompanyDetails: Component = (): JSX.Element => {
           </Grid>
         </Grid>
       </Show>
-      <Show when={depletionRes.state === 'ready'} fallback={<SkeletonCounts num={3} height={"3rem"} />}>
+      <Show
+        when={depletionRes.state === 'ready'}
+        fallback={<SkeletonCounts num={3} height={'3rem'} />}
+      >
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
             <Typography variant="h5">Depletion</Typography>
@@ -224,22 +229,29 @@ const CompanyDetails: Component = (): JSX.Element => {
   );
 };
 
-type PropsSkeletonCounts = { num: number, height?: string };
+type PropsSkeletonCounts = { num: number; height?: string };
 
 const SkeletonCounts: Component<PropsSkeletonCounts> = (props): JSX.Element => {
-    return (
-        <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-          <Grid item xs={12} sx={{ mb: -2.25 }}>
-            <Skeleton width="10rem" variant="text" />
-          </Grid>
-          <For each={new Array(props.num)}>{_ => {
-            return (
+  return (
+    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+      <Grid item xs={12} sx={{ mb: -2.25 }}>
+        <Skeleton width="10rem" variant="text" />
+      </Grid>
+      <For each={new Array(props.num)}>
+        {_ => {
+          return (
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <Skeleton width="100%"  height={props?.height ?? "7rem"} variant="rectangular" />
+              <Skeleton
+                width="100%"
+                height={props?.height ?? '7rem'}
+                variant="rectangular"
+              />
             </Grid>
-            )}}
-          </For>
-        </Grid>)
+          );
+        }}
+      </For>
+    </Grid>
+  );
 };
 
 const EmptyStatisticsCard: Component<PropsStatisticsCard> = (
@@ -303,7 +315,11 @@ const CountActionsCard: Component<PropsStatisticsCard & PropsActions> = (
       isLoss={isLoss(props.count)}
     >
       <Divider />
-      <Actions isListDisabled={isLoss(props.count)} actionNew={props.actionNew} actionList={props.actionList} />
+      <Actions
+        isListDisabled={isLoss(props.count)}
+        actionNew={props.actionNew}
+        actionList={props.actionList}
+      />
     </StatisticsCard>
   );
 };

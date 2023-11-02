@@ -1,4 +1,4 @@
-import {TypographyOptions} from "@suid/material/styles/createTypography";
+import { TypographyOptions } from '@suid/material/styles/createTypography';
 
 const Typography = (fontFamily: string): Partial<TypographyOptions> => ({
   fontFamily,

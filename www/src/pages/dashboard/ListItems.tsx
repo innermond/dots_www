@@ -18,10 +18,12 @@ const listItem = (icon: any, text: string, path: string): JSX.Element => {
   const [, setState] = appstate;
 
   return (
-    <ListItemButton onClick={() => {
-      setState("currentPageTitle", "...");
-      navigate(path);
-    }}>
+    <ListItemButton
+      onClick={() => {
+        setState('currentPageTitle', '...');
+        navigate(path);
+      }}
+    >
       <ListItemIcon>
         <Show when={true}>{icon}</Show>
       </ListItemIcon>

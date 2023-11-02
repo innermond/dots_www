@@ -11,30 +11,30 @@ const theme = createTheme({
   components: {
     MuiTable: {
       defaultProps: {
-        sx: {border: styleBorder},
+        sx: { border: styleBorder },
       },
-     },
+    },
     MuiTableHead: {
       defaultProps: {
         sx: {
-          "& tr": {
+          '& tr': {
             backgroundColor: palette.grey![200],
-            "&:hover th": {
+            '&:hover th': {
               backgroundColor: 'transparent',
             },
           },
-          "& th": {
+          '& th': {
             fontWeight: 700,
             textTransform: 'uppercase',
-          }
-        }
-      }
+          },
+        },
+      },
     },
     MuiTableRow: {
       defaultProps: {
         sx: {
-          "&:hover td": {
-              backgroundColor: 'transparent',
+          '&:hover td': {
+            backgroundColor: 'transparent',
           },
         },
       },
@@ -57,6 +57,5 @@ const theme = createTheme({
   //palette: {mode: 'dark'},
   palette,
 });
-
 
 export default theme;

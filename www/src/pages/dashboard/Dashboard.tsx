@@ -47,7 +47,7 @@ declare module 'solid-js' {
 
 type ErrorResource = ApiError | Error;
 
-const [ state, setState ] = appstate;
+const [state, setState] = appstate;
 
 const drawerWidth: number = 240;
 
@@ -72,7 +72,7 @@ const Dashboard: Component = () => {
   createEffect(() => {
     const title = getPathTitleMap().get(pathname());
     if (title !== undefined) {
-      setState("currentPageTitle", title);
+      setState('currentPageTitle', title);
     }
   });
 
@@ -89,7 +89,7 @@ const Dashboard: Component = () => {
       toasting('data we got do no represent a company');
       return;
     }
-    setState("currentPageTitle", '...');
+    setState('currentPageTitle', '...');
     navigate(`/company/${(e as CompanyData).id}`);
   };
 

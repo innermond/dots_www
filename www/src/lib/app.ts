@@ -7,7 +7,7 @@ type AppState = {
   currentCompany: CompanyData;
 };
 
-const appStateZero = {currentPageTitle: '...', currentCompany: companyZero};
+const appStateZero = { currentPageTitle: '...', currentCompany: companyZero };
 
 const state = createStore<AppState>(appStateZero);
 

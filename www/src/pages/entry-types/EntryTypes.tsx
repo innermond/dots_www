@@ -23,11 +23,11 @@ import {
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
-import {useNavigate} from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 
 import { entryType } from '@/lib/api';
 import appstate from '@/lib/app';
-import {EntryTypeData} from './types';
+import { EntryTypeData } from './types';
 import DialogSave from '@/components/DialogSave';
 
 const EntryTypes: Component = (): JSX.Element => {
@@ -45,7 +45,7 @@ const EntryTypes: Component = (): JSX.Element => {
   };
 
   onMount(() => {
-    setState("currentPageTitle", "Entry types's list");
+    setState('currentPageTitle', "Entry types's list");
   });
 
   const navigate = useNavigate();
@@ -60,27 +60,48 @@ const EntryTypes: Component = (): JSX.Element => {
 
   return (
     <>
-      <DialogSave.With dyn={dyn} title="Add entry type" textSave="Add" open={addEntryTypeSignal} />
+      <DialogSave.With
+        dyn={dyn}
+        title="Add entry type"
+        textSave="Add"
+        open={addEntryTypeSignal}
+      />
       <Show when={result.state === 'ready'}>
         <TableContainer component={Paper}>
-          <Stack direction="row" sx={{p: 1, display: 'flex', justifyContent: 'end', backgroundColor:theme.palette.grey[200] }}>
+          <Stack
+            direction="row"
+            sx={{
+              p: 1,
+              display: 'flex',
+              justifyContent: 'end',
+              backgroundColor: theme.palette.grey[200],
+            }}
+          >
             <Button
               size="small"
               variant="contained"
               startIcon={<AddIcon />}
               onClick={openDialogToAddEntryType}
             >
-              Add Entry Type 
+              Add Entry Type
             </Button>
           </Stack>
           <Table size="small" aria-label="simple table">
             <TableHead>
               <TableRow hover>
-                <TableCell><Checkbox /></TableCell>
+                <TableCell>
+                  <Checkbox />
+                </TableCell>
                 <TableCell component="th">Code</TableCell>
-                <TableCell component="th" align="right">Description</TableCell>
-                <TableCell component="th" align="right">Unit</TableCell>
-                <TableCell component="th" align="right">Action</TableCell>
+                <TableCell component="th" align="right">
+                  Description
+                </TableCell>
+                <TableCell component="th" align="right">
+                  Unit
+                </TableCell>
+                <TableCell component="th" align="right">
+                  Action
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -88,14 +109,20 @@ const EntryTypes: Component = (): JSX.Element => {
                 {(c: EntryTypeData) => {
                   return (
                     <TableRow>
-                      <TableCell><Checkbox /></TableCell>
                       <TableCell>
-                        {c.code}
+                        <Checkbox />
                       </TableCell>
+                      <TableCell>{c.code}</TableCell>
                       <TableCell align="right">{c.description}</TableCell>
                       <TableCell align="right">{c.unit}</TableCell>
                       <TableCell align="right">
-                        <IconButton color="primary" aria-label="view entry type" onclick={()=>navigate('./' + c.id, {replace: true })}>
+                        <IconButton
+                          color="primary"
+                          aria-label="view entry type"
+                          onclick={() =>
+                            navigate('./' + c.id, { replace: true })
+                          }
+                        >
                           <VisibilityOutlinedIcon />
                         </IconButton>
                       </TableCell>

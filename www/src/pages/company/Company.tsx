@@ -21,7 +21,7 @@ import { A } from '@solidjs/router';
 import { company } from '@/lib/api';
 
 import appstate from '@/lib/app';
-const [ , setState ] = appstate;
+const [, setState] = appstate;
 const Company: Component = (): JSX.Element => {
   const [change, setChange] = createSignal(false);
   const [result] = createResource(change, company.all);
@@ -74,7 +74,10 @@ const Company: Component = (): JSX.Element => {
                   <TableCell align="right">{c.rn}</TableCell>
                   <TableCell align="right">{c.tin}</TableCell>
                   <TableCell align="right">
-                    <A onClick={() => setState("currentCompany", c)} href={'./' + c.id}>
+                    <A
+                      onClick={() => setState('currentCompany', c)}
+                      href={'./' + c.id}
+                    >
                       Go to
                     </A>
                   </TableCell>

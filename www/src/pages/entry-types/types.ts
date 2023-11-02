@@ -66,10 +66,7 @@ const entryTypesZero: DataEntryTypes = {
   n: 0,
 };
 
-export type {
-  EntryTypeData,
-  DataEntryTypes,
-};
+export type { EntryTypeData, DataEntryTypes };
 export {
   isEntryTypeData,
   isKeyofEntryTypeData,

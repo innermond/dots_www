@@ -7,10 +7,7 @@ import {
   isDataCompanyDepletion,
 } from '@/pages/company/types';
 
-import {
-  DataEntryTypes,
-  isDataEntryTypes,
-} from '@/pages/entry-types/types';
+import { DataEntryTypes, isDataEntryTypes } from '@/pages/entry-types/types';
 
 const API = 'http://api.dots.volt.com/v1';
 
@@ -256,4 +253,4 @@ function convertKeysToCamelCase(data: unknown): CamelCase<typeof data> {
   return data;
 }
 
-export {company, entryType};
+export { company, entryType };

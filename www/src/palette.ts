@@ -1,5 +1,5 @@
 // material-ui
-import { DeepPartial } from "@suid/types";
+import { DeepPartial } from '@suid/types';
 import type { PaletteOptions } from '@suid/material/styles/createPalette';
 
 // third-party
@@ -7,7 +7,6 @@ import { presetPalettes } from '@ant-design/colors';
 
 // project import
 import ThemeOption from './theme-option';
-
 
 const Palette = (mode: PaletteOptions['mode']): DeepPartial<PaletteOptions> => {
   const colors = presetPalettes;
@@ -33,26 +32,26 @@ const Palette = (mode: PaletteOptions['mode']): DeepPartial<PaletteOptions> => {
   const paletteColor = ThemeOption(colors);
 
   return {
-      mode,
-      common: {
-        black: '#000',
-        white: '#fff',
-      },
-      ...paletteColor,
-      text: {
-        primary: paletteColor.grey[700],
-        secondary: paletteColor.grey[500],
-        disabled: paletteColor.grey[400],
-      },
-      action: {
-        disabled: paletteColor.grey[300],
-      },
-      divider: paletteColor.grey[200],
-      background: {
-        paper: paletteColor.grey[0],
-        default: paletteColor.grey.A50,
-      },
-    };
+    mode,
+    common: {
+      black: '#000',
+      white: '#fff',
+    },
+    ...paletteColor,
+    text: {
+      primary: paletteColor.grey[700],
+      secondary: paletteColor.grey[500],
+      disabled: paletteColor.grey[400],
+    },
+    action: {
+      disabled: paletteColor.grey[300],
+    },
+    divider: paletteColor.grey[200],
+    background: {
+      paper: paletteColor.grey[0],
+      default: paletteColor.grey.A50,
+    },
+  };
 };
 
 export default Palette;
