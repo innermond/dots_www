@@ -26,7 +26,7 @@ import AddIcon from '@suid/icons-material/Add';
 import ListIcon from '@suid/icons-material/List';
 import StatisticsCard, {
   PropsStatisticsCard,
-} from '../dashboard/StatisticsCard';
+} from '@/pages/dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
 
 const [ , setState ] = appstate;

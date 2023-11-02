@@ -2,11 +2,6 @@ import CloseIcon from "@suid/icons-material/Close";
 import {
   Button,
   Dialog,
-  ListItem,
-  ListItemText,
-  ListItemButton,
-  List,
-  Divider,
   AppBar,
   Toolbar,
   IconButton,
@@ -14,8 +9,9 @@ import {
   Slide,
 } from "@suid/material";
 import { TransitionProps } from "@suid/material/transitions";
-import { ComponentProps, createSignal, JSXElement, lazy, ParentProps, Signal } from "solid-js";
+import { JSXElement, ParentProps, Signal } from "solid-js";
 import {Dynamic} from "solid-js/web";
+import type {Component} from "solid-js";
 
 const Transition = function Transition(
   props: TransitionProps & {
@@ -36,6 +32,7 @@ const DialogSave = (props: DialogSaveProps) => {
 
   return (
       <Dialog
+      fullWidth
         open={open()}
         onClose={handleClose}
         TransitionComponent={Transition}
@@ -70,13 +67,13 @@ const DialogSave = (props: DialogSaveProps) => {
   );
 }
 
-export  const makeDialogSave = (props: DialogSaveProps & {path: string}): JSXElement => {
-    const cmp = lazy(()=>import(props.path));
-    return (
-      <DialogSave title={props.title} textSave={props.textSave} open={props.open} >
-        <Dynamic component={cmp} />
-      </DialogSave>
-    )
-  }
+const With = (props: DialogSaveProps & {dyn: Component}): JSXElement => {
+  return (
+    <DialogSave title={props.title} textSave={props.textSave} open={props.open} >
+      <Dynamic component={props.dyn} />
+    </DialogSave>
+  )
+}
 
+DialogSave.With = With;
 export default DialogSave;

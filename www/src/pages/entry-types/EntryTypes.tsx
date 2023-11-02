@@ -4,6 +4,7 @@ import {
   Show,
   For,
   createSignal,
+  lazy,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -18,15 +19,16 @@ import {
   Stack,
   Button,
   useTheme,
+  IconButton,
 } from '@suid/material';
-import { A } from '@solidjs/router';
 import AddIcon from '@suid/icons-material/Add';
+import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
+import {useNavigate} from '@solidjs/router';
 
 import { entryType } from '@/lib/api';
 import appstate from '@/lib/app';
 import {EntryTypeData} from './types';
-import {Dynamic} from 'solid-js/web';
-import {makeDialogSave} from '@/components/DialogSave';
+import DialogSave from '@/components/DialogSave';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -46,16 +48,19 @@ const EntryTypes: Component = (): JSX.Element => {
     setState("currentPageTitle", "Entry types's list");
   });
 
+  const navigate = useNavigate();
+
   const addEntryTypeSignal = createSignal(false);
   const openDialogToAddEntryType = () => {
     addEntryTypeSignal[1](true);
   };
+  const dyn = lazy(() => import('./EntryTypeAdd'));
 
   const theme = useTheme();
 
   return (
     <>
-      <Dynamic path="./EntryTypeAdd.tsx" title="Add entry type" textSave="Add" open={addEntryTypeSignal} component={makeDialogSave} />
+      <DialogSave.With dyn={dyn} title="Add entry type" textSave="Add" open={addEntryTypeSignal} />
       <Show when={result.state === 'ready'}>
         <TableContainer component={Paper}>
           <Stack direction="row" sx={{p: 1, display: 'flex', justifyContent: 'end', backgroundColor:theme.palette.grey[200] }}>
@@ -90,9 +95,9 @@ const EntryTypes: Component = (): JSX.Element => {
                       <TableCell align="right">{c.description}</TableCell>
                       <TableCell align="right">{c.unit}</TableCell>
                       <TableCell align="right">
-                        <A href={'./' + c.id}>
-                          Go to
-                        </A>
+                        <IconButton color="primary" aria-label="view entry type" onclick={()=>navigate('./' + c.id, {replace: true })}>
+                          <VisibilityOutlinedIcon />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   );
