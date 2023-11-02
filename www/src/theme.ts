@@ -33,7 +33,6 @@ const theme = createTheme({
     MuiTableRow: {
       defaultProps: {
         sx: {
-          borderBottom: styleBorder,
           "&:hover td": {
               backgroundColor: 'transparent',
           },
@@ -43,7 +42,6 @@ const theme = createTheme({
     MuiTableCell: {
       defaultProps: {
         sx: {
-          borderCollapse: 'separate',
           borderBottom: styleBorder,
           backgroundColor: palette.grey![50],
         },
