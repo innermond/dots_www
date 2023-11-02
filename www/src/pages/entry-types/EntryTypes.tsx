@@ -3,6 +3,7 @@ import {
   createResource,
   Show,
   For,
+  createSignal,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -24,6 +25,8 @@ import AddIcon from '@suid/icons-material/Add';
 import { entryType } from '@/lib/api';
 import appstate from '@/lib/app';
 import {EntryTypeData} from './types';
+import {Dynamic} from 'solid-js/web';
+import {makeDialogSave} from '@/components/DialogSave';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -42,55 +45,64 @@ const EntryTypes: Component = (): JSX.Element => {
   onMount(() => {
     setState("currentPageTitle", "Entry types's list");
   });
- 
+
+  const addEntryTypeSignal = createSignal(false);
+  const openDialogToAddEntryType = () => {
+    addEntryTypeSignal[1](true);
+  };
+
   const theme = useTheme();
 
   return (
-    <Show when={result.state === 'ready'}>
-      <TableContainer component={Paper}>
-        <Stack direction="row" sx={{p: 1, display: 'flex', justifyContent: 'end', backgroundColor:theme.palette.grey[200] }}>
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<AddIcon />}
-          >
-            Add Entry Type 
-          </Button>
-        </Stack>
-        <Table size="small" aria-label="simple table">
-          <TableHead>
-            <TableRow hover>
-              <TableCell><Checkbox /></TableCell>
-              <TableCell component="th">Code</TableCell>
-              <TableCell component="th" align="right">Description</TableCell>
-              <TableCell component="th" align="right">Unit</TableCell>
-              <TableCell component="th" align="right">Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <For each={entryTypes()}>
-              {(c: EntryTypeData) => {
-                return (
-                  <TableRow>
-                    <TableCell><Checkbox /></TableCell>
-                    <TableCell>
-                      {c.code}
-                    </TableCell>
-                    <TableCell align="right">{c.description}</TableCell>
-                    <TableCell align="right">{c.unit}</TableCell>
-                    <TableCell align="right">
-                      <A href={'./' + c.id}>
-                        Go to
-                      </A>
-                    </TableCell>
-                  </TableRow>
-                );
-              }}
-            </For>
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Show>
+    <>
+      <Dynamic path="./EntryTypeAdd.tsx" title="Add entry type" textSave="Add" open={addEntryTypeSignal} component={makeDialogSave} />
+      <Show when={result.state === 'ready'}>
+        <TableContainer component={Paper}>
+          <Stack direction="row" sx={{p: 1, display: 'flex', justifyContent: 'end', backgroundColor:theme.palette.grey[200] }}>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={openDialogToAddEntryType}
+            >
+              Add Entry Type 
+            </Button>
+          </Stack>
+          <Table size="small" aria-label="simple table">
+            <TableHead>
+              <TableRow hover>
+                <TableCell><Checkbox /></TableCell>
+                <TableCell component="th">Code</TableCell>
+                <TableCell component="th" align="right">Description</TableCell>
+                <TableCell component="th" align="right">Unit</TableCell>
+                <TableCell component="th" align="right">Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <For each={entryTypes()}>
+                {(c: EntryTypeData) => {
+                  return (
+                    <TableRow>
+                      <TableCell><Checkbox /></TableCell>
+                      <TableCell>
+                        {c.code}
+                      </TableCell>
+                      <TableCell align="right">{c.description}</TableCell>
+                      <TableCell align="right">{c.unit}</TableCell>
+                      <TableCell align="right">
+                        <A href={'./' + c.id}>
+                          Go to
+                        </A>
+                      </TableCell>
+                    </TableRow>
+                  );
+                }}
+              </For>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Show>
+    </>
   );
 };
 
