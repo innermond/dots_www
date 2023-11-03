@@ -45,7 +45,7 @@ type Icons = Record<Iconstr, Promise<Component>>;
 // array to object
 const icons: Icons = iconstr.reduce( (acc: Icons,  n: Iconstr) => {
   // raw import works
-  acc[n] = import(`@suid/icons-material/${n}`);
+  acc[n] = import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`);
   // lazy don't
   //acc[n] = lazy(()=>import(`@suid/icons-material/${n}`));
   return acc;
