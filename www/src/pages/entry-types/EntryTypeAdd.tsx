@@ -5,15 +5,14 @@ import {
   MenuItem,
   Select,
   InputLabel,
-  OutlinedInput,
+  FormGroup,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { JSX, createSignal } from 'solid-js';
 
 export default function EntryTypeAdd(props: any): JSX.Element {
   return (
-    <Container component="form">
-      <FormControl sx={{ width: '10rem' }}>
+    <Container sx={{display: 'flex', alignItems:'center'}}>
         <TextField
           margin="normal"
           required
@@ -23,8 +22,6 @@ export default function EntryTypeAdd(props: any): JSX.Element {
           id="code"
           autoComplete="off"
         />
-      </FormControl>
-      <FormControl>
         <TextField
           margin="normal"
           required
@@ -34,10 +31,9 @@ export default function EntryTypeAdd(props: any): JSX.Element {
           id="description"
           autoComplete="off"
         />
-      </FormControl>
-      <FormControl sx={{ width: '7rem' }}>
-        <UnitSelect />
-      </FormControl>
+        <FormControl margin="normal" sx={{ width: '10rem' }}>
+          <UnitSelect />
+        </FormControl>
     </Container>
   );
 }
@@ -52,7 +48,6 @@ const UnitSelect = () => {
     <>
       <InputLabel id="unit-label">Unit</InputLabel>
       <Select
-        input={<OutlinedInput />}
         labelId="unit-label"
         label="Unit"
         id="unit-select"
