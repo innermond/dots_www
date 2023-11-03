@@ -7,7 +7,9 @@ import {
   IconButton,
   Typography,
   Slide,
+  Divider,
 } from '@suid/material';
+import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
 import { JSXElement, ParentProps, Signal } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
@@ -41,7 +43,7 @@ const DialogSave = (props: DialogSaveProps) => {
       onClose={handleClose}
       TransitionComponent={Transition}
     >
-      <AppBar sx={{ position: 'relative' }}>
+      <AppBar color="transparent"  sx={{ position: 'relative' }}>
         <Toolbar>
           <IconButton
             edge="start"
@@ -61,10 +63,13 @@ const DialogSave = (props: DialogSaveProps) => {
           >
             {props.title}
           </Typography>
-          <Button autofocus color="inherit" onClick={handleClose}>
+          <Button
+            startIcon={<AddIcon />}
+            color="primary" onClick={handleClose}>
             {props.textSave ?? 'save'}
           </Button>
         </Toolbar>
+        <Divider />
       </AppBar>
       {props.children}
     </Dialog>

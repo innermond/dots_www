@@ -78,8 +78,7 @@ const EntryTypes: Component = (): JSX.Element => {
             }}
           >
             <Button
-              size="small"
-              variant="contained"
+              size="large"
               startIcon={<AddIcon />}
               onClick={openDialogToAddEntryType}
             >

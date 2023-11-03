@@ -9,6 +9,11 @@ const styleBorder = '1px solid ' + palette.grey![300];
 
 const theme = createTheme({
   components: {
+    MuiAppBar: {
+      defaultProps: {
+        elevation: 0,
+      },
+    },
     MuiTable: {
       defaultProps: {
         sx: { border: styleBorder },
