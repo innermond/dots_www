@@ -8,7 +8,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "clean": "rm -rf dist/*",
-    "dist": "npm run clean && npm run build && cp -r dist/* distant && npm run clean"
+    "dist": "npm run clean && rm -rf distant/* &&  npm run build && cp -r dist/* distant && npm run clean"
   },
   "license": "MIT",
   "devDependencies": {
