@@ -7,11 +7,12 @@ import {
   InputLabel,
   useTheme,
   FormGroup,
-  Typography,
   Button,
+  Typography,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
-import { JSX, Show, createSignal } from 'solid-js';
+import { JSX, Show, createSignal, createEffect } from 'solid-js';
+import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 const theme = useTheme();
 
@@ -45,11 +46,34 @@ export default function EntryTypeAdd(props: any): JSX.Element {
 
 const UnitSelect = () => {
   const [selected, setSelected] = createSignal('');
+  const [isOpen, setIsOpen] = createSignal(false);
   const [newUnit, setNewUnit] = createSignal(false);
 
   const handleChange = (event: SelectChangeEvent) => {
     setSelected(event.target.value);
+    setIsOpen(false);
   };
+
+  const switchSelect = (txt: string, willOpen: boolean) => {
+    const color = theme.palette.text.secondary;
+    return (
+      <Button
+        endIcon={<ChangeCircleOutlinedIcon color="action" />}
+        sx={{width: 'fit-content', alignSelf: 'flex-end'}}
+        onClick={()=>{
+          setNewUnit(willOpen);
+          if (willOpen) {
+            setIsOpen(true);
+          }
+        }}
+      >
+        <Typography sx={{textTransform: 'lowercase', color}}>
+          {txt}
+         </Typography>
+      </Button>
+    )
+  };
+
   return (
     <FormGroup sx={{width: '100%'}}>
       <Show when={!newUnit()}>
@@ -61,18 +85,34 @@ const UnitSelect = () => {
             id="unit-select"
             value={selected()}
             onChange={handleChange}
-            defaultOpen={true}
+            onClick={(evt: MouseEvent)=>{
+              setIsOpen(() => {
+                const id = (evt.target as HTMLElement)?.id;
+                return id === 'unit-select';
+              });
+            }}
+            open={isOpen()}
           >
             <MenuItem value={10}>buc</MenuItem>
             <MenuItem value={20}>piece</MenuItem>
             <MenuItem value={30}>hour</MenuItem>
           </Select>
         </FormControl>
-        <Button onClick={()=>setNewUnit(true)}>or add new unit</Button>
+        {switchSelect('or add a new unit', true)}
       </Show>
       <Show when={newUnit()}>
-        <TextField />
-        <Button onClick={()=>setNewUnit(false)}>or use existent unit</Button>
+        <TextField
+          autoFocus={newUnit()}
+          focused={newUnit()}
+          inputRef={input => setTimeout(() => input.focus())}
+          required
+          name="unit"
+          label="Unit"
+          type="text"
+          id="unit"
+          autoComplete="off"
+        />
+        {switchSelect('or use existent unit', false)}
       </Show>
     </FormGroup>
   );

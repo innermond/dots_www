@@ -64,6 +64,7 @@ const DialogSave = (props: DialogSaveProps) => {
             {props.title}
           </Typography>
           <Button
+            variant="contained"
             startIcon={<AddIcon />}
             color="primary" onClick={handleClose}>
             {props.textSave ?? 'save'}
