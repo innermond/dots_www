@@ -41,6 +41,7 @@ declare module 'solid-js' {
   namespace JSX {
     interface CustomEvents {
       refetchItem: CustomEvent;
+      postEntryType: CustomEvent;
     }
   }
 }

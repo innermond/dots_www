@@ -11,13 +11,13 @@ import {
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
-import { JSXElement, ParentProps, Signal } from 'solid-js';
+import { JSX, ParentProps, Signal } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import type { Component } from 'solid-js';
 
 const Transition = function Transition(
   props: TransitionProps & {
-    children: JSXElement;
+    children: JSX.Element;
   },
 ) {
   return <Slide direction="up" {...props} />;
@@ -41,6 +41,7 @@ const DialogSave = (props: DialogSaveProps) => {
       fullWidth
       open={open()}
       onClose={handleClose}
+      onClick={handleClick} 
       TransitionComponent={Transition}
     >
       <AppBar color="transparent" sx={{ position: 'relative' }}>
@@ -67,7 +68,7 @@ const DialogSave = (props: DialogSaveProps) => {
             variant="contained"
             startIcon={<AddIcon />}
             color="primary"
-            onClick={handleClose}
+            onClick={handleClick}
           >
             {props.textSave ?? 'save'}
           </Button>
@@ -79,7 +80,13 @@ const DialogSave = (props: DialogSaveProps) => {
   );
 };
 
-const With = (props: DialogSaveProps & { dyn: Component }): JSXElement => {
+const handleClick = (evt: Event) => {
+  evt.stopPropagation();
+  const e = new CustomEvent('postEntryType', { bubbles: true });
+  evt.target?.dispatchEvent(e);
+};
+
+const With = (props: DialogSaveProps & { dyn: Component }): JSX.Element => {
   return (
     <DialogSave title={props.title} textSave={props.textSave} open={props.open}>
       <Dynamic component={props.dyn} />

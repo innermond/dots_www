@@ -67,7 +67,7 @@ const EntryTypes: Component = (): JSX.Element => {
         open={addEntryTypeSignal}
       />
       <Show when={result.state === 'ready'}>
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} on:postEntryType={evt=>console.log(evt)}>
           <Stack
             direction="row"
             sx={{

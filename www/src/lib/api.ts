@@ -7,7 +7,7 @@ import {
   isDataCompanyDepletion,
 } from '@/pages/company/types';
 
-import { DataEntryTypes, isDataEntryTypes } from '@/pages/entry-types/types';
+import { DataEntryTypes, isDataEntryTypes, EntryTypeData, isEntryTypeData } from '@/pages/entry-types/types';
 
 const API = 'http://api.dots.volt.com/v1';
 
@@ -186,6 +186,8 @@ class APICompany {
   }
 }
 
+type PostEntryTypeData = Omit<EntryTypeData, "id">;
+
 class APIEntryType {
   async all(): Promise<DataEntryTypes | Error> {
     const headers = {
@@ -200,6 +202,21 @@ class APIEntryType {
     );
 
     return verifiedJSONorError<DataEntryTypes>(isDataEntryTypes, json);
+  }
+
+  async add(data: EntryTypeData): Promise<EntryTypeData | Error> {
+    const headers = {
+      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
+    };
+    const json = await send<EntryTypeData>(
+      'adding entry type',
+      'POST',
+      '/entry-types',
+      data,
+      headers,
+    );
+
+    return verifiedJSONorError<EntryTypeData>(isEntryTypeData, json);
   }
 }
 

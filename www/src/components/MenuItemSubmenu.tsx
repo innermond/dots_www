@@ -81,7 +81,7 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
   const handleRefresh = (evt: Event) => {
     evt.stopPropagation();
     const e = new CustomEvent('refetchItem', { bubbles: true });
-    evt.currentTarget?.dispatchEvent(e);
+    evt.target?.dispatchEvent(e);
   };
 
   const errored: (hint?: string, color?: SvgIconColor) => JSX.Element = (

@@ -11,14 +11,43 @@ import {
   Typography,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
-import { JSX, Show, createSignal } from 'solid-js';
+import { Show, createSignal, createResource } from 'solid-js';
+import type { JSX } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
+
+import {entryType} from '@/lib/api'; 
+
+async function postEntryTypeData(e: Event) {
+  e.preventDefault();
+  const data = new FormData(e.target as HTMLFormElement).entries();
+  const result: Record<string, string> = {};
+  for (const [k, v] of data) {
+    result[k] = v as string;
+  }
+  const { code, description, unit } = result;
+  const requestData = { id:0, code, description, unit }
+  return entryType.add(requestData);
+}
 
 const theme = useTheme();
 
+declare module 'solid-js' {
+  namespace JSX {
+    interface CustomEvents {
+      postEntryType: CustomEvent;
+    }
+  }
+}
+
 export default function EntryTypeAdd(props: any): JSX.Element {
+const [startSubmit, setStartSubmit] = createSignal<Event | null>();
+const [submitForm] = createResource(startSubmit, postEntryTypeData);
   return (
     <Container
+      on:postEntryType={(evt: Event) => {
+        console.log(evt)
+        setStartSubmit(evt);
+      }}
       component="form"
       sx={{
         padding: theme.spacing(3),
