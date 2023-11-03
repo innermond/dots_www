@@ -41,7 +41,7 @@ const ellipsisStyle: SxProps = {
 // this gives hint to vite what to package
 const iconstr = ['HorizontalSplit'] as const;
 type Iconstr = typeof iconstr[number];
-type Icons = Record<Iconstr, Component>;
+type Icons = Record<Iconstr, typeof SvgIcon>;
 // array to object
 const icons: Icons = iconstr.reduce( (acc: Icons,  n: Iconstr) => {
   acc[n] = lazy(()=>import(n));
