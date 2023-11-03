@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
-import { JSX, Show, createSignal, createEffect } from 'solid-js';
+import { JSX, Show, createSignal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 const theme = useTheme();
@@ -64,10 +64,16 @@ const UnitSelect = () => {
   const [selected, setSelected] = createSignal('');
   const [isOpen, setIsOpen] = createSignal(false);
   const [newUnit, setNewUnit] = createSignal(false);
+  const [newUnitValue, setNewUnitValue] = createSignal('');
 
   const handleChange = (event: SelectChangeEvent) => {
     setSelected(event.target.value);
     setIsOpen(false);
+  };
+
+  const handleNewUnitChange = (evt: Event) => {
+    setNewUnit(true);
+    setNewUnitValue((evt.target as HTMLInputElement)?.value);
   };
 
   const switchSelect = (txt: string, willOpen: boolean) => {
@@ -118,8 +124,7 @@ const UnitSelect = () => {
       </Show>
       <Show when={newUnit()}>
         <TextField
-          autoFocus={newUnit()}
-          focused={newUnit()}
+          focused
           inputRef={input => setTimeout(() => input.focus())}
           required
           name="unit"
@@ -127,6 +132,8 @@ const UnitSelect = () => {
           type="text"
           id="unit"
           autoComplete="off"
+          onChange={handleNewUnitChange}
+          value={newUnitValue()}
         />
         {switchSelect('or use existent unit', false)}
       </Show>
