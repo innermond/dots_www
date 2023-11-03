@@ -43,7 +43,7 @@ const DialogSave = (props: DialogSaveProps) => {
       onClose={handleClose}
       TransitionComponent={Transition}
     >
-      <AppBar color="transparent"  sx={{ position: 'relative' }}>
+      <AppBar color="transparent" sx={{ position: 'relative' }}>
         <Toolbar>
           <IconButton
             edge="start"
@@ -66,7 +66,9 @@ const DialogSave = (props: DialogSaveProps) => {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            color="primary" onClick={handleClose}>
+            color="primary"
+            onClick={handleClose}
+          >
             {props.textSave ?? 'save'}
           </Button>
         </Toolbar>

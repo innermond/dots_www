@@ -18,8 +18,24 @@ const theme = useTheme();
 
 export default function EntryTypeAdd(props: any): JSX.Element {
   return (
-    <Container component="form" sx={{padding: theme.spacing(3), display: 'flex', alignItems:'center', flexDirection: 'column', rowGap: theme.spacing(2)}}>
-    <FormGroup sx={{width: '100%', display: 'flex', flexDirection: 'row', columnGap: theme.spacing(1)}}>
+    <Container
+      component="form"
+      sx={{
+        padding: theme.spacing(3),
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'column',
+        rowGap: theme.spacing(2),
+      }}
+    >
+      <FormGroup
+        sx={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          columnGap: theme.spacing(1),
+        }}
+      >
         <TextField
           required
           name="code"
@@ -27,7 +43,7 @@ export default function EntryTypeAdd(props: any): JSX.Element {
           type="text"
           id="code"
           autoComplete="off"
-          sx={{width: '10rem'}}
+          sx={{ width: '10rem' }}
         />
         <TextField
           required
@@ -36,10 +52,10 @@ export default function EntryTypeAdd(props: any): JSX.Element {
           type="text"
           id="description"
           autoComplete="off"
-          sx={{flex: 1}}
+          sx={{ flex: 1 }}
         />
-    </FormGroup>
-        <UnitSelect />
+      </FormGroup>
+      <UnitSelect />
     </Container>
   );
 }
@@ -59,23 +75,23 @@ const UnitSelect = () => {
     return (
       <Button
         endIcon={<ChangeCircleOutlinedIcon color="action" />}
-        sx={{width: 'fit-content', alignSelf: 'flex-end'}}
-        onClick={()=>{
+        sx={{ width: 'fit-content', alignSelf: 'flex-end' }}
+        onClick={() => {
           setNewUnit(willOpen);
           if (willOpen) {
             setIsOpen(true);
           }
         }}
       >
-        <Typography sx={{textTransform: 'lowercase', color}}>
+        <Typography sx={{ textTransform: 'lowercase', color }}>
           {txt}
-         </Typography>
+        </Typography>
       </Button>
-    )
+    );
   };
 
   return (
-    <FormGroup sx={{width: '100%'}}>
+    <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
         <FormControl>
           <InputLabel id="unit-label">Unit</InputLabel>
@@ -85,7 +101,7 @@ const UnitSelect = () => {
             id="unit-select"
             value={selected()}
             onChange={handleChange}
-            onClick={(evt: MouseEvent)=>{
+            onClick={(evt: MouseEvent) => {
               setIsOpen(() => {
                 const id = (evt.target as HTMLElement)?.id;
                 return id === 'unit-select';
