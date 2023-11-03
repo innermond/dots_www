@@ -11,7 +11,7 @@ import MainCard from '@/components/MainCard';
 
 import { mergeProps, Show, createMemo, lazy } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import type { ParentComponent } from 'solid-js';
+import type { Component, ParentComponent } from 'solid-js';
 import TrendingUp from '@suid/icons-material/TrendingUp';
 import TrendingDown from '@suid/icons-material/TrendingDown';
 import { SxProps } from '@suid/system';
@@ -38,10 +38,26 @@ const ellipsisStyle: SxProps = {
   textOverflow: 'ellipsis',
 };
 
-const loadIcon: any = (iconstr: string) => {
-  return lazy(
+// this gives hint to vite what to package
+const iconstr = ['HorizontalSplit'] as const;
+type Iconstr = typeof iconstr[number];
+type Icons = Record<Iconstr, Component>;
+// array to object
+const icons: Icons = iconstr.reduce( (acc: Icons,  n: Iconstr) => {
+  acc[n] = lazy(()=>import(n));
+  return acc;
+}, {} as Icons );
+const isIconstr = (str: Iconstr): str is Iconstr => {
+  return iconstr.includes(str);
+};
+
+const loadIcon: any = (s: any) => {
+  if (!isIconstr(s)) return '';
+  // this makes vite to package ALL icons (though as seperate files) from node_modules....
+  /*return lazy(
     () => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`),
-  );
+  );*/
+  return icons[s];
 };
 
 const theme = useTheme();
