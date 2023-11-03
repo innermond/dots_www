@@ -7,7 +7,12 @@ import {
   isDataCompanyDepletion,
 } from '@/pages/company/types';
 
-import { DataEntryTypes, isDataEntryTypes, EntryTypeData, isEntryTypeData } from '@/pages/entry-types/types';
+import {
+  DataEntryTypes,
+  isDataEntryTypes,
+  EntryTypeData,
+  isEntryTypeData,
+} from '@/pages/entry-types/types';
 
 const API = 'http://api.dots.volt.com/v1';
 
@@ -186,7 +191,7 @@ class APICompany {
   }
 }
 
-type PostEntryTypeData = Omit<EntryTypeData, "id">;
+type PostEntryTypeData = Omit<EntryTypeData, 'id'>;
 
 class APIEntryType {
   async all(): Promise<DataEntryTypes | Error> {

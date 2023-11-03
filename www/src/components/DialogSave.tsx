@@ -41,7 +41,7 @@ const DialogSave = (props: DialogSaveProps) => {
       fullWidth
       open={open()}
       onClose={handleClose}
-      onClick={handleClick} 
+      onClick={handleClick}
       TransitionComponent={Transition}
     >
       <AppBar color="transparent" sx={{ position: 'relative' }}>
