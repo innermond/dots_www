@@ -44,9 +44,9 @@ type Iconstr = (typeof iconstr)[number];
 type Icons = Record<Iconstr, Promise<Component>>;
 // array to object
 const icons: Icons = iconstr.reduce((acc: Icons, n: Iconstr) => {
-  // raw import works
-  acc[n] = import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`);
-  // lazy don't
+  // raw import works but when use ../../../node_modules/@suid/... imports all seperate svgs from icons-material...
+  acc[n] = import(`@suid/icons-material/${iconstr}.jsx`);
+  // lazy don't but vite knows to import only svg from iconstr
   //acc[n] = lazy(()=>import(`@suid/icons-material/${n}`));
   return acc;
 }, {} as Icons);
