@@ -60,7 +60,7 @@ const EntryTypes: Component = (): JSX.Element => {
 
   return (
     <>
-      <DialogSave.With
+      <DialogSave
         dyn={dyn}
         title="Add entry type"
         textSave="Add"
@@ -69,7 +69,6 @@ const EntryTypes: Component = (): JSX.Element => {
       <Show when={result.state === 'ready'}>
         <TableContainer
           component={Paper}
-          on:postEntryType={evt => console.log(evt)}
         >
           <Stack
             direction="row"

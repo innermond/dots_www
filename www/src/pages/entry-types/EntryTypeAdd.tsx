@@ -11,8 +11,8 @@ import {
   Typography,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
-import { Show, createSignal, createResource } from 'solid-js';
-import type { JSX } from 'solid-js';
+import { Show, createSignal, createResource, createEffect, onMount, onCleanup } from 'solid-js';
+import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 import { entryType } from '@/lib/api';
@@ -31,23 +31,31 @@ async function postEntryTypeData(e: Event) {
 
 const theme = useTheme();
 
-declare module 'solid-js' {
-  namespace JSX {
-    interface CustomEvents {
-      postEntryType: CustomEvent;
-    }
-  }
-}
-
-export default function EntryTypeAdd(props: any): JSX.Element {
+export default function EntryTypeAdd(props: {action: Signal<boolean>}): JSX.Element {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
+
+  const [action, setAction] = props!.action;
+
+  const handleSubmit = (evt: SubmitEvent) => {
+    evt.preventDefault();
+    setStartSubmit(evt);
+    // TODO this is a MUST in order to be able to request again
+    setAction(false);
+  };
+  let formRef: HTMLFormElement|undefined;
+  onMount(() => formRef!.addEventListener('submit', handleSubmit));
+  onCleanup(() => {
+    formRef!.removeEventListener('submit', handleSubmit);
+  });
+  createEffect(() => {
+    if (action()) {
+      formRef!.requestSubmit();
+    }
+  })
   return (
     <Container
-      on:postEntryType={(evt: Event) => {
-        console.log(evt);
-        setStartSubmit(evt);
-      }}
+      ref={formRef}
       component="form"
       sx={{
         padding: theme.spacing(3),
@@ -133,13 +141,14 @@ const UnitSelect = () => {
           <Select
             labelId="unit-label"
             label="Unit"
-            id="unit-select"
+            id="unit"
+            name="unit"
             value={selected()}
             onChange={handleChange}
             onClick={(evt: MouseEvent) => {
               setIsOpen(() => {
                 const id = (evt.target as HTMLElement)?.id;
-                return id === 'unit-select';
+                return id === 'unit';
               });
             }}
             open={isOpen()}

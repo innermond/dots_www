@@ -11,7 +11,7 @@ import {
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
-import { JSX, ParentProps, Signal } from 'solid-js';
+import { JSX, ParentProps, Signal, createSignal } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import type { Component } from 'solid-js';
 
@@ -27,6 +27,7 @@ export type DialogSaveProps = {
   open: Signal<boolean>;
   title: string;
   textSave?: string;
+  dyn?: Component<{action: Signal<boolean>}>; 
 } & ParentProps;
 
 const DialogSave = (props: DialogSaveProps) => {
@@ -36,12 +37,23 @@ const DialogSave = (props: DialogSaveProps) => {
     setOpen(false);
   };
 
+  const actionSignal = createSignal(false);
+  const [, setAction] = actionSignal;
+
+  const handleClick = (evt: Event) => {
+    setAction(true);
+  };
+
+  let Dyn: JSX.Element;
+  if (props.dyn) {
+    Dyn = <Dynamic action={actionSignal} component={props.dyn} />
+  }
+
   return (
     <Dialog
       fullWidth
       open={open()}
       onClose={handleClose}
-      onClick={handleClick}
       TransitionComponent={Transition}
     >
       <AppBar color="transparent" sx={{ position: 'relative' }}>
@@ -75,24 +87,10 @@ const DialogSave = (props: DialogSaveProps) => {
         </Toolbar>
         <Divider />
       </AppBar>
+      {Dyn}
       {props.children}
     </Dialog>
   );
 };
 
-const handleClick = (evt: Event) => {
-  evt.stopPropagation();
-  const e = new CustomEvent('postEntryType', { bubbles: true });
-  evt.target?.dispatchEvent(e);
-};
-
-const With = (props: DialogSaveProps & { dyn: Component }): JSX.Element => {
-  return (
-    <DialogSave title={props.title} textSave={props.textSave} open={props.open}>
-      <Dynamic component={props.dyn} />
-    </DialogSave>
-  );
-};
-
-DialogSave.With = With;
 export default DialogSave;
