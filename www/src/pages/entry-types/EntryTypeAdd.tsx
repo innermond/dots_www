@@ -9,6 +9,7 @@ import {
   FormGroup,
   Button,
   Typography,
+  Alert,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
 import {
@@ -21,8 +22,20 @@ import {
 } from 'solid-js';
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
+import { toast } from 'solid-toast';
 
 import { apiEntryType } from '@/api';
+import {createStore} from 'solid-js/store';
+import type {MessagesMap, Validable, Validators} from '@/lib/form';
+import {
+  required,
+  minlen,
+  maxlen,
+  validate,
+} from '@/lib/form';
+import HelperTextMultiline from '@/components/HelperTextMultiline';
+import { setLoading } from '@/components/Loading';
+import {useNavigate} from '@solidjs/router';
 
 async function postEntryTypeData(e: Event) {
   e.preventDefault();
@@ -36,11 +49,63 @@ async function postEntryTypeData(e: Event) {
   return apiEntryType.add(requestData);
 }
 
+const makeDefaults = (...names: string[]) => {
+  const defaults = {} as Validable<typeof names[number]>;
+  let n: string;
+  for (n of names) {
+    defaults[n] = {error: false, message: []}
+  }
+
+  return defaults;
+};
+
 const theme = useTheme();
 
 export default function EntryTypeAdd(props: {
   action: Signal<boolean>;
 }): JSX.Element {
+
+  const names : string[] = ['code', 'description', 'unit']; 
+  type FieldNames = typeof names[number];
+  const defaultInputs = makeDefaults(...names);
+  const [inputs, setInputs] = createStore(defaultInputs);
+
+  const validators: Validators<FieldNames> = {
+    code: [required,  minlen(7), maxlen(50)],
+    description: [required,  minlen(7), maxlen(100)],
+    unit: [required,  minlen(2), maxlen(20)],
+  };
+
+  const textmessages = [
+    (f: string) => `${f} is required`,
+    (f: string, v: string, { len }: { len: number }) =>
+      `${f} must be more than ${len} - has ${v.length}`,
+    (f: string, v: string, { len }: { len: number }) =>
+      `${f} must be less than ${len} - has ${v.length}`,
+  ];
+
+  const messages: MessagesMap<'email' | 'password'> = {
+    code: textmessages,
+    description: textmessages,
+    unit: textmessages,
+  };
+
+  function handleInput(e: Event) {
+    e.preventDefault();
+    const { name, value } = e.target as HTMLInputElement;
+    if (!names.includes(name)) return;
+
+    const multierrors: string[] = validate<FieldNames>(
+      name,
+      value,
+      validators,
+      messages,
+    );
+    setInputs(name as 'email' | 'password', v => {
+      return { ...v, error: multierrors.length > 0, message: multierrors };
+    });
+  }
+
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
 
@@ -61,11 +126,55 @@ export default function EntryTypeAdd(props: {
     if (action()) {
       formRef!.requestSubmit();
     }
+ 
+  createEffect(() => {
+    if (submitForm.loading) {
+      toast.dismiss();
+      setLoading(true);
+    }
   });
+
+  const navigate = useNavigate();
+  createEffect(() => {
+    if (submitForm.state === 'ready') {
+      const result = submitForm() as any;
+      if (!(result instanceof Error) && result.hasOwnProperty('token_access')) {
+        const token_access = result.token_access;
+        const key = 'dots.tok';
+        sessionStorage.setItem(key, token_access);
+        navigate('/');
+      }
+
+      toast.dismiss();
+      setLoading(false);
+
+      const zero = {
+        error: false,
+        message: [],
+      };
+      setInputs({ code: zero, description: zero, unit: zero });
+      formRef?.reset();
+    }
+  });
+
+  createEffect(() => {
+    if (submitForm.error) {
+      const data = submitForm.error;
+      const message = data?.error ?? data?.cause?.error ?? 'An error occured';
+      toast.custom(() => <Alert severity="error">{message}</Alert>, {
+        duration: 6000,
+        unmountDelay: 0,
+      });
+      setLoading(false);
+    }
+  });
+ });
   return (
     <Container
       ref={formRef}
+      novalidate
       component="form"
+      onInput={handleInput}
       sx={{
         padding: theme.spacing(3),
         display: 'flex',
@@ -90,6 +199,7 @@ export default function EntryTypeAdd(props: {
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
+          helperText={<HelperTextMultiline lines={inputs.code.message} />}
         />
         <TextField
           required
@@ -99,6 +209,7 @@ export default function EntryTypeAdd(props: {
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
+          helperText={<HelperTextMultiline lines={inputs.description.message} />}
         />
       </FormGroup>
       <UnitSelect />
