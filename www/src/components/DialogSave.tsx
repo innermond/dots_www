@@ -27,7 +27,7 @@ export type DialogSaveProps = {
   open: Signal<boolean>;
   title: string;
   textSave?: string;
-  dyn?: Component<{action: Signal<boolean>}>; 
+  dyn?: Component<{ action: Signal<boolean> }>;
 } & ParentProps;
 
 const DialogSave = (props: DialogSaveProps) => {
@@ -46,7 +46,7 @@ const DialogSave = (props: DialogSaveProps) => {
 
   let Dyn: JSX.Element;
   if (props.dyn) {
-    Dyn = <Dynamic action={actionSignal} component={props.dyn} />
+    Dyn = <Dynamic action={actionSignal} component={props.dyn} />;
   }
 
   return (

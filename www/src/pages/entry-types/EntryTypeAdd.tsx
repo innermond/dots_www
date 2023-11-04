@@ -11,7 +11,14 @@ import {
   Typography,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
-import { Show, createSignal, createResource, createEffect, onMount, onCleanup } from 'solid-js';
+import {
+  Show,
+  createSignal,
+  createResource,
+  createEffect,
+  onMount,
+  onCleanup,
+} from 'solid-js';
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
@@ -31,7 +38,9 @@ async function postEntryTypeData(e: Event) {
 
 const theme = useTheme();
 
-export default function EntryTypeAdd(props: {action: Signal<boolean>}): JSX.Element {
+export default function EntryTypeAdd(props: {
+  action: Signal<boolean>;
+}): JSX.Element {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
 
@@ -43,7 +52,7 @@ export default function EntryTypeAdd(props: {action: Signal<boolean>}): JSX.Elem
     // TODO this is a MUST in order to be able to request again
     setAction(false);
   };
-  let formRef: HTMLFormElement|undefined;
+  let formRef: HTMLFormElement | undefined;
   onMount(() => formRef!.addEventListener('submit', handleSubmit));
   onCleanup(() => {
     formRef!.removeEventListener('submit', handleSubmit);
@@ -52,7 +61,7 @@ export default function EntryTypeAdd(props: {action: Signal<boolean>}): JSX.Elem
     if (action()) {
       formRef!.requestSubmit();
     }
-  })
+  });
   return (
     <Container
       ref={formRef}

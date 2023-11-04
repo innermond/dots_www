@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import * as path from 'path'
+import * as path from 'path';
 import solidPlugin from 'vite-plugin-solid';
 // import devtools from 'solid-devtools/vite';
 
@@ -14,7 +14,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src/"),
+      '@': path.resolve(__dirname, './src/'),
     },
   },
   server: {
