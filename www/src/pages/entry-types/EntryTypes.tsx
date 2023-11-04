@@ -25,7 +25,7 @@ import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
 import { useNavigate } from '@solidjs/router';
 
-import { entryType } from '@/lib/api';
+import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData } from './types';
 import DialogSave from '@/components/DialogSave';
@@ -33,7 +33,7 @@ import DialogSave from '@/components/DialogSave';
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
 
-  const [result] = createResource(entryType.all);
+  const [result] = createResource(apiEntryType.all);
   const entryTypes = (): EntryTypeData[] => {
     const info = result();
     if (info instanceof Error || !info) {

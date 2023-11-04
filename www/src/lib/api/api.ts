@@ -16,7 +16,7 @@ import {
 
 const API = 'http://api.dots.volt.com/v1';
 
-export class ApiError extends Error {
+class ApiError extends Error {
   response: Response;
   data: any;
 
@@ -155,89 +155,6 @@ export function login(data: LoginParams): Promise<JSON | Error> {
 
 const key = 'dots.tok';
 
-class APICompany {
-  async all(): Promise<DataCompanies | Error> {
-    const url = '/companies';
-
-    const args = {
-      hint: 'loading companies',
-      method: 'GET',
-      url,
-      isFn: isDataCompanies,
-    } as ApiArgs<DataCompanies> ;
-
-    return api(args);
-  }
-
-  async one(id: string): Promise<DataCompanies | Error> {
-    const url = query('/companies', {id});
-    const args = {
-      hint: 'loading company',
-      method: 'GET',
-      url,
-      isFn: isDataCompanies,
-    } as ApiArgs<DataCompanies> ;
-
-    return api(args);
-  }
-
-  async stats(id: string): Promise<DataCompanyStats | Error> {
-    const url = query('/companies/stats', {id});
-    const args = {
-      hint: 'getting stats of company',
-      method: 'GET',
-      url,
-      isFn: isDataCompanyStats,
-    } as ApiArgs<DataCompanyStats> ;
-
-    return api(args);
-  }
-
-  async depletion(id: string): Promise<DataCompanyDepletion | Error> {
-    const url = query('/companies/depletion?', {id});
-    const args = {
-      hint: 'getting depletion for company',
-      method: 'GET',
-      url,
-      isFn: isDataCompanyDepletion,
-    } as ApiArgs<DataCompanyDepletion> ;
-
-    return api(args);
-  }
-}
-
-type PostEntryTypeData = Omit<EntryTypeData, 'id'>;
-
-class APIEntryType {
-  async all(): Promise<DataEntryTypes | Error> {
-    const args = {
-      hint: 'loading entry types',
-      method: 'GET',
-      url: '/entry-types',
-      isFn: isDataEntryTypes,
-    } as ApiArgs<DataEntryTypes> ;
-
-    return api(args);
-  };
-
-  async add(data: EntryTypeData): Promise<EntryTypeData | Error> {
-    const args = {
-      hint: 'adding entry type',
-      method: 'POST',
-      url: '/entry-types',
-      isFn: isEntryTypeData,
-      data,
-    } as ApiArgs<EntryTypeData> ;
-
-    return api(args);
-  }
-}
-
-const company = new APICompany();
-Object.freeze(company);
-
-const entryType = new APIEntryType();
-Object.freeze(entryType);
 
 function verifiedJSONorError<T>(
   validator: (json: unknown) => json is T,
@@ -283,4 +200,5 @@ function convertKeysToCamelCase(data: unknown): CamelCase<typeof data> {
   return data;
 }
 
-export { company, entryType };
+export type {ApiArgs};
+export {ApiError, api, query, send};

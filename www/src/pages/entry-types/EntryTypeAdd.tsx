@@ -22,7 +22,7 @@ import {
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
-import { entryType } from '@/lib/api';
+import { apiEntryType } from '@/api';
 
 async function postEntryTypeData(e: Event) {
   e.preventDefault();
@@ -32,8 +32,8 @@ async function postEntryTypeData(e: Event) {
     result[k] = v as string;
   }
   const { code, description, unit } = result;
-  const requestData = { code, description, unit };
-  return entryType.add(requestData);
+  const requestData = { id: 0, code, description, unit };
+  return apiEntryType.add(requestData);
 }
 
 const theme = useTheme();

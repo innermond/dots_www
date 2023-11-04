@@ -18,13 +18,13 @@ import {
 } from '@suid/material';
 import { A } from '@solidjs/router';
 
-import { company } from '@/lib/api';
+import { apiCompany } from '@/api';
 
 import appstate from '@/lib/app';
 const [, setState] = appstate;
 const Company: Component = (): JSX.Element => {
   const [change, setChange] = createSignal(false);
-  const [result] = createResource(change, company.all);
+  const [result] = createResource(change, apiCompany.all);
   const companies = () => {
     const info = result();
     if (info instanceof Error || !info) {

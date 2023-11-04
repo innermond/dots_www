@@ -18,7 +18,7 @@ import type {
   DataCompanyDepletion,
 } from '@/pages/company/types';
 import { isDataCompanies } from '@/pages/company/types';
-import { ApiError, company } from '@/lib/api';
+import { ApiError } from '@/lib/api';
 import toasting from '@/lib/toast';
 import appstate from '@/lib/app';
 import { Grid, Typography, Button, Divider, Stack } from '@suid/material';
@@ -28,12 +28,13 @@ import StatisticsCard, {
   PropsStatisticsCard,
 } from '@/pages/dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
+import {apiCompany} from '@/api';
 
 const [, setState] = appstate;
 
 const CompanyDetails: Component = (): JSX.Element => {
   const params = useParams();
-  const [companyRes] = createResource(() => params.id, company.one);
+  const [companyRes] = createResource(() => params.id, apiCompany.one);
   const data = createMemo((): DataCompanies | Error | undefined => {
     if (companyRes.state === 'errored') {
       return companyRes.error;
@@ -79,7 +80,7 @@ const CompanyDetails: Component = (): JSX.Element => {
     setState('currentPageTitle', info?.longname ?? '...');
   });
 
-  const [statsRes] = createResource(() => params.id, company.stats);
+  const [statsRes] = createResource(() => params.id, apiCompany.stats);
   const stats = createMemo((): DataCompanyStats | Error | undefined => {
     if (statsRes.state === 'errored') {
       return statsRes.error;
@@ -120,7 +121,7 @@ const CompanyDetails: Component = (): JSX.Element => {
     }
   });
 
-  const [depletionRes] = createResource(() => params.id, company.depletion);
+  const [depletionRes] = createResource(() => params.id, apiCompany.depletion);
   const depletion = createMemo((): DataCompanyDepletion | Error | undefined => {
     if (depletionRes.state === 'errored') {
       return depletionRes.error;

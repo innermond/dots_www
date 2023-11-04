@@ -31,17 +31,16 @@ import { getPathTitleMap } from './items';
 import MenuItemSubmenu from '@/components/MenuItemSubmenu';
 import type { CompanyData, DataCompanies } from '@/pages/company/types';
 import { isCompanyData, isDataCompanies } from '@/pages/company/types';
-import { ApiError, company } from '@/lib/api';
-
+import { ApiError } from '@/lib/api';
 import appstate from '@/lib/app';
 import { setLoading } from '@/components/Loading';
 import toasting from '@/lib/toast';
+import {apiCompany} from '@/api';
 
 declare module 'solid-js' {
   namespace JSX {
     interface CustomEvents {
       refetchItem: CustomEvent;
-      postEntryType: CustomEvent;
     }
   }
 }
@@ -94,7 +93,7 @@ const Dashboard: Component = () => {
     navigate(`/company/${(e as CompanyData).id}`);
   };
 
-  const [companiesRes, { refetch }] = createResource(company.all);
+  const [companiesRes, { refetch }] = createResource(apiCompany.all);
 
   const refetchCompany = (evt: Event) => {
     evt.stopPropagation();
