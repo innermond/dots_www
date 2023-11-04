@@ -32,7 +32,7 @@ async function postEntryTypeData(e: Event) {
     result[k] = v as string;
   }
   const { code, description, unit } = result;
-  const requestData = { id: 0, code, description, unit };
+  const requestData = { code, description, unit };
   return entryType.add(requestData);
 }
 

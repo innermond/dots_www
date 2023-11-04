@@ -32,7 +32,7 @@ async function send<T>(
   hint: string,
   method: string,
   url: string,
-  data: T,
+  data?: T,
   extraHeaders?: { [key: string]: string },
 ): Promise<JSON | Error> {
   const headers: HeadersInit = {
@@ -90,6 +90,60 @@ async function send<T>(
   }
 }
 
+type IsFn<T> = (json: unknown) => json is T;
+type ApiArgs<T> = {
+  data?: T;
+  isFn: IsFn<T>;
+  hint: string;
+  method: 'POST'|'GET'|'OPTIONS'|'PATCH'|'DELETE';
+  url: string;
+  extraHeaders?: { [key: string]: string };
+}
+
+const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
+  const {
+    hint,
+    method,
+    url,
+    data,
+    extraHeaders,
+    isFn,
+  } = args;
+
+  let headers = {
+    Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
+  };
+  if (extraHeaders) {
+    headers = {...headers, ...extraHeaders};
+  }
+
+  const json = await send<T>(
+    hint,
+    method,
+    url,
+    data,
+    headers,
+  );
+
+  const verifiedOrError = verifiedJSONorError<T>(isFn, json);
+
+  if (verifiedOrError instanceof Error) {
+    return verifiedOrError;
+  }
+  return convertKeysToCamelCase(verifiedOrError) as T;
+}
+
+const query = (path: string, pairs: Record<string, string>) => {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(pairs)) {
+    q.append(k, v);
+  }
+  const qstr = q.toString();
+  const url = `${path}?${qstr}`;
+
+  return url;
+};
+
 type LoginParams = {
   usr: string;
   pwd: string;
@@ -103,91 +157,52 @@ const key = 'dots.tok';
 
 class APICompany {
   async all(): Promise<DataCompanies | Error> {
-    const headers = {
-      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
-    };
-    const json = await send<undefined>(
-      'loading companies',
-      'GET',
-      '/companies',
-      undefined,
-      headers,
-    );
+    const url = '/companies';
 
-    return verifiedJSONorError<DataCompanies>(isDataCompanies, json);
+    const args = {
+      hint: 'loading companies',
+      method: 'GET',
+      url,
+      isFn: isDataCompanies,
+    } as ApiArgs<DataCompanies> ;
+
+    return api(args);
   }
 
   async one(id: string): Promise<DataCompanies | Error> {
-    const q = new URLSearchParams();
-    q.append('id', id);
-    const qstr = q.toString();
+    const url = query('/companies', {id});
+    const args = {
+      hint: 'loading company',
+      method: 'GET',
+      url,
+      isFn: isDataCompanies,
+    } as ApiArgs<DataCompanies> ;
 
-    const headers = {
-      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
-    };
-    const json = await send<undefined>(
-      'loading company',
-      'GET',
-      `/companies?${qstr}`,
-      undefined,
-      headers,
-    );
-
-    return verifiedJSONorError<DataCompanies>(isDataCompanies, json);
+    return api(args);
   }
 
   async stats(id: string): Promise<DataCompanyStats | Error> {
-    const q = new URLSearchParams();
-    q.append('id', id);
-    const qstr = q.toString();
+    const url = query('/companies/stats', {id});
+    const args = {
+      hint: 'getting stats of company',
+      method: 'GET',
+      url,
+      isFn: isDataCompanyStats,
+    } as ApiArgs<DataCompanyStats> ;
 
-    const headers = {
-      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
-    };
-    const json = await send<undefined>(
-      'getting stats of company',
-      'GET',
-      `/companies/stats?${qstr}`,
-      undefined,
-      headers,
-    );
-
-    const verifiedOrError = verifiedJSONorError<DataCompanyStats>(
-      isDataCompanyStats,
-      json,
-    );
-    if (verifiedOrError instanceof Error) {
-      return verifiedOrError;
-    }
-
-    return convertKeysToCamelCase(verifiedOrError) as DataCompanyStats;
+    return api(args);
   }
 
   async depletion(id: string): Promise<DataCompanyDepletion | Error> {
-    const q = new URLSearchParams();
-    q.append('id', id);
-    const qstr = q.toString();
+    const url = query('/companies/depletion?', {id});
+    const args = {
+      hint: 'getting depletion for company',
+      method: 'GET',
+      url,
+      isFn: isDataCompanyDepletion,
+    } as ApiArgs<DataCompanyDepletion> ;
 
-    const headers = {
-      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
-    };
-    const json = await send<undefined>(
-      'getting depletion for company',
-      'GET',
-      `/companies/depletion?${qstr}`,
-      undefined,
-      headers,
-    );
-
-    const verifiedOrError = verifiedJSONorError<DataCompanyDepletion>(
-      isDataCompanyDepletion,
-      json,
-    );
-    if (verifiedOrError instanceof Error) {
-      return verifiedOrError;
-    }
-
-    return convertKeysToCamelCase(verifiedOrError) as DataCompanyDepletion;
+    return api(args);
   }
 }
 
@@ -195,33 +210,26 @@ type PostEntryTypeData = Omit<EntryTypeData, 'id'>;
 
 class APIEntryType {
   async all(): Promise<DataEntryTypes | Error> {
-    const headers = {
-      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
-    };
-    const json = await send<undefined>(
-      'loading entry types',
-      'GET',
-      '/entry-types',
-      undefined,
-      headers,
-    );
+    const args = {
+      hint: 'loading entry types',
+      method: 'GET',
+      url: '/entry-types',
+      isFn: isDataEntryTypes,
+    } as ApiArgs<DataEntryTypes> ;
 
-    return verifiedJSONorError<DataEntryTypes>(isDataEntryTypes, json);
-  }
+    return api(args);
+  };
 
   async add(data: EntryTypeData): Promise<EntryTypeData | Error> {
-    const headers = {
-      Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
-    };
-    const json = await send<EntryTypeData>(
-      'adding entry type',
-      'POST',
-      '/entry-types',
+    const args = {
+      hint: 'adding entry type',
+      method: 'POST',
+      url: '/entry-types',
+      isFn: isEntryTypeData,
       data,
-      headers,
-    );
+    } as ApiArgs<EntryTypeData> ;
 
-    return verifiedJSONorError<EntryTypeData>(isEntryTypeData, json);
+    return api(args);
   }
 }
 
