@@ -101,7 +101,7 @@ export default function EntryTypeAdd(props: {
       validators,
       messages,
     );
-    setInputs(name as 'email' | 'password', v => {
+    setInputs(name as FieldNames, v => {
       return { ...v, error: multierrors.length > 0, message: multierrors };
     });
   }
