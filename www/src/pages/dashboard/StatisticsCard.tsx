@@ -40,22 +40,25 @@ const ellipsisStyle: SxProps = {
 
 // this gives hint to vite what to package
 const iconstr = ['HorizontalSplit'] as const;
-type Iconstr = (typeof iconstr)[number];
-type Icons = Record<Iconstr, Promise<Component>>;
+
+type IconKey = (typeof iconstr)[number];
+type Icons = { [k in IconKey]: Promise<Component> };
+
 // array to object
-const icons: Icons = iconstr.reduce((acc: Icons, n: Iconstr) => {
+const icons: Icons = iconstr.reduce((acc: Icons, n: IconKey) => {
   // raw import works but when use ../../../node_modules/@suid/... imports all seperate svgs from icons-material...
-  acc[n] = import(`@suid/icons-material/${iconstr}.jsx`);
-  // lazy don't but vite knows to import only svg from iconstr
-  //acc[n] = lazy(()=>import(`@suid/icons-material/${n}`));
+  if (typeof n !== 'string') return acc;
+  //acc[n] = import(`@icons/${n}.jsx`);
+  acc[n] = import(`../../../node_modules/@suid/icons-material/${n}.jsx`);
+  //acc[n] = lazy(() => import(`@icons/${n}.jsx`));
   return acc;
 }, {} as Icons);
-const isIconstr = (str: Iconstr): str is Iconstr => {
+const isIconKey = (str: IconKey): str is IconKey => {
   return iconstr.includes(str);
 };
 
 const loadIcon: any = (s: any) => {
-  if (!isIconstr(s)) return '';
+  if (!isIconKey(s)) return '';
   // this makes vite to package ALL icons (though as seperate files) from node_modules....
   /*return lazy(
     () => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`),
