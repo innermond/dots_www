@@ -40,7 +40,7 @@ const DialogSave = (props: DialogSaveProps) => {
   const actionSignal = createSignal(false);
   const [, setAction] = actionSignal;
 
-  const handleClick = (evt: Event) => {
+  const handleClick = () => {
     setAction(true);
   };
 

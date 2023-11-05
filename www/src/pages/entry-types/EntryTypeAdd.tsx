@@ -69,6 +69,14 @@ export default function EntryTypeAdd(props: {
   type FieldNames = typeof names[number];
   const defaultInputs = makeDefaults(...names);
   const [inputs, setInputs] = createStore(defaultInputs);
+  const inputsHasErrors = () => {
+    for (const name of names) {
+      if (inputs[name].error) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const validators: Validators<FieldNames> = {
     code: [required,  minlen(7), maxlen(50)],
@@ -84,15 +92,31 @@ export default function EntryTypeAdd(props: {
       `${f} must be less than ${len} - has ${v.length}`,
   ];
 
-  const messages: MessagesMap<'email' | 'password'> = {
+  const messages: MessagesMap<FieldNames> = {
     code: textmessages,
     description: textmessages,
     unit: textmessages,
   };
 
-  function handleInput(e: Event) {
-    e.preventDefault();
-    const { name, value } = e.target as HTMLInputElement;
+  const types = [
+    HTMLInputElement,
+    HTMLTextAreaElement,
+    HTMLSelectElement,
+    //HTMLButtonElement,
+    //HTMLFieldSetElement,
+    //HTMLLegendElement,
+    //HTMLLabelElement,
+  ];
+  type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+  const isFormControlType = (elem: unknown): boolean => {
+     return types.some((t: Function) => (elem instanceof t));
+  }
+
+  const checkInput = (target: unknown): void => {
+    if (!isFormControlType(target)) return;
+
+    const { name, value } = target as FormControl;
     if (!names.includes(name)) return;
 
     const multierrors: string[] = validate<FieldNames>(
@@ -106,6 +130,16 @@ export default function EntryTypeAdd(props: {
     });
   }
 
+  function handleInput(e: Event) {
+    e.preventDefault();
+    if (!e.target) return;
+    if (e.target instanceof HTMLFormElement) {
+      Array.from(e.target.elements).map((t: unknown) => checkInput(t)); 
+      return;
+    } 
+    checkInput(e.target);
+  }
+
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
 
@@ -113,6 +147,12 @@ export default function EntryTypeAdd(props: {
 
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
+
+    handleInput(evt);
+    if (inputsHasErrors()) {
+      setAction(false);
+      return;
+    }
     setStartSubmit(evt);
     // TODO this is a MUST in order to be able to request again
     setAction(false);
@@ -192,32 +232,32 @@ export default function EntryTypeAdd(props: {
         }}
       >
         <TextField
-          required
           name="code"
           label="Code"
           type="text"
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
+          error={inputs.code.error}
           helperText={<HelperTextMultiline lines={inputs.code.message} />}
         />
         <TextField
-          required
           name="description"
           label="Description"
           type="text"
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
+          error={inputs.description.error}
           helperText={<HelperTextMultiline lines={inputs.description.message} />}
         />
       </FormGroup>
-      <UnitSelect />
+      <UnitSelect validated={inputs.unit} />
     </Container>
   );
 }
 
-const UnitSelect = () => {
+const UnitSelect = (props: {validated: any}) => {
   const [selected, setSelected] = createSignal('');
   const [isOpen, setIsOpen] = createSignal(false);
   const [newUnit, setNewUnit] = createSignal(false);
@@ -272,6 +312,7 @@ const UnitSelect = () => {
               });
             }}
             open={isOpen()}
+            error={props.validated.error}
           >
             <MenuItem value={10}>buc</MenuItem>
             <MenuItem value={20}>piece</MenuItem>
@@ -284,7 +325,6 @@ const UnitSelect = () => {
         <TextField
           focused
           inputRef={input => setTimeout(() => input.focus())}
-          required
           name="unit"
           label="Unit"
           type="text"
@@ -292,6 +332,8 @@ const UnitSelect = () => {
           autoComplete="off"
           onChange={handleNewUnitChange}
           value={newUnitValue()}
+          error={props.validated.error}
+          helperText={props.validated.message}
         />
         {switchSelect('or use existent unit', false)}
       </Show>
