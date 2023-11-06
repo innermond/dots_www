@@ -3,6 +3,7 @@ type Validable<T extends string> = {
 };
 
 type Validation = {
+  value: any;
   error: boolean;
   message: string[];
 };

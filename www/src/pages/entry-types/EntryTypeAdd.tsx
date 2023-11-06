@@ -20,6 +20,8 @@ import {
   onMount,
   onCleanup,
   For,
+  Accessor,
+  createMemo,
 } from 'solid-js';
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
@@ -57,7 +59,7 @@ const makeDefaults = (...names: string[]) => {
   const defaults = {} as Validable<typeof names[number]>;
   let n: string;
   for (n of names) {
-    defaults[n] = {error: false, message: []}
+    defaults[n] = {value: undefined, error: false, message: []}
   }
 
   return defaults;
@@ -87,6 +89,12 @@ export default function EntryTypeAdd(props: {
 
   const names : string[] = ['code', 'description', 'unit']; 
   type Names = FieldNames<typeof names>;
+
+  const zero = {
+    value: undefined,
+    error: false,
+    message: [],
+  };
 
   const defaultInputs = makeDefaults(...names);
   const [inputs, setInputs] = createStore(defaultInputs);
@@ -131,10 +139,16 @@ export default function EntryTypeAdd(props: {
       validators,
       messages,
     );
-    setInputs(name as Names, v => {
-      return { ...v, error: multierrors.length > 0, message: multierrors };
+    setInputs(name as Names, () => {
+      return { value,  error: multierrors.length > 0, message: multierrors };
     });
   }
+
+  createEffect(() => {
+    if (!reset()) return;
+
+    setInputs({ code: zero, description: zero, unit: zero });
+  });
 
   function handleInput(e: Event) {
     e.preventDefault();
@@ -201,17 +215,14 @@ export default function EntryTypeAdd(props: {
       setLoading(false);
       toasting(`added entry type "${code}" / unit "${unit}"`);
 
-      const zero = {
-        error: false,
-        message: [],
-      };
       setInputs({ code: zero, description: zero, unit: zero });
 
-      for (const elem of Array.from(formRef!.elements).filter((e: Element) => names.includes(e['id']))) {
+      /*for (const elem of Array.from(formRef!.elements).filter((e: Element) => names.includes(e['id']))) {
         if (isInstanceOf<FormControl>(elem)) {
           (elem as FormControl).value = '';
         }
-      }
+      }*/
+      setReset(true);
 }});
 
   createEffect(() => {
@@ -226,12 +237,13 @@ export default function EntryTypeAdd(props: {
     }
   });
 
+  const [reset, setReset] = createSignal(false);
+
   return (
     <Container
       ref={formRef}
       novalidate
       component="form"
-      onInput={handleInput}
       sx={{
         padding: theme.spacing(3),
         display: 'flex',
@@ -255,6 +267,9 @@ export default function EntryTypeAdd(props: {
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
+          onInput={handleInput}
+          defaultValue={''}
+          value={inputs.code.value}
           error={inputs.code.error}
           helperText={<HelperTextMultiline lines={inputs.code.message} />}
         />
@@ -265,16 +280,19 @@ export default function EntryTypeAdd(props: {
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
+          onInput={handleInput}
+          defaultValue={''}
+          value={inputs.description.value}
           error={inputs.description.error}
           helperText={<HelperTextMultiline lines={inputs.description.message} />}
         />
       </FormGroup>
-      <UnitSelect validated={inputs.unit} />
+      <UnitSelect reset={reset} validated={inputs.unit} />
     </Container>
   )
 }
 
-const UnitSelect = (props: {validated: any}) => {
+const UnitSelect = (props: {validated: any, reset: Accessor<boolean>}) => {
   const [selected, setSelected] = createSignal('');
   const [isOpen, setIsOpen] = createSignal(false);
   const [newUnit, setNewUnit] = createSignal(false);
@@ -321,6 +339,12 @@ const UnitSelect = (props: {validated: any}) => {
     );
   };
 
+  const selectValue = () => {
+    if (selected()) return selected();
+    if (props.reset()) return '';
+  };
+
+  const items = createMemo(() => units());
   return (
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
@@ -329,20 +353,24 @@ const UnitSelect = (props: {validated: any}) => {
           <Select
             labelId="unit-label"
             label="Unit"
-            id="unit"
+            id="unit-wrapper"
             name="unit"
-            value={selected()}
+            inputProps={{
+              id: 'unit',
+            }}
+            defaultValue={''}
+            value={props.validated.value}
             onChange={handleChange}
             onClick={(evt: MouseEvent) => {
               setIsOpen(() => {
                 const id = (evt.target as HTMLElement)?.id;
-                return id === 'unit';
+                return id === 'unit-wrapper';
               });
             }}
             open={isOpen()}
             error={props.validated.error}
           >
-            <For each={units()}>
+            <For each={items()}>
               {(u: string|Error) => {
                 if (u instanceof Error) {
                   return (<MenuItem value={u.message}>{u.message}</MenuItem>)
