@@ -37,6 +37,7 @@ import {
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import { setLoading } from '@/components/Loading';
 import {useNavigate} from '@solidjs/router';
+import toasting from '@/lib/toast';
 
 async function postEntryTypeData(e: Event) {
   e.preventDefault();
@@ -59,6 +60,21 @@ const makeDefaults = (...names: string[]) => {
 
   return defaults;
 };
+
+const types = [
+  HTMLInputElement,
+  HTMLTextAreaElement,
+  HTMLSelectElement,
+  //HTMLButtonElement,
+  //HTMLFieldSetElement,
+  //HTMLLegendElement,
+  //HTMLLabelElement,
+];
+type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+const isFormControlType = (elem: unknown): boolean => {
+   return types.some((t: Function) => (elem instanceof t));
+}
 
 const theme = useTheme();
 
@@ -98,21 +114,6 @@ export default function EntryTypeAdd(props: {
     description: textmessages,
     unit: textmessages,
   };
-
-  const types = [
-    HTMLInputElement,
-    HTMLTextAreaElement,
-    HTMLSelectElement,
-    //HTMLButtonElement,
-    //HTMLFieldSetElement,
-    //HTMLLegendElement,
-    //HTMLLabelElement,
-  ];
-  type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-
-  const isFormControlType = (elem: unknown): boolean => {
-     return types.some((t: Function) => (elem instanceof t));
-  }
 
   const checkInput = (target: unknown): void => {
     if (!isFormControlType(target)) return;
@@ -167,6 +168,7 @@ export default function EntryTypeAdd(props: {
     if (action()) {
       formRef!.requestSubmit();
     }
+  })
  
   createEffect(() => {
     if (submitForm.loading) {
@@ -186,17 +188,22 @@ export default function EntryTypeAdd(props: {
         navigate('/');
       }
 
-      toast.dismiss();
-      setLoading(false);
+      //toast.dismiss();
+      //setLoading(false);
+      setTimeout(() => toasting(`added unit`), 0);
 
       const zero = {
         error: false,
         message: [],
       };
       setInputs({ code: zero, description: zero, unit: zero });
-      formRef?.reset();
-    }
-  });
+
+      for (const elem of formRef!.elements) {
+        if (isFormControlType(elem)) {
+          (elem as FormControl).value = '';
+        }
+      }
+}});
 
   createEffect(() => {
     if (submitForm.error) {
@@ -209,7 +216,7 @@ export default function EntryTypeAdd(props: {
       setLoading(false);
     }
   });
- });
+
   return (
     <Container
       ref={formRef}
@@ -255,7 +262,7 @@ export default function EntryTypeAdd(props: {
       </FormGroup>
       <UnitSelect validated={inputs.unit} />
     </Container>
-  );
+  )
 }
 
 const UnitSelect = (props: {validated: any}) => {
