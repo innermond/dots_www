@@ -19,6 +19,7 @@ import {
   createEffect,
   onMount,
   onCleanup,
+  For,
 } from 'solid-js';
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
@@ -263,6 +264,17 @@ const UnitSelect = (props: {validated: any}) => {
   const [newUnit, setNewUnit] = createSignal(false);
   const [newUnitValue, setNewUnitValue] = createSignal('');
 
+  const [unitsResource] = createResource(apiEntryType.units);
+  const units = (): (string|Error)[] => {
+    const info = unitsResource();
+    if (info instanceof Error || !info) {
+      return [];
+    }
+
+    const { data, n } = info as any;
+    return n ? data : [];
+  };
+
   const handleChange = (event: SelectChangeEvent) => {
     setSelected(event.target.value);
     setIsOpen(false);
@@ -314,9 +326,15 @@ const UnitSelect = (props: {validated: any}) => {
             open={isOpen()}
             error={props.validated.error}
           >
-            <MenuItem value={10}>buc</MenuItem>
-            <MenuItem value={20}>piece</MenuItem>
-            <MenuItem value={30}>hour</MenuItem>
+            <For each={units()}>
+              {(u: string|Error) => {
+                if (u instanceof Error) {
+                  return (<MenuItem value={u.message}>{u.message}</MenuItem>)
+                }  
+                return (<MenuItem value={u}>{u}</MenuItem>)
+                }
+              }
+            </For>
           </Select>
         </FormControl>
         {switchSelect('or add a new unit', true)}

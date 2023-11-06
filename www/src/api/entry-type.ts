@@ -1,5 +1,5 @@
 import {api, ApiArgs} from "@/lib/api";
-import {DataEntryTypes, EntryTypeData, isDataEntryTypes, isEntryTypeData} from "@/pages/entry-types/types";
+import {DataEntryTypes, DataEntryTypeUnits, EntryTypeData, isDataEntryTypes, isDataEntryTypeUnits, isEntryTypeData} from "@/pages/entry-types/types";
 
 class APIEntryType {
   async all(): Promise<DataEntryTypes | Error> {
@@ -9,6 +9,17 @@ class APIEntryType {
       url: '/entry-types',
       isFn: isDataEntryTypes,
     } as ApiArgs<DataEntryTypes> ;
+
+    return api(args);
+  };
+
+  async units(): Promise<DataEntryTypeUnits | Error> {
+    const args = {
+      hint: 'loading entry type units',
+      method: 'GET',
+      url: '/entry-types?units',
+      isFn: isDataEntryTypeUnits,
+    } as ApiArgs<DataEntryTypeUnits> ;
 
     return api(args);
   };
