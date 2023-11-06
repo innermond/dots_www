@@ -38,49 +38,10 @@ const ellipsisStyle: SxProps = {
   textOverflow: 'ellipsis',
 };
 
-// this gives hint to vite what to package
-const iconstr = ['HorizontalSplit'] as const;
-
-type IconKey = (typeof iconstr)[number];
-type Icons = { [k in IconKey]: Promise<Component> };
-
-// array to object
-const icons: Icons = iconstr.reduce((acc: Icons, n: IconKey) => {
-  // raw import works but when use ../../../node_modules/@suid/... imports all seperate svgs from icons-material...
-  if (typeof n !== 'string') return acc;
-  //acc[n] = import(`@icons/${n}.jsx`);
-  acc[n] = import(`../../../node_modules/@suid/icons-material/${n}.jsx`);
-  //acc[n] = lazy(() => import(`@icons/${n}.jsx`));
-  return acc;
-}, {} as Icons);
-const isIconKey = (str: IconKey): str is IconKey => {
-  return iconstr.includes(str);
-};
-
-const loadIcon: any = (s: any) => {
-  if (!isIconKey(s)) return '';
-  // this makes vite to package ALL icons (though as seperate files) from node_modules....
-  /*return lazy(
-    () => import(`../../../node_modules/@suid/icons-material/${iconstr}.jsx`),
-  );*/
-  return icons[s];
-};
-
 const theme = useTheme();
 
 const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
   props = mergeProps(defaultPropsStatisticsCard, props);
-
-  const otherIcon = (): typeof SvgIcon | null => {
-    if (typeof props?.icon === 'string') {
-      return loadIcon(props.icon);
-    } else if (!!props?.icon) {
-      return props.icon;
-    }
-    return null;
-  };
-
-  const dynIcon = otherIcon();
 
   const colorByIsLoss = createMemo(() =>
     props.isLoss ? 'warning' : props.color,
@@ -113,19 +74,9 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
                 icon={
                   <Show
                     when={props.isLoss}
-                    fallback={
-                      dynIcon ? (
-                        <Dynamic component={dynIcon} />
-                      ) : (
-                        <TrendingUp style={{ color: 'inherit' }} />
-                      )
-                    }
+                    fallback={ <TrendingUp style={{ color: 'inherit' }} /> }
                   >
-                    {dynIcon ? (
-                      <Dynamic component={dynIcon} />
-                    ) : (
-                      <TrendingDown style={{ color: 'inherit' }} />
-                    )}
+                    <TrendingDown style={{ color: 'inherit' }} />
                   </Show>
                 }
                 label={`${props.percentage!.toFixed(2)}%`}
