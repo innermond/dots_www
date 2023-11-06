@@ -24,6 +24,8 @@ import {
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 import { toast } from 'solid-toast';
+import type {EntryTypeData} from '@/pages/entry-types/types';
+import {isEntryTypeData} from '@/pages/entry-types/types';
 
 import { apiEntryType } from '@/api';
 import {createStore} from 'solid-js/store';
@@ -71,9 +73,10 @@ const types = [
   //HTMLLabelElement,
 ];
 type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+type FieldNames<T extends string[]> = T[number];
 
-const isFormControlType = (elem: unknown): boolean => {
-   return types.some((t: Function) => (elem instanceof t));
+function isInstanceOf<T>(elem: unknown): elem is T {
+  return types.some((t: Function) => (elem instanceof t));
 }
 
 const theme = useTheme();
@@ -83,7 +86,8 @@ export default function EntryTypeAdd(props: {
 }): JSX.Element {
 
   const names : string[] = ['code', 'description', 'unit']; 
-  type FieldNames = typeof names[number];
+  type Names = FieldNames<typeof names>;
+
   const defaultInputs = makeDefaults(...names);
   const [inputs, setInputs] = createStore(defaultInputs);
   const inputsHasErrors = () => {
@@ -95,7 +99,7 @@ export default function EntryTypeAdd(props: {
     return false;
   };
 
-  const validators: Validators<FieldNames> = {
+  const validators: Validators<Names> = {
     code: [required,  minlen(7), maxlen(50)],
     description: [required,  minlen(7), maxlen(100)],
     unit: [required,  minlen(2), maxlen(20)],
@@ -109,25 +113,25 @@ export default function EntryTypeAdd(props: {
       `${f} must be less than ${len} - has ${v.length}`,
   ];
 
-  const messages: MessagesMap<FieldNames> = {
+  const messages: MessagesMap<Names> = {
     code: textmessages,
     description: textmessages,
     unit: textmessages,
   };
 
-  const checkInput = (target: unknown): void => {
-    if (!isFormControlType(target)) return;
+  const validateInputUpdateStore = (target: unknown): void => {
+    if (!isInstanceOf<FormControl>(target)) return;
 
     const { name, value } = target as FormControl;
     if (!names.includes(name)) return;
 
-    const multierrors: string[] = validate<FieldNames>(
+    const multierrors: string[] = validate<Names>(
       name,
       value,
       validators,
       messages,
     );
-    setInputs(name as FieldNames, v => {
+    setInputs(name as Names, v => {
       return { ...v, error: multierrors.length > 0, message: multierrors };
     });
   }
@@ -136,10 +140,12 @@ export default function EntryTypeAdd(props: {
     e.preventDefault();
     if (!e.target) return;
     if (e.target instanceof HTMLFormElement) {
-      Array.from(e.target.elements).map((t: unknown) => checkInput(t)); 
+      Array.from(e.target.elements)
+        .filter((t: Element) => (('id' in t) && names.includes(t.id)))
+        .map((t: unknown) => validateInputUpdateStore(t)); 
       return;
     } 
-    checkInput(e.target);
+    validateInputUpdateStore(e.target);
   }
 
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
@@ -188,9 +194,12 @@ export default function EntryTypeAdd(props: {
         navigate('/');
       }
 
-      //toast.dismiss();
-      //setLoading(false);
-      setTimeout(() => toasting(`added unit`), 0);
+      if (!isEntryTypeData(result)) {
+        throw new Error('data received is not an entry type');
+      }
+      const {code, unit} = (result as EntryTypeData);
+      setLoading(false);
+      toasting(`added entry type "${code}" / unit "${unit}"`);
 
       const zero = {
         error: false,
@@ -198,8 +207,8 @@ export default function EntryTypeAdd(props: {
       };
       setInputs({ code: zero, description: zero, unit: zero });
 
-      for (const elem of formRef!.elements) {
-        if (isFormControlType(elem)) {
+      for (const elem of Array.from(formRef!.elements).filter((e: Element) => names.includes(e['id']))) {
+        if (isInstanceOf<FormControl>(elem)) {
           (elem as FormControl).value = '';
         }
       }
