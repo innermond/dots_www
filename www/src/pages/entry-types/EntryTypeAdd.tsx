@@ -285,12 +285,16 @@ export default function EntryTypeAdd(props: {
 }
 
 // It is a component that can switch between a Select and a TextField
-const UnitSelect = (props: { unit: any; reset: Accessor<boolean>; notifyStore: Function; }) => {
+const UnitSelect = (props: {
+  unit: any;
+  reset: Accessor<boolean>;
+  notifyStore: Function;
+}) => {
   // open/close Select
   const [isOpen, setIsOpen] = createSignal(false);
   // switch to Text
   const [newUnit, setNewUnit] = createSignal(false);
-  
+
   // list of units
   const [unitsResource] = createResource(apiEntryType.units);
   const units = (): (string | Error)[] => {
@@ -303,7 +307,7 @@ const UnitSelect = (props: { unit: any; reset: Accessor<boolean>; notifyStore: F
     return n ? data : [];
   };
 
-  const handleChange = (evt: SelectChangeEvent) => {
+  const handleSelectChange = (evt: SelectChangeEvent) => {
     // trigger onInput
     props.notifyStore({ name: 'unit', value: evt.target.value });
     setIsOpen(false);
@@ -350,7 +354,7 @@ const UnitSelect = (props: { unit: any; reset: Accessor<boolean>; notifyStore: F
             }}
             defaultValue={''}
             value={props.unit.value}
-            onChange={handleChange}
+            onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {
               const id = (evt.target as HTMLElement)?.id;
               const inside = id === 'unit-wrapper';
