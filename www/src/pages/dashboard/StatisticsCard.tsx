@@ -74,7 +74,7 @@ const StatisticsCard: ParentComponent<PropsStatisticsCard> = props => {
                 icon={
                   <Show
                     when={props.isLoss}
-                    fallback={ <TrendingUp style={{ color: 'inherit' }} /> }
+                    fallback={<TrendingUp style={{ color: 'inherit' }} />}
                   >
                     <TrendingDown style={{ color: 'inherit' }} />
                   </Show>

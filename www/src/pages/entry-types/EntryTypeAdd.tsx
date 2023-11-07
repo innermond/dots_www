@@ -26,21 +26,16 @@ import {
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 import { toast } from 'solid-toast';
-import type {EntryTypeData} from '@/pages/entry-types/types';
-import {isEntryTypeData} from '@/pages/entry-types/types';
+import type { EntryTypeData } from '@/pages/entry-types/types';
+import { isEntryTypeData } from '@/pages/entry-types/types';
 
 import { apiEntryType } from '@/api';
-import {createStore} from 'solid-js/store';
-import type {MessagesMap, Validable, Validators} from '@/lib/form';
-import {
-  required,
-  minlen,
-  maxlen,
-  validate,
-} from '@/lib/form';
+import { createStore } from 'solid-js/store';
+import type { MessagesMap, Validable, Validators } from '@/lib/form';
+import { required, minlen, maxlen, validate } from '@/lib/form';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import { setLoading } from '@/components/Loading';
-import {useNavigate} from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
 
 async function postEntryTypeData(e: Event) {
@@ -56,26 +51,22 @@ async function postEntryTypeData(e: Event) {
 }
 
 const makeDefaults = (...names: string[]) => {
-  const defaults = {} as Validable<typeof names[number]>;
+  const defaults = {} as Validable<(typeof names)[number]>;
   let n: string;
   for (n of names) {
-    // use value: null because undefined will make component uncontrolled 
-    defaults[n] = {value: null, error: false, message: []}
+    // use value: null because undefined will make component uncontrolled
+    defaults[n] = { value: null, error: false, message: [] };
   }
 
   return defaults;
 };
 
-const types = [
-  HTMLInputElement,
-  HTMLTextAreaElement,
-  HTMLSelectElement,
-];
+const types = [HTMLInputElement, HTMLTextAreaElement, HTMLSelectElement];
 type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 type FieldNames<T extends string[]> = T[number];
 
 function isInstanceOf<T>(elem: unknown): elem is T {
-  return types.some((t: Function) => (elem instanceof t));
+  return types.some((t: Function) => elem instanceof t);
 }
 
 const theme = useTheme();
@@ -83,8 +74,7 @@ const theme = useTheme();
 export default function EntryTypeAdd(props: {
   action: Signal<boolean>;
 }): JSX.Element {
-
-  const names : string[] = ['code', 'description', 'unit']; 
+  const names: string[] = ['code', 'description', 'unit'];
   type Names = FieldNames<typeof names>;
 
   const zero = {
@@ -105,9 +95,9 @@ export default function EntryTypeAdd(props: {
   };
 
   const validators: Validators<Names> = {
-    code: [required,  minlen(7), maxlen(50)],
-    description: [required,  minlen(7), maxlen(100)],
-    unit: [required,  minlen(2), maxlen(20)],
+    code: [required, minlen(7), maxlen(50)],
+    description: [required, minlen(7), maxlen(100)],
+    unit: [required, minlen(2), maxlen(20)],
   };
 
   const textmessages = [
@@ -125,7 +115,7 @@ export default function EntryTypeAdd(props: {
   };
 
   const validateInputUpdateStore = (data: unknown): void => {
-    const hasNameValue = ('name' in (data as any) && 'value' in (data as any));
+    const hasNameValue = 'name' in (data as any) && 'value' in (data as any);
     if (!hasNameValue) {
       return;
     }
@@ -140,9 +130,9 @@ export default function EntryTypeAdd(props: {
       messages,
     );
     setInputs(name as Names, () => {
-      return { value,  error: multierrors.length > 0, message: multierrors };
+      return { value, error: multierrors.length > 0, message: multierrors };
     });
-  }
+  };
 
   createEffect(() => {
     if (!reset()) return;
@@ -155,10 +145,10 @@ export default function EntryTypeAdd(props: {
     if (!e.target) return;
     if (e.target instanceof HTMLFormElement) {
       Array.from(e.target.elements)
-        .filter((t: Element) => (('id' in t) && names.includes(t.id)))
-        .map((t: unknown) => validateInputUpdateStore(t)); 
+        .filter((t: Element) => 'id' in t && names.includes(t.id))
+        .map((t: unknown) => validateInputUpdateStore(t));
       return;
-    } 
+    }
     validateInputUpdateStore(e.target);
   }
 
@@ -188,8 +178,8 @@ export default function EntryTypeAdd(props: {
     if (action()) {
       formRef!.requestSubmit();
     }
-  })
- 
+  });
+
   createEffect(() => {
     if (submitForm.loading) {
       toast.dismiss();
@@ -211,7 +201,7 @@ export default function EntryTypeAdd(props: {
       if (!isEntryTypeData(result)) {
         throw new Error('data received is not an entry type');
       }
-      const {code, unit} = (result as EntryTypeData);
+      const { code, unit } = result as EntryTypeData;
       setLoading(false);
       toasting(`added entry type "${code}" / unit "${unit}"`);
 
@@ -223,7 +213,8 @@ export default function EntryTypeAdd(props: {
         }
       }*/
       setReset(true);
-}});
+    }
+  });
 
   createEffect(() => {
     if (submitForm.error) {
@@ -282,20 +273,30 @@ export default function EntryTypeAdd(props: {
           sx={{ flex: 1 }}
           value={inputs.description.value}
           error={inputs.description.error}
-          helperText={<HelperTextMultiline lines={inputs.description.message} />}
+          helperText={
+            <HelperTextMultiline lines={inputs.description.message} />
+          }
         />
       </FormGroup>
-      <UnitSelect reset={reset} notifyStore={validateInputUpdateStore} validated={inputs.unit} />
+      <UnitSelect
+        reset={reset}
+        notifyStore={validateInputUpdateStore}
+        validated={inputs.unit}
+      />
     </Container>
-  )
+  );
 }
 
-const UnitSelect = (props: {validated: any, reset: Accessor<boolean>, notifyStore: Function}) => {
+const UnitSelect = (props: {
+  validated: any;
+  reset: Accessor<boolean>;
+  notifyStore: Function;
+}) => {
   const [isOpen, setIsOpen] = createSignal(false);
   const [newUnit, setNewUnit] = createSignal(false);
 
   const [unitsResource] = createResource(apiEntryType.units);
-  const units = (): (string|Error)[] => {
+  const units = (): (string | Error)[] => {
     const info = unitsResource();
     if (info instanceof Error || !info) {
       return [];
@@ -307,12 +308,12 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>, notifyStor
 
   const handleChange = (evt: SelectChangeEvent) => {
     // trigger onInput
-    props.notifyStore({name: 'unit', value: evt.target.value});
+    props.notifyStore({ name: 'unit', value: evt.target.value });
     setIsOpen(false);
   };
 
   const handleNewUnitChange = (evt: Event) => {
-    props.notifyStore({name: 'unit', value: evt.target!.value});
+    props.notifyStore({ name: 'unit', value: evt.target!.value });
     setNewUnit(true);
   };
 
@@ -323,7 +324,7 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>, notifyStor
         endIcon={<ChangeCircleOutlinedIcon color="action" />}
         sx={{ width: 'fit-content', alignSelf: 'flex-end' }}
         onClick={() => {
-          props.notifyStore({name:'unit', value: ''});
+          props.notifyStore({ name: 'unit', value: '' });
           setNewUnit(willOpen);
           if (willOpen) {
             setIsOpen(true);
@@ -342,7 +343,9 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>, notifyStor
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
         <FormControl>
-          <InputLabel shrink={props.validated.value} id="unit-label">Unit</InputLabel>
+          <InputLabel shrink={props.validated.value} id="unit-label">
+            Unit
+          </InputLabel>
           <Select
             labelId="unit-label"
             label="Unit"
@@ -353,7 +356,7 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>, notifyStor
             }}
             defaultValue={''}
             value={props.validated.value}
-            onChange = {handleChange}
+            onChange={handleChange}
             onClick={(evt: MouseEvent) => {
               setIsOpen(() => {
                 const id = (evt.target as HTMLElement)?.id;
@@ -364,13 +367,12 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>, notifyStor
             error={props.validated.error}
           >
             <For each={items()}>
-              {(u: string|Error) => {
+              {(u: string | Error) => {
                 if (u instanceof Error) {
-                  return (<MenuItem value={u.message}>{u.message}</MenuItem>)
-                }  
-                return (<MenuItem value={u}>{u}</MenuItem>)
+                  return <MenuItem value={u.message}>{u.message}</MenuItem>;
                 }
-              }
+                return <MenuItem value={u}>{u}</MenuItem>;
+              }}
             </For>
           </Select>
         </FormControl>

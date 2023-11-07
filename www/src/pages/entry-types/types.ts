@@ -56,7 +56,6 @@ function isDataEntryTypeUnits(d: unknown): d is DataEntryTypeUnits {
   return true;
 }
 
-
 function isDataEntryTypes(d: unknown): d is DataEntryTypes {
   if (d instanceof ApiError) {
     return true;

@@ -28,7 +28,7 @@ import StatisticsCard, {
   PropsStatisticsCard,
 } from '@/pages/dashboard/StatisticsCard';
 import Skeleton from '@suid/material/Skeleton';
-import {apiCompany} from '@/api';
+import { apiCompany } from '@/api';
 
 const [, setState] = appstate;
 

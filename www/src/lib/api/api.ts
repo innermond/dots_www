@@ -95,35 +95,22 @@ type ApiArgs<T> = {
   data?: T;
   isFn: IsFn<T>;
   hint: string;
-  method: 'POST'|'GET'|'OPTIONS'|'PATCH'|'DELETE';
+  method: 'POST' | 'GET' | 'OPTIONS' | 'PATCH' | 'DELETE';
   url: string;
   extraHeaders?: { [key: string]: string };
-}
+};
 
 const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
-  const {
-    hint,
-    method,
-    url,
-    data,
-    extraHeaders,
-    isFn,
-  } = args;
+  const { hint, method, url, data, extraHeaders, isFn } = args;
 
   let headers = {
     Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
   };
   if (extraHeaders) {
-    headers = {...headers, ...extraHeaders};
+    headers = { ...headers, ...extraHeaders };
   }
 
-  const json = await send<T>(
-    hint,
-    method,
-    url,
-    data,
-    headers,
-  );
+  const json = await send<T>(hint, method, url, data, headers);
 
   const verifiedOrError = verifiedJSONorError<T>(isFn, json);
 
@@ -131,7 +118,7 @@ const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
     return verifiedOrError;
   }
   return convertKeysToCamelCase(verifiedOrError) as T;
-}
+};
 
 const query = (path: string, pairs: Record<string, string>) => {
   const q = new URLSearchParams();
@@ -154,7 +141,6 @@ export function login(data: LoginParams): Promise<JSON | Error> {
 }
 
 const key = 'dots.tok';
-
 
 function verifiedJSONorError<T>(
   validator: (json: unknown) => json is T,
@@ -200,5 +186,5 @@ function convertKeysToCamelCase(data: unknown): CamelCase<typeof data> {
   return data;
 }
 
-export type {ApiArgs};
-export {ApiError, api, query, send};
+export type { ApiArgs };
+export { ApiError, api, query, send };

@@ -6,7 +6,7 @@ import { Toaster } from 'solid-toast';
 
 import theme from './theme';
 import routes from '@/pages/routes';
-import Loading, {loading} from './components/Loading';
+import Loading, { loading } from './components/Loading';
 
 const App: Component = (): JSX.Element => {
   const Routes = useRoutes(routes);
