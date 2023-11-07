@@ -114,7 +114,10 @@ export default function EntryTypeAdd(props: {
     unit: textmessages,
   };
 
-  const validateInputUpdateStore = (data: unknown, skipValidation: boolean = false): void => {
+  const validateInputUpdateStore = (
+    data: unknown,
+    skipValidation: boolean = false,
+  ): void => {
     const hasNameValue = 'name' in (data as any) && 'value' in (data as any);
     if (!hasNameValue) {
       return;
@@ -123,13 +126,14 @@ export default function EntryTypeAdd(props: {
     const { name, value } = data as any;
     if (!names.includes(name)) return;
 
-    const multierrors: string[] = skipValidation ? [] : validate<Names>(
-      name,
+    const multierrors: string[] = skipValidation
+      ? []
+      : validate<Names>(name, value, validators, messages);
+    setInputs(name as Names, {
       value,
-      validators,
-      messages,
-    );
-    setInputs(name as Names, { value, error: multierrors.length > 0, message: multierrors });
+      error: multierrors.length > 0,
+      message: multierrors,
+    });
   };
 
   createEffect(() => {
@@ -351,7 +355,7 @@ const UnitSelect = (props: {
               const inside = id === 'unit-wrapper';
               setIsOpen(() => inside);
               if (!inside) {
-                setTimeout(props.notifyStore({ unit: zero(true) })); 
+                setTimeout(props.notifyStore({ unit: zero(true) }));
               }
             }}
             open={isOpen()}
