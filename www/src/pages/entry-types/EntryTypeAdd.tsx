@@ -157,6 +157,7 @@ export default function EntryTypeAdd(props: {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
 
+  // action is responsability of the outer component
   const [action, setAction] = props!.action;
 
   const handleSubmit = (evt: SubmitEvent) => {
