@@ -288,6 +288,7 @@ export default function EntryTypeAdd(props: {
 const UnitSelect = (props: { unit: any; reset: Accessor<boolean>; notifyStore: Function; }) => {
   // open/close Select
   const [isOpen, setIsOpen] = createSignal(false);
+  // switch to Text
   const [newUnit, setNewUnit] = createSignal(false);
 
   const [unitsResource] = createResource(apiEntryType.units);
