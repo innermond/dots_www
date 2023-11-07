@@ -285,11 +285,7 @@ export default function EntryTypeAdd(props: {
 }
 
 // It is a component that can switch between a Select and a TextField
-const UnitSelect = (props: {
-  unit: any;
-  reset: Accessor<boolean>;
-  notifyStore: Function;
-}) => {
+const UnitSelect = (props: { unit: any; reset: Accessor<boolean>; notifyStore: Function; }) => {
   const [isOpen, setIsOpen] = createSignal(false);
   const [newUnit, setNewUnit] = createSignal(false);
 
