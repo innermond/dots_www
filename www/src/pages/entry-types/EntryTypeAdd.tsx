@@ -284,6 +284,7 @@ export default function EntryTypeAdd(props: {
   );
 }
 
+// It is a component that can switch between a Select and a TextField
 const UnitSelect = (props: {
   unit: any;
   reset: Accessor<boolean>;
