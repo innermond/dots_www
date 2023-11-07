@@ -71,17 +71,17 @@ function isInstanceOf<T>(elem: unknown): elem is T {
 
 const theme = useTheme();
 
+const zero = (undef: boolean = false) => ({
+  value: undef ?? '',
+  error: false,
+  message: [],
+});
+
 export default function EntryTypeAdd(props: {
   action: Signal<boolean>;
 }): JSX.Element {
   const names: string[] = ['code', 'description', 'unit'];
   type Names = FieldNames<typeof names>;
-
-  const zero = {
-    value: '',
-    error: false,
-    message: [],
-  };
 
   const defaultInputs = makeDefaults(...names);
   const [inputs, setInputs] = createStore(defaultInputs);
@@ -114,7 +114,7 @@ export default function EntryTypeAdd(props: {
     unit: textmessages,
   };
 
-  const validateInputUpdateStore = (data: unknown): void => {
+  const validateInputUpdateStore = (data: unknown, skipValidation: boolean = false): void => {
     const hasNameValue = 'name' in (data as any) && 'value' in (data as any);
     if (!hasNameValue) {
       return;
@@ -123,21 +123,19 @@ export default function EntryTypeAdd(props: {
     const { name, value } = data as any;
     if (!names.includes(name)) return;
 
-    const multierrors: string[] = validate<Names>(
+    const multierrors: string[] = skipValidation ? [] : validate<Names>(
       name,
       value,
       validators,
       messages,
     );
-    setInputs(name as Names, () => {
-      return { value, error: multierrors.length > 0, message: multierrors };
-    });
+    setInputs(name as Names, { value, error: multierrors.length > 0, message: multierrors });
   };
 
   createEffect(() => {
     if (!reset()) return;
 
-    setInputs({ code: zero, description: zero, unit: zero });
+    setInputs({ code: zero(), description: zero(), unit: zero(true) });
   });
 
   function handleInput(e: Event) {
@@ -205,13 +203,7 @@ export default function EntryTypeAdd(props: {
       setLoading(false);
       toasting(`added entry type "${code}" / unit "${unit}"`);
 
-      setInputs({ code: zero, description: zero, unit: zero });
-
-      /*for (const elem of Array.from(formRef!.elements).filter((e: Element) => names.includes(e['id']))) {
-        if (isInstanceOf<FormControl>(elem)) {
-          (elem as FormControl).value = '';
-        }
-      }*/
+      setInputs({ code: zero(), description: zero(), unit: zero(true) });
       setReset(true);
     }
   });
@@ -281,14 +273,14 @@ export default function EntryTypeAdd(props: {
       <UnitSelect
         reset={reset}
         notifyStore={validateInputUpdateStore}
-        validated={inputs.unit}
+        unit={inputs.unit}
       />
     </Container>
   );
 }
 
 const UnitSelect = (props: {
-  validated: any;
+  unit: any;
   reset: Accessor<boolean>;
   notifyStore: Function;
 }) => {
@@ -313,22 +305,19 @@ const UnitSelect = (props: {
   };
 
   const handleNewUnitChange = (evt: Event) => {
-    props.notifyStore({ name: 'unit', value: evt.target!.value });
-    setNewUnit(true);
+    props.notifyStore({ name: 'unit', value: (evt.target as any)?.value });
   };
 
-  const switchSelect = (txt: string, willOpen: boolean) => {
+  const switchNewUnit = (txt: string, openNewUnit: boolean) => {
     const color = theme.palette.text.secondary;
     return (
       <Button
         endIcon={<ChangeCircleOutlinedIcon color="action" />}
         sx={{ width: 'fit-content', alignSelf: 'flex-end' }}
         onClick={() => {
-          props.notifyStore({ name: 'unit', value: '' });
-          setNewUnit(willOpen);
-          if (willOpen) {
-            setIsOpen(true);
-          }
+          props.notifyStore({ name: 'unit', value: '' }, true);
+          setNewUnit(openNewUnit);
+          setIsOpen(!openNewUnit);
         }}
       >
         <Typography sx={{ textTransform: 'lowercase', color }}>
@@ -343,7 +332,7 @@ const UnitSelect = (props: {
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
         <FormControl>
-          <InputLabel shrink={props.validated.value} id="unit-label">
+          <InputLabel shrink={props.unit.value} id="unit-label">
             Unit
           </InputLabel>
           <Select
@@ -355,16 +344,18 @@ const UnitSelect = (props: {
               id: 'unit',
             }}
             defaultValue={''}
-            value={props.validated.value}
+            value={props.unit.value}
             onChange={handleChange}
             onClick={(evt: MouseEvent) => {
-              setIsOpen(() => {
-                const id = (evt.target as HTMLElement)?.id;
-                return id === 'unit-wrapper';
-              });
+              const id = (evt.target as HTMLElement)?.id;
+              const inside = id === 'unit-wrapper';
+              setIsOpen(() => inside);
+              if (!inside) {
+                setTimeout(props.notifyStore({ unit: zero(true) })); 
+              }
             }}
             open={isOpen()}
-            error={props.validated.error}
+            error={props.unit.error}
           >
             <For each={items()}>
               {(u: string | Error) => {
@@ -376,11 +367,10 @@ const UnitSelect = (props: {
             </For>
           </Select>
         </FormControl>
-        {switchSelect('or add a new unit', true)}
+        {switchNewUnit('or add a new unit', true)}
       </Show>
       <Show when={newUnit()}>
         <TextField
-          focused
           inputRef={input => setTimeout(() => input.focus())}
           name="unit"
           label="Unit"
@@ -388,12 +378,11 @@ const UnitSelect = (props: {
           id="unit"
           autoComplete="off"
           onChange={handleNewUnitChange}
-          defaultValue={''}
-          value={props.validated.value}
-          error={props.validated.error}
-          helperText={props.validated.message}
+          value={props.unit.value}
+          error={props.unit.error}
+          helperText={props.unit.message}
         />
-        {switchSelect('or use existent unit', false)}
+        {switchNewUnit('or use existent unit', false)}
       </Show>
     </FormGroup>
   );
