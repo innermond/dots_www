@@ -59,7 +59,8 @@ const makeDefaults = (...names: string[]) => {
   const defaults = {} as Validable<typeof names[number]>;
   let n: string;
   for (n of names) {
-    defaults[n] = {value: undefined, error: false, message: []}
+    // use value: null because undefined will make component uncontrolled 
+    defaults[n] = {value: null, error: false, message: []}
   }
 
   return defaults;
@@ -69,10 +70,6 @@ const types = [
   HTMLInputElement,
   HTMLTextAreaElement,
   HTMLSelectElement,
-  //HTMLButtonElement,
-  //HTMLFieldSetElement,
-  //HTMLLegendElement,
-  //HTMLLabelElement,
 ];
 type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 type FieldNames<T extends string[]> = T[number];
@@ -91,7 +88,7 @@ export default function EntryTypeAdd(props: {
   type Names = FieldNames<typeof names>;
 
   const zero = {
-    value: undefined,
+    value: '',
     error: false,
     message: [],
   };
@@ -127,10 +124,13 @@ export default function EntryTypeAdd(props: {
     unit: textmessages,
   };
 
-  const validateInputUpdateStore = (target: unknown): void => {
-    if (!isInstanceOf<FormControl>(target)) return;
+  const validateInputUpdateStore = (data: unknown): void => {
+    const hasNameValue = ('name' in (data as any) && 'value' in (data as any));
+    if (!hasNameValue) {
+      return;
+    }
 
-    const { name, value } = target as FormControl;
+    const { name, value } = data as any;
     if (!names.includes(name)) return;
 
     const multierrors: string[] = validate<Names>(
@@ -243,7 +243,9 @@ export default function EntryTypeAdd(props: {
     <Container
       ref={formRef}
       novalidate
+      autocomplete="off"
       component="form"
+      onInput={handleInput}
       sx={{
         padding: theme.spacing(3),
         display: 'flex',
@@ -267,8 +269,6 @@ export default function EntryTypeAdd(props: {
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
-          onInput={handleInput}
-          defaultValue={''}
           value={inputs.code.value}
           error={inputs.code.error}
           helperText={<HelperTextMultiline lines={inputs.code.message} />}
@@ -280,23 +280,19 @@ export default function EntryTypeAdd(props: {
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
-          onInput={handleInput}
-          defaultValue={''}
           value={inputs.description.value}
           error={inputs.description.error}
           helperText={<HelperTextMultiline lines={inputs.description.message} />}
         />
       </FormGroup>
-      <UnitSelect reset={reset} validated={inputs.unit} />
+      <UnitSelect reset={reset} notifyStore={validateInputUpdateStore} validated={inputs.unit} />
     </Container>
   )
 }
 
-const UnitSelect = (props: {validated: any, reset: Accessor<boolean>}) => {
-  const [selected, setSelected] = createSignal('');
+const UnitSelect = (props: {validated: any, reset: Accessor<boolean>, notifyStore: Function}) => {
   const [isOpen, setIsOpen] = createSignal(false);
   const [newUnit, setNewUnit] = createSignal(false);
-  const [newUnitValue, setNewUnitValue] = createSignal('');
 
   const [unitsResource] = createResource(apiEntryType.units);
   const units = (): (string|Error)[] => {
@@ -309,14 +305,15 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>}) => {
     return n ? data : [];
   };
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setSelected(event.target.value);
+  const handleChange = (evt: SelectChangeEvent) => {
+    // trigger onInput
+    props.notifyStore({name: 'unit', value: evt.target.value});
     setIsOpen(false);
   };
 
   const handleNewUnitChange = (evt: Event) => {
+    props.notifyStore({name: 'unit', value: evt.target!.value});
     setNewUnit(true);
-    setNewUnitValue((evt.target as HTMLInputElement)?.value);
   };
 
   const switchSelect = (txt: string, willOpen: boolean) => {
@@ -326,6 +323,7 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>}) => {
         endIcon={<ChangeCircleOutlinedIcon color="action" />}
         sx={{ width: 'fit-content', alignSelf: 'flex-end' }}
         onClick={() => {
+          props.notifyStore({name:'unit', value: ''});
           setNewUnit(willOpen);
           if (willOpen) {
             setIsOpen(true);
@@ -339,17 +337,12 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>}) => {
     );
   };
 
-  const selectValue = () => {
-    if (selected()) return selected();
-    if (props.reset()) return '';
-  };
-
   const items = createMemo(() => units());
   return (
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
         <FormControl>
-          <InputLabel id="unit-label">Unit</InputLabel>
+          <InputLabel shrink={props.validated.value} id="unit-label">Unit</InputLabel>
           <Select
             labelId="unit-label"
             label="Unit"
@@ -360,7 +353,7 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>}) => {
             }}
             defaultValue={''}
             value={props.validated.value}
-            onChange={handleChange}
+            onChange = {handleChange}
             onClick={(evt: MouseEvent) => {
               setIsOpen(() => {
                 const id = (evt.target as HTMLElement)?.id;
@@ -393,7 +386,8 @@ const UnitSelect = (props: {validated: any, reset: Accessor<boolean>}) => {
           id="unit"
           autoComplete="off"
           onChange={handleNewUnitChange}
-          value={newUnitValue()}
+          defaultValue={''}
+          value={props.validated.value}
           error={props.validated.error}
           helperText={props.validated.message}
         />
