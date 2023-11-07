@@ -290,7 +290,8 @@ const UnitSelect = (props: { unit: any; reset: Accessor<boolean>; notifyStore: F
   const [isOpen, setIsOpen] = createSignal(false);
   // switch to Text
   const [newUnit, setNewUnit] = createSignal(false);
-
+  
+  // list of units
   const [unitsResource] = createResource(apiEntryType.units);
   const units = (): (string | Error)[] => {
     const info = unitsResource();
