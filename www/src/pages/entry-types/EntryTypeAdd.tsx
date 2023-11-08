@@ -54,10 +54,23 @@ function payload<T>(obj: T, filterList: string[]): Partial<T> {
 
 async function postEntryTypeData(e: Event) {
   e.preventDefault();
-  const data = new FormData(e.target as HTMLFormElement).entries();
+  if (!e.target) return;
+
+  const data = Array.from(
+    new FormData(e.target as HTMLFormElement).entries(),
+  ).reduce(
+    (
+      acc: Record<string, FormDataEntryValue>,
+      [k, v]: [string, FormDataEntryValue],
+    ) => {
+      acc[k] = v;
+      return acc;
+    },
+    {} as Record<string, FormDataEntryValue>,
+  );
   const requestData = {
     id: 0,
-    ...payload(Array.from(data), ['code', 'description', 'unit']),
+    ...payload(data, ['code', 'description', 'unit']),
   } as EntryTypeData;
   return apiEntryType.add(requestData);
 }
