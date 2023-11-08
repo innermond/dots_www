@@ -72,7 +72,7 @@ function isInstanceOf<T>(elem: unknown): elem is T {
 const theme = useTheme();
 
 const zero = (undef: boolean = false) => ({
-  value: undef ?? '',
+  value: undef ? null : '',
   error: false,
   message: [],
 });
@@ -154,11 +154,11 @@ export default function EntryTypeAdd(props: {
     validateInputUpdateStore(e.target);
   }
 
-  const [startSubmit, setStartSubmit] = createSignal<Event | null>();
-  const [submitForm] = createResource(startSubmit, postEntryTypeData);
-
   // action is responsability of the outer component
   const [action, setAction] = props!.action;
+
+  const [startSubmit, setStartSubmit] = createSignal<Event | null>();
+  const [submitForm] = createResource(startSubmit, postEntryTypeData);
 
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
@@ -168,9 +168,8 @@ export default function EntryTypeAdd(props: {
       setAction(false);
       return;
     }
+
     setStartSubmit(evt);
-    // TODO this is a MUST in order to be able to request again
-    setAction(false);
   };
   let formRef: HTMLFormElement | undefined;
   onMount(() => formRef!.addEventListener('submit', handleSubmit));
@@ -178,15 +177,20 @@ export default function EntryTypeAdd(props: {
     formRef!.removeEventListener('submit', handleSubmit);
   });
   createEffect(() => {
-    if (action()) {
+    if (action() && !submitForm.loading) {
       formRef!.requestSubmit();
     }
   });
+
+  const isDisabled = () => submitForm.loading;
 
   createEffect(() => {
     if (submitForm.loading) {
       toast.dismiss();
       setLoading(true);
+    } else {
+      // TODO this is a MUST in order to be able to request again
+      setAction(false);
     }
   });
 
@@ -260,6 +264,7 @@ export default function EntryTypeAdd(props: {
           value={inputs.code.value}
           error={inputs.code.error}
           helperText={<HelperTextMultiline lines={inputs.code.message} />}
+          disabled={isDisabled()}
         />
         <TextField
           name="description"
@@ -273,12 +278,14 @@ export default function EntryTypeAdd(props: {
           helperText={
             <HelperTextMultiline lines={inputs.description.message} />
           }
+          disabled={isDisabled()}
         />
       </FormGroup>
       <UnitSelect
         reset={reset}
         notifyStore={validateInputUpdateStore}
         unit={inputs.unit}
+        disabled={isDisabled()}
       />
     </Container>
   );
@@ -289,6 +296,7 @@ const UnitSelect = (props: {
   unit: any;
   reset: Accessor<boolean>;
   notifyStore: Function;
+  disabled: boolean;
 }) => {
   // open/close Select
   const [isOpen, setIsOpen] = createSignal(false);
@@ -324,10 +332,15 @@ const UnitSelect = (props: {
         endIcon={<ChangeCircleOutlinedIcon color="action" />}
         sx={{ width: 'fit-content', alignSelf: 'flex-end' }}
         onClick={() => {
+          if (props.disabled) {
+            return;
+          }
+
           props.notifyStore({ name: 'unit', value: '' }, true);
           setNewUnit(openNewUnit);
           setIsOpen(!openNewUnit);
         }}
+        disabled={props.disabled}
       >
         <Typography sx={{ textTransform: 'lowercase', color }}>
           {txt}
@@ -340,7 +353,7 @@ const UnitSelect = (props: {
   return (
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
-        <FormControl>
+        <FormControl disabled={props.disabled}>
           <InputLabel shrink={props.unit.value} id="unit-label">
             Unit
           </InputLabel>
@@ -356,6 +369,10 @@ const UnitSelect = (props: {
             value={props.unit.value}
             onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {
+              if (props.disabled) {
+                return;
+              }
+
               const id = (evt.target as HTMLElement)?.id;
               const inside = id === 'unit-wrapper';
               setIsOpen(() => inside);
@@ -390,6 +407,7 @@ const UnitSelect = (props: {
           value={props.unit.value}
           error={props.unit.error}
           helperText={props.unit.message}
+          disabled={props.disabled}
         />
         {switchNewUnit('or use existent unit', false)}
       </Show>

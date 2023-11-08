@@ -11,7 +11,7 @@ import {
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
-import { JSX, ParentProps, Signal, createSignal } from 'solid-js';
+import { JSX, ParentProps, Signal, createEffect, createSignal } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import type { Component } from 'solid-js';
 
@@ -38,7 +38,9 @@ const DialogSave = (props: DialogSaveProps) => {
   };
 
   const actionSignal = createSignal(false);
-  const [, setAction] = actionSignal;
+  const [action, setAction] = actionSignal;
+
+  createEffect(() => console.log('action', action()));
 
   const handleClick = () => {
     setAction(true);
