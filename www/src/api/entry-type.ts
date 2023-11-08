@@ -31,16 +31,20 @@ class APIEntryType {
     return api(args);
   }
 
-  async add(data: EntryTypeData): Promise<EntryTypeData | Error> {
+  add(data: EntryTypeData): [Promise<EntryTypeData | Error>, Function] {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     const args = {
       hint: 'adding entry type',
       method: 'POST',
       url: '/entry-types',
       isFn: isEntryTypeData,
       data,
+      signal,
     } as ApiArgs<EntryTypeData>;
 
-    return api(args);
+    return [api(args), () => controller.abort()];
   }
 }
 

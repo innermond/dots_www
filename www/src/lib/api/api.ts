@@ -34,12 +34,13 @@ async function send<T>(
   url: string,
   data?: T,
   extraHeaders?: { [key: string]: string },
+  signal?: AbortSignal,
 ): Promise<JSON | Error> {
   const headers: HeadersInit = {
     'Content-type': 'application/json',
     ...extraHeaders,
   };
-  const opts: RequestInit = { method, headers };
+  const opts: RequestInit = { method, headers, signal };
 
   opts.mode = 'cors';
   opts.redirect = 'follow';
@@ -86,6 +87,10 @@ async function send<T>(
     }
     return json;
   } catch (err: any) {
+    // TODO find a proper way to deal with AbortError
+    if (err?.name === 'AbortError') {
+      throw new Error(err.message);
+    }
     throw err;
   }
 }
@@ -98,10 +103,11 @@ type ApiArgs<T> = {
   method: 'POST' | 'GET' | 'OPTIONS' | 'PATCH' | 'DELETE';
   url: string;
   extraHeaders?: { [key: string]: string };
+  signal?: AbortSignal;
 };
 
 const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
-  const { hint, method, url, data, extraHeaders, isFn } = args;
+  const { hint, method, url, data, extraHeaders, isFn, signal } = args;
 
   let headers = {
     Authorization: 'Bearer ' + sessionStorage.getItem(key) ?? '',
@@ -110,7 +116,7 @@ const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
     headers = { ...headers, ...extraHeaders };
   }
 
-  const json = await send<T>(hint, method, url, data, headers);
+  const json = await send<T>(hint, method, url, data, headers, signal);
 
   const verifiedOrError = verifiedJSONorError<T>(isFn, json);
 

@@ -11,7 +11,7 @@ import {
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
-import { JSX, ParentProps, Signal, createEffect, createSignal } from 'solid-js';
+import { JSX, ParentProps, Signal, createSignal, Accessor } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import type { Component } from 'solid-js';
 
@@ -27,35 +27,36 @@ export type DialogSaveProps = {
   open: Signal<boolean>;
   title: string;
   textSave?: string;
-  dyn?: Component<{ action: Signal<boolean> }>;
+  dyn?: Component<{ closing: Accessor<boolean>; action: Signal<boolean> }>;
 } & ParentProps;
 
 const DialogSave = (props: DialogSaveProps) => {
   const [open, setOpen] = props!.open;
 
-  const handleClose = () => {
+  const handleCloseClick = () => {
     setOpen(false);
   };
 
   const actionSignal = createSignal(false);
-  const [action, setAction] = actionSignal;
+  const [, setAction] = actionSignal;
 
-  createEffect(() => console.log('action', action()));
-
-  const handleClick = () => {
+  const handleActionClick = () => {
     setAction(true);
   };
 
+  const closing = () => !open();
   let Dyn: JSX.Element;
   if (props.dyn) {
-    Dyn = <Dynamic action={actionSignal} component={props.dyn} />;
+    Dyn = (
+      <Dynamic closing={closing} action={actionSignal} component={props.dyn} />
+    );
   }
 
   return (
     <Dialog
       fullWidth
       open={open()}
-      onClose={handleClose}
+      onClose={handleCloseClick}
       TransitionComponent={Transition}
     >
       <AppBar color="transparent" sx={{ position: 'relative' }}>
@@ -63,7 +64,7 @@ const DialogSave = (props: DialogSaveProps) => {
           <IconButton
             edge="start"
             color="inherit"
-            onClick={handleClose}
+            onClick={handleCloseClick}
             aria-label="close"
           >
             <CloseIcon />
@@ -82,7 +83,7 @@ const DialogSave = (props: DialogSaveProps) => {
             variant="contained"
             startIcon={<AddIcon />}
             color="primary"
-            onClick={handleClick}
+            onClick={handleActionClick}
           >
             {props.textSave ?? 'save'}
           </Button>

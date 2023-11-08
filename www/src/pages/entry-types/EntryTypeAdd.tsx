@@ -26,6 +26,7 @@ import {
 import type { JSX, Signal } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 import { toast } from 'solid-toast';
+import { AlertColor } from '@suid/material/Alert/AlertProps';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
 
@@ -52,29 +53,6 @@ function payload<T>(obj: T, filterList: string[]): Partial<T> {
   return out;
 }
 
-async function postEntryTypeData(e: Event) {
-  e.preventDefault();
-  if (!e.target) return;
-
-  const data = Array.from(
-    new FormData(e.target as HTMLFormElement).entries(),
-  ).reduce(
-    (
-      acc: Record<string, FormDataEntryValue>,
-      [k, v]: [string, FormDataEntryValue],
-    ) => {
-      acc[k] = v;
-      return acc;
-    },
-    {} as Record<string, FormDataEntryValue>,
-  );
-  const requestData = {
-    id: 0,
-    ...payload(data, ['code', 'description', 'unit']),
-  } as EntryTypeData;
-  return apiEntryType.add(requestData);
-}
-
 const makeDefaults = (...names: string[]) => {
   const defaults = {} as Validable<(typeof names)[number]>;
   let n: string;
@@ -86,13 +64,8 @@ const makeDefaults = (...names: string[]) => {
   return defaults;
 };
 
-const types = [HTMLInputElement, HTMLTextAreaElement, HTMLSelectElement];
 type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 type FieldNames<T extends string[]> = T[number];
-
-function isInstanceOf<T>(elem: unknown): elem is T {
-  return types.some((t: Function) => elem instanceof t);
-}
 
 const theme = useTheme();
 
@@ -103,6 +76,7 @@ const zero = (undef: boolean = false) => ({
 });
 
 export default function EntryTypeAdd(props: {
+  closing: Accessor<boolean>;
   action: Signal<boolean>;
 }): JSX.Element {
   const names: string[] = ['code', 'description', 'unit'];
@@ -179,6 +153,30 @@ export default function EntryTypeAdd(props: {
     validateInputUpdateStore(e.target);
   }
 
+  async function postEntryTypeData(e: Event) {
+    e.preventDefault();
+    if (!e.target) return;
+
+    const data = Array.from(
+      new FormData(e.target as HTMLFormElement).entries(),
+    ).reduce(
+      (
+        acc: Record<string, FormDataEntryValue>,
+        [k, v]: [string, FormDataEntryValue],
+      ) => {
+        acc[k] = v;
+        return acc;
+      },
+      {} as Record<string, FormDataEntryValue>,
+    );
+    const requestData = {
+      id: 0,
+      ...payload(data, ['code', 'description', 'unit']),
+    } as EntryTypeData;
+    const [remote, abort] = apiEntryType.add(requestData);
+    createEffect(() => props.closing() && abort());
+    return await remote;
+  }
   // action is responsability of the outer component
   const [action, setAction] = props!.action;
 
@@ -245,8 +243,18 @@ export default function EntryTypeAdd(props: {
   createEffect(() => {
     if (submitForm.error) {
       const data = submitForm.error;
-      const message = data?.error ?? data?.cause?.error ?? 'An error occured';
-      toast.custom(() => <Alert severity="error">{message}</Alert>, {
+      let severity = 'error';
+      let message =
+        data?.message ??
+        data?.error ??
+        data?.cause?.error ??
+        'An error occured';
+      if (props.closing() || data?.name === 'AbortError') {
+        message = data.message;
+        severity = 'info';
+      }
+      const alert = <Alert severity={severity as AlertColor}>{message}</Alert>;
+      toast.custom(() => alert, {
         duration: 6000,
         unmountDelay: 0,
       });
