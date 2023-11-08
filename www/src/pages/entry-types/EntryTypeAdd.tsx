@@ -38,15 +38,27 @@ import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
 
+function payload<T>(obj: T, filterList: string[]): Partial<T> {
+  const isObject = typeof obj === 'object' && obj !== null;
+  if (!isObject) return {};
+
+  const out: Partial<T> = Object.keys(obj).reduce((acc, k) => {
+    if (filterList.includes(k) && k in obj) {
+      acc[k as keyof T] = obj[k as keyof T];
+    }
+    return acc;
+  }, {} as Partial<T>);
+
+  return out;
+}
+
 async function postEntryTypeData(e: Event) {
   e.preventDefault();
   const data = new FormData(e.target as HTMLFormElement).entries();
-  const result: Record<string, string> = {};
-  for (const [k, v] of data) {
-    result[k] = v as string;
-  }
-  const { code, description, unit } = result;
-  const requestData = { id: 0, code, description, unit };
+  const requestData = {
+    id: 0,
+    ...payload(Array.from(data), ['code', 'description', 'unit']),
+  } as EntryTypeData;
   return apiEntryType.add(requestData);
 }
 
