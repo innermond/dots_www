@@ -21,7 +21,7 @@ type MessagesMap<T extends string> = {
 };
 type Messages = Array<(...params: any) => string | string[]>;
 
-export function validate<T extends string>(
+function validate<T extends string>(
   name: string,
   value: any,
   validators: Validators<T>,
@@ -55,6 +55,17 @@ export function validate<T extends string>(
   return multierrors;
 }
 
+const makeDefaults = (...names: string[]) => {
+  const defaults = {} as Validable<(typeof names)[number]>;
+  let n: string;
+  for (n of names) {
+    // use value: null because undefined will make component uncontrolled
+    defaults[n] = { value: null, error: false, message: [] };
+  }
+
+  return defaults;
+};
+
 export type {
   Validable,
   Validation,
@@ -65,3 +76,5 @@ export type {
   MessagesMap,
   Messages,
 };
+
+export { validate, makeDefaults };

@@ -186,5 +186,25 @@ function convertKeysToCamelCase(data: unknown): CamelCase<typeof data> {
   return data;
 }
 
+function payload<T>(obj: T, filterList: string[]): Partial<T> {
+  const isObject = typeof obj === 'object' && obj !== null;
+  if (!isObject) return {};
+
+  const out: Partial<T> = Object.keys(obj).reduce((acc, k) => {
+    if (filterList.includes(k) && k in obj) {
+      acc[k as keyof T] = obj[k as keyof T];
+    }
+    return acc;
+  }, {} as Partial<T>);
+
+  return out;
+}
+
+const zero = (undef: boolean = false) => ({
+  value: undef ? null : '',
+  error: false,
+  message: [],
+});
+
 export type { ApiArgs };
-export { ApiError, api, query, send, apix };
+export { ApiError, api, apix, query, send, payload, zero };

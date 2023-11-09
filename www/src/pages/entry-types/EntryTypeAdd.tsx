@@ -9,7 +9,6 @@ import {
   FormGroup,
   Button,
   Typography,
-  Alert,
 } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
 import {
@@ -24,56 +23,26 @@ import {
   createMemo,
 } from 'solid-js';
 import type { JSX, Signal } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
-import { toast } from 'solid-toast';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
+
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
-
 import { apiEntryType } from '@/api';
-import { createStore } from 'solid-js/store';
-import type { MessagesMap, Validable, Validators } from '@/lib/form';
+import type { MessagesMap, Validators } from '@/lib/form';
+import { makeDefaults } from '@/lib/form';
 import { required, minlen, maxlen, validate } from '@/lib/form';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
-
-function payload<T>(obj: T, filterList: string[]): Partial<T> {
-  const isObject = typeof obj === 'object' && obj !== null;
-  if (!isObject) return {};
-
-  const out: Partial<T> = Object.keys(obj).reduce((acc, k) => {
-    if (filterList.includes(k) && k in obj) {
-      acc[k as keyof T] = obj[k as keyof T];
-    }
-    return acc;
-  }, {} as Partial<T>);
-
-  return out;
-}
-
-const makeDefaults = (...names: string[]) => {
-  const defaults = {} as Validable<(typeof names)[number]>;
-  let n: string;
-  for (n of names) {
-    // use value: null because undefined will make component uncontrolled
-    defaults[n] = { value: null, error: false, message: [] };
-  }
-
-  return defaults;
-};
+import { payload, zero } from '@/lib/api';
 
 type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 type FieldNames<T extends string[]> = T[number];
 
 const theme = useTheme();
-
-const zero = (undef: boolean = false) => ({
-  value: undef ? null : '',
-  error: false,
-  message: [],
-});
 
 export default function EntryTypeAdd(props: {
   closing: Accessor<boolean>;
@@ -218,7 +187,7 @@ export default function EntryTypeAdd(props: {
 
   createEffect(() => {
     if (submitForm.loading) {
-      toast.dismiss();
+      toasting.dismiss();
       setLoading(true);
     } else {
       // TODO this is a MUST in order to be able to request again
@@ -252,7 +221,7 @@ export default function EntryTypeAdd(props: {
   createEffect(() => {
     if (submitForm.error) {
       const data = submitForm.error;
-      let severity = 'error';
+      let severity = 'error' as AlertColor;
       let message =
         data?.message ??
         data?.error ??
@@ -262,11 +231,7 @@ export default function EntryTypeAdd(props: {
         message = data.message;
         severity = 'info';
       }*/
-      const alert = <Alert severity={severity as AlertColor}>{message}</Alert>;
-      toast.custom(() => alert, {
-        duration: 6000,
-        unmountDelay: 0,
-      });
+      toasting(message, severity);
       setLoading(false);
     }
   });
