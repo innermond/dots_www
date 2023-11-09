@@ -174,7 +174,12 @@ export default function EntryTypeAdd(props: {
       ...payload(data, ['code', 'description', 'unit']),
     } as EntryTypeData;
     const [remote, abort] = apiEntryType.add(requestData);
-    createEffect(() => props.closing() && abort());
+    createEffect(() => {
+      if (props.closing() && submitForm.loading) {
+        abort();
+        setReset(true);
+      }
+    });
     return await remote;
   }
   // action is responsability of the outer component
@@ -182,7 +187,6 @@ export default function EntryTypeAdd(props: {
 
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
-
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
 
@@ -201,7 +205,12 @@ export default function EntryTypeAdd(props: {
   });
   createEffect(() => {
     if (action() && !submitForm.loading) {
-      formRef!.requestSubmit();
+      try {
+        formRef!.requestSubmit();
+      } catch (e) {
+        console.log(e);
+        throw e;
+      }
     }
   });
 
@@ -249,10 +258,10 @@ export default function EntryTypeAdd(props: {
         data?.error ??
         data?.cause?.error ??
         'An error occured';
-      if (props.closing() || data?.name === 'AbortError') {
+      /*if (props.closing()) {
         message = data.message;
         severity = 'info';
-      }
+      }*/
       const alert = <Alert severity={severity as AlertColor}>{message}</Alert>;
       toast.custom(() => alert, {
         duration: 6000,

@@ -32,16 +32,16 @@ class APIEntryType {
     return api(args);
   }
 
-  add(data: EntryTypeData): ReturnType<typeof apix<EntryTypeData>> {
+  add(data: EntryTypeData): ReturnType<typeof apix<typeof data>> {
     const args = {
       hint: 'adding entry type',
       method: 'POST',
       url: '/entry-types',
       isFn: isEntryTypeData,
       data,
-    } as ApiArgs<EntryTypeData>;
+    } as ApiArgs<typeof data>;
 
-    return apix<EntryTypeData>(args);
+    return apix<typeof data>(args);
   }
 }
 
