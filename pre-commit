@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "PRE COMMIT HOOK"
+echo "pre-commit: prettify"
 HERE="$(dirname "$0")"
 
 # recruit interested filenames
