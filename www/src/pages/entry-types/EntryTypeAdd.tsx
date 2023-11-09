@@ -45,9 +45,11 @@ export default function EntryTypeAdd(props: {
   closing: Accessor<boolean>;
   action: Signal<boolean>;
 }): JSX.Element {
+  // names of form inputs
   const names: string[] = ['code', 'description', 'unit'];
   type Names = FieldNames<typeof names>;
 
+  // set up local state for the inputs named above
   const defaultInputs = makeDefaults(...names);
   const [inputs, setInputs] = createStore(defaultInputs);
   const inputsHasErrors = () => {
@@ -59,12 +61,14 @@ export default function EntryTypeAdd(props: {
     return false;
   };
 
+  // set up validation
   const validators: Validators<Names> = {
     code: [required, minlen(7), maxlen(50)],
     description: [required, minlen(7), maxlen(100)],
     unit: [required, minlen(2), maxlen(20)],
   };
-
+  
+  // functions that prepare error messages
   const textmessages = [
     (f: string) => `${f} is required`,
     (f: string, v: string, { len }: { len: number }) =>
@@ -73,12 +77,15 @@ export default function EntryTypeAdd(props: {
       `${f} must be less than ${len} - has ${v.length}`,
   ];
 
+  // map error messages with field names
   const messages: MessagesMap<Names> = {
     code: textmessages,
     description: textmessages,
     unit: textmessages,
   };
 
+  // validate named fields and then
+  // update the local inputs store
   const validateInputUpdateStore = (
     data: unknown,
     skipValidation: boolean = false,
@@ -101,13 +108,16 @@ export default function EntryTypeAdd(props: {
     });
   };
 
+  // reset local state
+  // resseting falls down to DOM, clearing inputs
   createEffect(() => {
     if (!reset()) return;
 
     setInputs({ code: zero(), description: zero(), unit: zero(true) });
   });
 
-  function handleInput(e: Event) {
+  // respond to input events
+  const handleInput = (e: Event): void => {
     e.preventDefault();
     if (!e.target) return;
     if (e.target instanceof HTMLFormElement) {
@@ -119,10 +129,12 @@ export default function EntryTypeAdd(props: {
     validateInputUpdateStore(e.target);
   }
 
+  // submit data
   async function postEntryTypeData(e: Event) {
     e.preventDefault();
     if (!e.target) return;
 
+    // prepare data from DOM
     const data = Array.from(
       new FormData(e.target as HTMLFormElement).entries(),
     ).reduce(
@@ -135,24 +147,32 @@ export default function EntryTypeAdd(props: {
       },
       {} as Record<string, FormDataEntryValue>,
     );
+    // to pure data
     const requestData = {
       id: 0,
-      ...payload(data, ['code', 'description', 'unit']),
+      ...payload(data, names),
     } as EntryTypeData;
+    // fire request
     const [remote, abort] = apiEntryType.add(requestData);
+
+    // closing while loading trigger request abortion
     createEffect(() => {
       if (props.closing() && submitForm.loading) {
         abort();
         setReset(true);
       }
     });
+
     return await remote;
   }
   // action is responsability of the outer component
   const [action, setAction] = props!.action;
 
+  // submitting driven by signals
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
+
+  // vaidate and submit 
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
 
@@ -164,11 +184,20 @@ export default function EntryTypeAdd(props: {
 
     setStartSubmit(evt);
   };
+  
+  // bind submit event 
   let formRef: HTMLFormElement | undefined;
+  // set up handling the submit event
   onMount(() => formRef!.addEventListener('submit', handleSubmit));
   onCleanup(() => {
     formRef!.removeEventListener('submit', handleSubmit);
   });
+
+  // when action() then DOM form submit
+  // the above submit event trigger handleSubmit
+  // which pinch reactive system through setStartSubmit(evt)
+  // then postEntryTypeData(evt)
+  // basically submiting stats from here way back up
   createEffect(() => {
     if (action() && !submitForm.loading) {
       try {

@@ -1,4 +1,5 @@
 #!/bin/sh
+echo "PRE COMMIT HOOK"
 HERE="$(dirname "$0")"
 
 # recruit interested filenames
