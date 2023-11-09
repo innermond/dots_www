@@ -121,14 +121,14 @@ const query = (path: string, pairs: Record<string, string>) => {
   return url;
 };
 
-function apix<T>(args: ApiArgs<T>) : [ReturnType<typeof api<T>>, Function] {
-    const controller = new AbortController();
-    const signal = controller.signal;
+function apix<T>(args: ApiArgs<T>): [ReturnType<typeof api<T>>, Function] {
+  const controller = new AbortController();
+  const signal = controller.signal;
 
-    const promise = api({...args, signal});
-    const abort = () => controller.abort();
+  const promise = api({ ...args, signal });
+  const abort = () => controller.abort();
 
-    return [promise, abort];
+  return [promise, abort];
 }
 
 type LoginParams = {

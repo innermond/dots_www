@@ -1,4 +1,4 @@
-import { api, apix, } from '@/lib/api';
+import { api, apix } from '@/lib/api';
 import type { ApiArgs } from '@/lib/api';
 import {
   DataEntryTypes,
