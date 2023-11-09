@@ -67,7 +67,7 @@ export default function EntryTypeAdd(props: {
     description: [required, minlen(7), maxlen(100)],
     unit: [required, minlen(2), maxlen(20)],
   };
-  
+
   // functions that prepare error messages
   const textmessages = [
     (f: string) => `${f} is required`,
@@ -127,7 +127,7 @@ export default function EntryTypeAdd(props: {
       return;
     }
     validateInputUpdateStore(e.target);
-  }
+  };
 
   // submit data
   async function postEntryTypeData(e: Event) {
@@ -156,15 +156,18 @@ export default function EntryTypeAdd(props: {
     const [remote, abort] = apiEntryType.add(requestData);
 
     // closing while loading trigger request abortion
+    const closeWhile = () => props.closing() && submitForm.loading;
     createEffect(() => {
-      if (props.closing() && submitForm.loading) {
+      if (closeWhile()) {
         abort();
+        setInputs({ code: zero(), description: zero(), unit: zero(true) });
         setReset(true);
       }
     });
 
     return await remote;
   }
+
   // action is responsability of the outer component
   const [action, setAction] = props!.action;
 
@@ -172,7 +175,7 @@ export default function EntryTypeAdd(props: {
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
 
-  // vaidate and submit 
+  // vaidate and submit
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
 
@@ -184,8 +187,8 @@ export default function EntryTypeAdd(props: {
 
     setStartSubmit(evt);
   };
-  
-  // bind submit event 
+
+  // bind submit event
   let formRef: HTMLFormElement | undefined;
   // set up handling the submit event
   onMount(() => formRef!.addEventListener('submit', handleSubmit));
