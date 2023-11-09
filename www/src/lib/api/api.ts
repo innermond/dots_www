@@ -1,19 +1,3 @@
-import {
-  DataCompanies,
-  DataCompanyStats,
-  isDataCompanies,
-  isDataCompanyStats,
-  DataCompanyDepletion,
-  isDataCompanyDepletion,
-} from '@/pages/company/types';
-
-import {
-  DataEntryTypes,
-  isDataEntryTypes,
-  EntryTypeData,
-  isEntryTypeData,
-} from '@/pages/entry-types/types';
-
 const API = 'http://api.dots.volt.com/v1';
 
 class ApiError extends Error {
@@ -137,6 +121,16 @@ const query = (path: string, pairs: Record<string, string>) => {
   return url;
 };
 
+function apix<T>(args: ApiArgs<T>) : [ReturnType<typeof api<T>>, Function] {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const promise = api({...args, signal});
+    const abort = () => controller.abort();
+
+    return [promise, abort];
+}
+
 type LoginParams = {
   usr: string;
   pwd: string;
@@ -193,4 +187,4 @@ function convertKeysToCamelCase(data: unknown): CamelCase<typeof data> {
 }
 
 export type { ApiArgs };
-export { ApiError, api, query, send };
+export { ApiError, api, query, send, apix };

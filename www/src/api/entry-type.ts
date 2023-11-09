@@ -1,4 +1,5 @@
-import { api, ApiArgs } from '@/lib/api';
+import { api, apix, } from '@/lib/api';
+import type { ApiArgs } from '@/lib/api';
 import {
   DataEntryTypes,
   DataEntryTypeUnits,
@@ -31,20 +32,16 @@ class APIEntryType {
     return api(args);
   }
 
-  add(data: EntryTypeData): [Promise<EntryTypeData | Error>, Function] {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
+  add(data: EntryTypeData): ReturnType<typeof apix<EntryTypeData>> {
     const args = {
       hint: 'adding entry type',
       method: 'POST',
       url: '/entry-types',
       isFn: isEntryTypeData,
       data,
-      signal,
     } as ApiArgs<EntryTypeData>;
 
-    return [api(args), () => controller.abort()];
+    return apix<EntryTypeData>(args);
   }
 }
 
