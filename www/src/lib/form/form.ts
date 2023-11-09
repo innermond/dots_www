@@ -70,6 +70,6 @@ type ValuableFormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectEl
 type FieldNames<T extends string[]> = T[number];
 
 export type {
-  Validable, Validation, Validator, Validators, Func, FuncWithArgs, MessagesMap, Messages, ValuableFormControl, FieldNames, };
+  Validable, Validation, Validator, Validators, Func, FuncWithArgs, MessagesMap, Messages, ValuableFormControl, FieldNames,};
 
 export { validate, makeDefaults };
