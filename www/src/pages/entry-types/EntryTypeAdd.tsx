@@ -30,7 +30,7 @@ import { AlertColor } from '@suid/material/Alert/AlertProps';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
 import { apiEntryType } from '@/api';
-import type { MessagesMap, Validators } from '@/lib/form';
+import type { MessagesMap, Validators, FieldNames } from '@/lib/form';
 import { makeDefaults } from '@/lib/form';
 import { required, minlen, maxlen, validate } from '@/lib/form';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
@@ -38,9 +38,6 @@ import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
 import { payload, zero } from '@/lib/api';
-
-type FormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-type FieldNames<T extends string[]> = T[number];
 
 const theme = useTheme();
 

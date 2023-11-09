@@ -66,6 +66,9 @@ const makeDefaults = (...names: string[]) => {
   return defaults;
 };
 
+type ValuableFormControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+type FieldNames<T extends string[]> = T[number];
+
 export type {
   Validable,
   Validation,
@@ -75,6 +78,8 @@ export type {
   FuncWithArgs,
   MessagesMap,
   Messages,
+  ValuableFormControl,
+  FieldNames,
 };
 
 export { validate, makeDefaults };
