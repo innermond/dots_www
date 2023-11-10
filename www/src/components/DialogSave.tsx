@@ -11,22 +11,15 @@ import {
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
-import {
-  JSX,
-  ParentProps,
-  Signal,
-  createSignal,
-  Accessor,
-  createMemo,
-} from 'solid-js';
+import { JSX, ParentProps, Signal, createSignal, Accessor } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import type { Component } from 'solid-js';
 
-const Transition = function Transition(
+const defaultTransition = function (
   props: TransitionProps & {
     children: JSX.Element;
   },
-) {
+): JSX.Element {
   return <Slide direction="up" {...props} />;
 };
 
@@ -34,6 +27,7 @@ export type DialogSaveProps = {
   open: Signal<boolean | undefined>;
   title: string;
   textSave?: string;
+  transition?: Component<TransitionProps & { children: JSX.Element }>;
   dyn?: Component<{ closing: Accessor<boolean>; action: Signal<boolean> }>;
 } & ParentProps;
 
@@ -73,7 +67,7 @@ const DialogSave = (props: DialogSaveProps) => {
       fullWidth
       open={isOpen()}
       onClose={handleCloseClick}
-      TransitionComponent={Transition}
+      TransitionComponent={props.transition ?? defaultTransition}
     >
       <AppBar color="transparent" sx={{ position: 'relative' }}>
         <Toolbar>

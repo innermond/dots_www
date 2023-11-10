@@ -6,7 +6,7 @@ import {
   createSignal,
   lazy,
 } from 'solid-js';
-import type { Component, JSX } from 'solid-js';
+import type { ParentComponent, Component, JSX } from 'solid-js';
 import {
   Paper,
   Table,
@@ -20,7 +20,9 @@ import {
   Button,
   useTheme,
   IconButton,
+  Slide,
 } from '@suid/material';
+import { TransitionProps } from '@suid/material/transitions';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
 import { useNavigate } from '@solidjs/router';
@@ -58,10 +60,15 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const theme = useTheme();
 
+  const dialogTransition = (
+    props: TransitionProps & { children: JSX.Element },
+  ) => <Slide {...props} direction="left" />;
+
   return (
     <>
       <DialogSave
         dyn={dyn}
+        transition={dialogTransition}
         title="Add entry type"
         textSave="Add"
         open={addEntryTypeSignal}
