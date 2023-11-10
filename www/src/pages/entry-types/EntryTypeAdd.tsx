@@ -1,30 +1,15 @@
+import { Container, TextField, useTheme, FormGroup } from '@suid/material';
 import {
-  Container,
-  FormControl,
-  TextField,
-  MenuItem,
-  Select,
-  InputLabel,
-  useTheme,
-  FormGroup,
-  Button,
-  Typography,
-} from '@suid/material';
-import { SelectChangeEvent } from '@suid/material/Select';
-import {
-  Show,
   createSignal,
   createResource,
   createEffect,
   onMount,
   onCleanup,
-  For,
   Accessor,
-  createMemo,
+  createComputed,
 } from 'solid-js';
 import type { JSX, Signal } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
+import { createStore, unwrap } from 'solid-js/store';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
 import type { EntryTypeData } from '@/pages/entry-types/types';
@@ -38,6 +23,7 @@ import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
 import { payload, zero } from '@/lib/api';
+import InputOrSelect from './InputOrSelect';
 
 const theme = useTheme();
 
@@ -148,11 +134,11 @@ export default function EntryTypeAdd(props: {
     const [remote, abort] = apiEntryType.add(requestData);
 
     // closing while loading trigger request abortion
-    const closeWhile = () => props.closing() && submitForm.loading;
+    const cancelRequest = () => props.closing() && submitForm.loading;
+
     createEffect(() => {
-      if (closeWhile()) {
+      if (cancelRequest()) {
         abort();
-        setInputs({ code: zero(), description: zero(), unit: zero(true) });
       }
     });
 
@@ -165,6 +151,14 @@ export default function EntryTypeAdd(props: {
   // submitting driven by signals
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
   const [submitForm] = createResource(startSubmit, postEntryTypeData);
+
+  createComputed(() => {
+    const v = props.closing();
+    if (v) {
+      setInputs({ code: zero(), description: zero(), unit: zero(true) });
+    }
+    return v;
+  });
 
   // vaidate and submit
   const handleSubmit = (evt: SubmitEvent) => {
@@ -205,17 +199,25 @@ export default function EntryTypeAdd(props: {
 
   const isDisabled = () => submitForm.loading;
 
+  createComputed(() => {
+    submitForm.loading ? setLoading(true) : setAction(false);
+  });
+
   createEffect(() => {
     if (submitForm.loading) {
       toasting.dismiss();
-      setLoading(true);
-    } else {
-      // TODO this is a MUST in order to be able to request again
-      setAction(false);
     }
   });
 
   const navigate = useNavigate();
+
+  createComputed(() => {
+    if (submitForm.state === 'ready') {
+      setLoading(false);
+      setInputs({ code: zero(), description: zero(), unit: zero(true) });
+    }
+  });
+
   createEffect(() => {
     if (submitForm.state === 'ready') {
       const result = submitForm() as any;
@@ -229,16 +231,19 @@ export default function EntryTypeAdd(props: {
       if (!isEntryTypeData(result)) {
         throw new Error('data received is not an entry type');
       }
-      const { code, unit } = result as EntryTypeData;
-      setLoading(false);
-      toasting(`added entry type "${code}" / unit "${unit}"`);
+      const { code } = result as EntryTypeData;
+      toasting(`entry type "${code}" has been added`);
+    }
+  });
 
-      setInputs({ code: zero(), description: zero(), unit: zero(true) });
+  createComputed(() => {
+    if (submitForm.state === 'errored') {
+      setLoading(false);
     }
   });
 
   createEffect(() => {
-    if (submitForm.error) {
+    if (submitForm.state === 'errored') {
       const data = submitForm.error;
       let severity = 'error' as AlertColor;
       let message =
@@ -246,16 +251,13 @@ export default function EntryTypeAdd(props: {
         data?.error ??
         data?.cause?.error ??
         'An error occured';
-      /*if (props.closing()) {
-        message = data.message;
-        severity = 'info';
-      }*/
+      if (data.name === 'AbortError') {
+        severity = 'info' as AlertColor;
+        message = 'Adding a new entry type has been canceled by user';
+      }
       toasting(message, severity);
-      setLoading(false);
     }
   });
-
-  const [reset, setReset] = createSignal(false);
 
   return (
     <Container
@@ -307,7 +309,7 @@ export default function EntryTypeAdd(props: {
           disabled={isDisabled()}
         />
       </FormGroup>
-      <UnitSelect
+      <InputOrSelect
         notifyStore={validateInputUpdateStore}
         unit={inputs.unit}
         disabled={isDisabled()}
@@ -315,125 +317,3 @@ export default function EntryTypeAdd(props: {
     </Container>
   );
 }
-
-// It is a component that can switch between a Select and a TextField
-const UnitSelect = (props: {
-  unit: any;
-  notifyStore: Function;
-  disabled: boolean;
-}) => {
-  // open/close Select
-  const [isOpen, setIsOpen] = createSignal(false);
-  // switch to Text
-  const [newUnit, setNewUnit] = createSignal(false);
-
-  // list of units
-  const [unitsResource] = createResource(apiEntryType.units);
-  const units = (): (string | Error)[] => {
-    const info = unitsResource();
-    if (info instanceof Error || !info) {
-      return [];
-    }
-
-    const { data, n } = info as any;
-    return n ? data : [];
-  };
-
-  const handleSelectChange = (evt: SelectChangeEvent) => {
-    // trigger onInput
-    props.notifyStore({ name: 'unit', value: evt.target.value });
-    setIsOpen(false);
-  };
-
-  const handleNewUnitChange = (evt: Event) => {
-    props.notifyStore({ name: 'unit', value: (evt.target as any)?.value });
-  };
-
-  const switchNewUnit = (txt: string, openNewUnit: boolean) => {
-    const color = theme.palette.text.secondary;
-    return (
-      <Button
-        endIcon={<ChangeCircleOutlinedIcon color="action" />}
-        sx={{ width: 'fit-content', alignSelf: 'flex-end' }}
-        onClick={() => {
-          if (props.disabled) {
-            return;
-          }
-
-          props.notifyStore({ name: 'unit', value: '' }, true);
-          setNewUnit(openNewUnit);
-          setIsOpen(!openNewUnit);
-        }}
-        disabled={props.disabled}
-      >
-        <Typography sx={{ textTransform: 'lowercase', color }}>
-          {txt}
-        </Typography>
-      </Button>
-    );
-  };
-
-  return (
-    <FormGroup sx={{ width: '100%' }}>
-      <Show when={!newUnit()}>
-        <FormControl disabled={props.disabled}>
-          <InputLabel shrink={props.unit.value} id="unit-label">
-            Unit
-          </InputLabel>
-          <Select
-            labelId="unit-label"
-            label="Unit"
-            id="unit-wrapper"
-            name="unit"
-            inputProps={{
-              id: 'unit',
-            }}
-            defaultValue={''}
-            value={props.unit.value}
-            onChange={handleSelectChange}
-            onClick={(evt: MouseEvent) => {
-              if (props.disabled) {
-                return;
-              }
-
-              const id = (evt.target as HTMLElement)?.id;
-              const inside = id === 'unit-wrapper';
-              setIsOpen(() => inside);
-              if (!inside) {
-                setTimeout(props.notifyStore({ unit: zero(true) }));
-              }
-            }}
-            open={isOpen()}
-            error={props.unit.error}
-          >
-            <For each={units()}>
-              {(u: string | Error) => {
-                if (u instanceof Error) {
-                  return <MenuItem value={u.message}>{u.message}</MenuItem>;
-                }
-                return <MenuItem value={u}>{u}</MenuItem>;
-              }}
-            </For>
-          </Select>
-        </FormControl>
-        {switchNewUnit('or add a new unit', true)}
-      </Show>
-      <Show when={newUnit()}>
-        <TextField
-          inputRef={input => setTimeout(() => input.focus())}
-          name="unit"
-          label="Unit"
-          type="text"
-          id="unit"
-          autoComplete="off"
-          onChange={handleNewUnitChange}
-          value={props.unit.value}
-          error={props.unit.error}
-          helperText={props.unit.message}
-          disabled={props.disabled}
-        />
-        {switchNewUnit('or use existent unit', false)}
-      </Show>
-    </FormGroup>
-  );
-};

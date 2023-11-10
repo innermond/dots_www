@@ -11,7 +11,14 @@ import {
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
-import { JSX, ParentProps, Signal, createSignal, Accessor } from 'solid-js';
+import {
+  JSX,
+  ParentProps,
+  Signal,
+  createSignal,
+  Accessor,
+  createMemo,
+} from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 import type { Component } from 'solid-js';
 
@@ -24,13 +31,14 @@ const Transition = function Transition(
 };
 
 export type DialogSaveProps = {
-  open: Signal<boolean>;
+  open: Signal<boolean | undefined>;
   title: string;
   textSave?: string;
   dyn?: Component<{ closing: Accessor<boolean>; action: Signal<boolean> }>;
 } & ParentProps;
 
 const DialogSave = (props: DialogSaveProps) => {
+  // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
 
   const handleCloseClick = () => {
@@ -44,7 +52,14 @@ const DialogSave = (props: DialogSaveProps) => {
     setAction(true);
   };
 
-  const closing = () => !open();
+  // must be true or false
+  // it start as closed (false) when open() is undefined
+  const closing = (): boolean => {
+    const v = open();
+    if (v === undefined) return false;
+    return !v;
+  };
+
   let Dyn: JSX.Element;
   if (props.dyn) {
     Dyn = (
@@ -52,10 +67,11 @@ const DialogSave = (props: DialogSaveProps) => {
     );
   }
 
+  const isOpen = () => open() ?? false;
   return (
     <Dialog
       fullWidth
-      open={open()}
+      open={isOpen()}
       onClose={handleCloseClick}
       TransitionComponent={Transition}
     >

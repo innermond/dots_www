@@ -4,7 +4,7 @@ import { AlertColor } from '@suid/material/Alert/AlertProps';
 import { toast } from 'solid-toast';
 
 const toasting = (message: string | JSX.Element, severity?: AlertColor) => {
-  if (!!severity) {
+  if (!severity) {
     severity = 'info';
   }
 

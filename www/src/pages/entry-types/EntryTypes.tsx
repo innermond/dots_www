@@ -50,7 +50,7 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const addEntryTypeSignal = createSignal(false);
+  const addEntryTypeSignal = createSignal<boolean | undefined>(undefined);
   const openDialogToAddEntryType = () => {
     addEntryTypeSignal[1](true);
   };

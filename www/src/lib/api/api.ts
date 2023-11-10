@@ -73,7 +73,7 @@ async function send<T>(
   } catch (err: any) {
     // TODO find a proper way to deal with AbortError
     if (err?.name === 'AbortError') {
-      throw new Error(err.message);
+      throw err;
     }
     throw err;
   }
