@@ -8,12 +8,22 @@ import {
   Typography,
   Slide,
   Divider,
+  Container,
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
-import { JSX, ParentProps, Signal, createSignal, Accessor } from 'solid-js';
+import {
+  Show,
+  JSX,
+  ParentProps,
+  Signal,
+  createSignal,
+  Accessor,
+} from 'solid-js';
+import { createStore } from 'solid-js/store';
 import { Dynamic } from 'solid-js/web';
 import type { Component } from 'solid-js';
+import { makeDefaults, FieldNames } from '@/lib/form';
 
 const defaultTransition = function (
   props: TransitionProps & {
@@ -29,6 +39,7 @@ export type DialogSaveProps = {
   textSave?: string;
   transition?: Component<TransitionProps & { children: JSX.Element }>;
   dyn?: Component<{ closing: Accessor<boolean>; action: Signal<boolean> }>;
+  names: string[];
 } & ParentProps;
 
 const DialogSave = (props: DialogSaveProps) => {
@@ -42,7 +53,12 @@ const DialogSave = (props: DialogSaveProps) => {
   const actionSignal = createSignal(false);
   const [, setAction] = actionSignal;
 
-  const handleActionClick = () => {
+  const handleActionClick = (evt: Event) => {
+    evt.preventDefault();
+    formRef?.requestSubmit();
+  };
+  const handleSubmit = (evt: Event) => {
+    evt.preventDefault();
     setAction(true);
   };
 
@@ -54,12 +70,22 @@ const DialogSave = (props: DialogSaveProps) => {
     return !v;
   };
 
-  let Dyn: JSX.Element;
-  if (props.dyn) {
-    Dyn = (
-      <Dynamic closing={closing} action={actionSignal} component={props.dyn} />
-    );
-  }
+  let formRef: HTMLFormElement | undefined;
+
+  const names = props.names;
+  type Names = FieldNames<typeof names>;
+
+  // set up local state for the inputs named above
+  const defaultInputs = makeDefaults(...names);
+  const [inputs, setInputs] = createStore(defaultInputs);
+  const inputsHasErrors = () => {
+    for (const name of names) {
+      if (inputs[name].error) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   const isOpen = () => open() ?? false;
   return (
@@ -100,7 +126,21 @@ const DialogSave = (props: DialogSaveProps) => {
         </Toolbar>
         <Divider />
       </AppBar>
-      {Dyn}
+      <Show when={props.dyn}>
+        <Container
+          ref={formRef}
+          novalidate
+          autocomplete="off"
+          component="form"
+          onSubmit={handleSubmit}
+        >
+          <Dynamic
+            closing={closing}
+            action={actionSignal}
+            component={props.dyn}
+          />
+        </Container>
+      </Show>
       {props.children}
     </Dialog>
   );

@@ -8,8 +8,8 @@ import {
   Accessor,
   createComputed,
 } from 'solid-js';
-import type { JSX, Signal } from 'solid-js';
-import { createStore, unwrap } from 'solid-js/store';
+import type { JSX, Signal, ComponentProps } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
 import type { EntryTypeData } from '@/pages/entry-types/types';
@@ -172,7 +172,7 @@ export default function EntryTypeAdd(props: {
 
     setStartSubmit(evt);
   };
-
+  /*
   // bind submit event
   let formRef: HTMLFormElement | undefined;
   // set up handling the submit event
@@ -196,7 +196,7 @@ export default function EntryTypeAdd(props: {
       }
     }
   });
-
+*/
   const isDisabled = () => submitForm.loading;
 
   createComputed(() => {
@@ -261,11 +261,6 @@ export default function EntryTypeAdd(props: {
 
   return (
     <Container
-      ref={formRef}
-      novalidate
-      autocomplete="off"
-      component="form"
-      onInput={handleInput}
       sx={{
         padding: theme.spacing(3),
         display: 'flex',

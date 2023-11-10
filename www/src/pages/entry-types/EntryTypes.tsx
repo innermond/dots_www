@@ -72,6 +72,7 @@ const EntryTypes: Component = (): JSX.Element => {
         title="Add entry type"
         textSave="Add"
         open={addEntryTypeSignal}
+        names={['code', 'description', 'unit']}
       />
       <Show when={result.state === 'ready'}>
         <TableContainer component={Paper}>
