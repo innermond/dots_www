@@ -108,14 +108,6 @@ export default function EntryTypeAdd(props: {
     });
   };
 
-  // reset local state
-  // resseting falls down to DOM, clearing inputs
-  createEffect(() => {
-    if (!reset()) return;
-
-    setInputs({ code: zero(), description: zero(), unit: zero(true) });
-  });
-
   // respond to input events
   const handleInput = (e: Event): void => {
     e.preventDefault();
@@ -161,7 +153,6 @@ export default function EntryTypeAdd(props: {
       if (closeWhile()) {
         abort();
         setInputs({ code: zero(), description: zero(), unit: zero(true) });
-        setReset(true);
       }
     });
 
@@ -243,7 +234,6 @@ export default function EntryTypeAdd(props: {
       toasting(`added entry type "${code}" / unit "${unit}"`);
 
       setInputs({ code: zero(), description: zero(), unit: zero(true) });
-      setReset(true);
     }
   });
 
@@ -318,7 +308,6 @@ export default function EntryTypeAdd(props: {
         />
       </FormGroup>
       <UnitSelect
-        reset={reset}
         notifyStore={validateInputUpdateStore}
         unit={inputs.unit}
         disabled={isDisabled()}
@@ -330,7 +319,6 @@ export default function EntryTypeAdd(props: {
 // It is a component that can switch between a Select and a TextField
 const UnitSelect = (props: {
   unit: any;
-  reset: Accessor<boolean>;
   notifyStore: Function;
   disabled: boolean;
 }) => {
@@ -385,7 +373,6 @@ const UnitSelect = (props: {
     );
   };
 
-  const items = createMemo(() => units());
   return (
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
@@ -419,7 +406,7 @@ const UnitSelect = (props: {
             open={isOpen()}
             error={props.unit.error}
           >
-            <For each={items()}>
+            <For each={units()}>
               {(u: string | Error) => {
                 if (u instanceof Error) {
                   return <MenuItem value={u.message}>{u.message}</MenuItem>;
