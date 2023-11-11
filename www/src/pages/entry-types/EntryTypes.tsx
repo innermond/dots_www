@@ -6,7 +6,7 @@ import {
   createSignal,
   lazy,
 } from 'solid-js';
-import type { ParentComponent, Component, JSX } from 'solid-js';
+import type { Component, JSX } from 'solid-js';
 import {
   Paper,
   Table,

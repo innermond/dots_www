@@ -32,7 +32,7 @@ class APIEntryType {
     return api(args);
   }
 
-  add(data: EntryTypeData): ReturnType<typeof apix<typeof data>> {
+  add(data: Omit<EntryTypeData, 'id'>): ReturnType<typeof apix<typeof data>> {
     const args = {
       hint: 'adding entry type',
       method: 'POST',

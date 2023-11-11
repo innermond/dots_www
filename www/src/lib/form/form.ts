@@ -55,7 +55,9 @@ function validate<T extends string>(
   return multierrors;
 }
 
-const makeDefaults = (...names: string[]) => {
+const makeDefaults = (
+  ...names: string[]
+): Validable<(typeof names)[number]> => {
   const defaults = {} as Validable<(typeof names)[number]>;
   let n: string;
   for (n of names) {
