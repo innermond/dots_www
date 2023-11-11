@@ -36,7 +36,6 @@ import { makeDefaults, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
-import { zero } from '@/lib/api';
 
 const defaultTransition = function (
   props: TransitionProps & {
@@ -88,6 +87,7 @@ const DialogSave = (props: DialogSaveProps) => {
     }
     return false;
   };
+  const zeroingInputs = () => setInputs(makeDefaults(...names));
 
   // set up validation
   const validators: Validators<Names> = {
@@ -205,7 +205,7 @@ const DialogSave = (props: DialogSaveProps) => {
   createComputed(() => {
     const v = closing();
     if (v) {
-      setInputs({ code: zero(), description: zero(), unit: zero(true) });
+      zeroingInputs();
     }
     return v;
   });
@@ -241,7 +241,7 @@ const DialogSave = (props: DialogSaveProps) => {
   createComputed(() => {
     if (submitForm.state === 'ready') {
       setLoading(false);
-      setInputs({ code: zero(), description: zero(), unit: zero(true) });
+      zeroingInputs();
     }
   });
 
