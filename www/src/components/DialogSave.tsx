@@ -288,7 +288,7 @@ const DialogSave = (props: DialogSaveProps) => {
 
   const appBar = (
     <AppBar color="transparent" sx={{ position: 'relative' }}>
-      <Toolbar>
+      <Toolbar sx={{ pr: 0 }}>
         <IconButton
           edge="start"
           color="inherit"
