@@ -21,6 +21,11 @@ type MessagesMap<T extends string> = {
 };
 type Messages = Array<(...params: any) => string | string[]>;
 
+type InnerValidation<T extends string> = {
+  validators: Validators<T>;
+  messages: MessagesMap<T>;
+};
+
 function validate<T extends string>(
   name: string,
   value: any,
@@ -85,6 +90,7 @@ export type {
   Messages,
   ValuableFormControl,
   FieldNames,
+  InnerValidation,
 };
 
 export { validate, makeDefaults };

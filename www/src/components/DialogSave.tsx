@@ -22,7 +22,7 @@ import {
   createComputed,
   createEffect,
 } from 'solid-js';
-import { Store, createStore } from 'solid-js/store';
+import { Store, createStore, unwrap } from 'solid-js/store';
 import { Dynamic } from 'solid-js/web';
 import type { Accessor, Component } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
@@ -30,8 +30,8 @@ import { AlertColor } from '@suid/material/Alert/AlertProps';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
 import { apiEntryType } from '@/api';
-import type { MessagesMap, Validable, Validators } from '@/lib/form';
-import { required, minlen, maxlen, validate } from '@/lib/form';
+import type { InnerValidation, Validable } from '@/lib/form';
+import { validate } from '@/lib/form';
 import { makeDefaults, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
@@ -89,28 +89,7 @@ const DialogSave = (props: DialogSaveProps) => {
   };
   const zeroingInputs = () => setInputs(makeDefaults(...names));
 
-  // set up validation
-  const validators: Validators<Names> = {
-    code: [required, minlen(7), maxlen(50)],
-    description: [required, minlen(7), maxlen(100)],
-    unit: [required, minlen(2), maxlen(20)],
-  };
-
-  // functions that prepare error messages
-  const textmessages = [
-    (f: string) => `${f} is required`,
-    (f: string, v: string, { len }: { len: number }) =>
-      `${f} must be more than ${len} - has ${v.length}`,
-    (f: string, v: string, { len }: { len: number }) =>
-      `${f} must be less than ${len} - has ${v.length}`,
-  ];
-
-  // map error messages with field names
-  const messages: MessagesMap<Names> = {
-    code: textmessages,
-    description: textmessages,
-    unit: textmessages,
-  };
+  const [validation, setValidation] = createSignal<InnerValidation<string>>();
 
   // validate named fields and then
   // update the local inputs store
@@ -123,12 +102,14 @@ const DialogSave = (props: DialogSaveProps) => {
       return;
     }
 
+    const fail = unwrap(validation());
+
     const { name, value } = data as any;
     if (!names.includes(name)) return;
 
     const multierrors: string[] = skipValidation
       ? []
-      : validate<Names>(name, value, validators, messages);
+      : validate<Names>(name, value, fail!.validators, fail!.messages);
     setInputs(name as Names, {
       value,
       error: multierrors.length > 0,
@@ -347,6 +328,7 @@ const DialogSave = (props: DialogSaveProps) => {
           <Dynamic
             inputs={inputs}
             isDisabled={isDisabled}
+            setValidation={setValidation}
             component={props.dyn}
           />
         </Container>
