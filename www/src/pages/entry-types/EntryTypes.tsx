@@ -5,6 +5,8 @@ import {
   For,
   createSignal,
   lazy,
+  getOwner,
+  runWithOwner,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -25,12 +27,14 @@ import {
 import { TransitionProps } from '@suid/material/transitions';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
+import EditIcon from '@suid/icons-material/Edit';
 import { useNavigate } from '@solidjs/router';
 
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData } from './types';
 import DialogSave from '@/components/DialogSave';
+import { Dynamic } from 'solid-js/web';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -52,11 +56,17 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const addEntryTypeSignal = createSignal<boolean | undefined>(undefined);
-  const openDialogToAddEntryType = () => {
-    addEntryTypeSignal[1](true);
+  const dialogSignal = createSignal<boolean | undefined>(undefined);
+  const [openDialog, setOpenDialog] = dialogSignal;
+
+  const [dyn, setDyn] = createSignal<'editEntry' | 'addEntry'>();
+  const addEntryType = lazy(() => import('./EntryTypeAdd'));
+  const editEntryType = lazy(() => import('./EntryTypeEdit'));
+
+  const openDialogWith = (cmp: 'editEntry' | 'addEntry') => {
+    setOpenDialog(true);
+    setDyn(cmp);
   };
-  const dyn = lazy(() => import('./EntryTypeAdd'));
 
   const theme = useTheme();
 
@@ -64,16 +74,26 @@ const EntryTypes: Component = (): JSX.Element => {
     props: TransitionProps & { children: JSX.Element },
   ) => <Slide {...props} direction="left" />;
 
+  const dialogSave = () => (
+    <Show when={openDialog()}>
+      <DialogSave
+        transition={dialogTransition}
+        title={
+          (dyn() as string) === 'editEntry'
+            ? 'Edit entry type'
+            : 'Add entry type'
+        }
+        textSave="Add"
+        open={dialogSignal}
+        names={['code', 'description', 'unit']}
+        dyn={(dyn() as string) === 'editEntry' ? editEntryType : addEntryType}
+      />
+    </Show>
+  );
+
   return (
     <>
-      <DialogSave
-        dyn={dyn}
-        transition={dialogTransition}
-        title="Add entry type"
-        textSave="Add"
-        open={addEntryTypeSignal}
-        names={['code', 'description', 'unit']}
-      />
+      {dialogSave}
       <Show when={result.state === 'ready'}>
         <TableContainer component={Paper}>
           <Stack
@@ -88,7 +108,7 @@ const EntryTypes: Component = (): JSX.Element => {
             <Button
               size="large"
               startIcon={<AddIcon />}
-              onClick={openDialogToAddEntryType}
+              onClick={() => openDialogWith('addEntry')}
             >
               Add Entry Type
             </Button>
@@ -126,11 +146,20 @@ const EntryTypes: Component = (): JSX.Element => {
                         <IconButton
                           color="primary"
                           aria-label="view entry type"
-                          onclick={() =>
+                          /*onclick={() =>
                             navigate('./' + c.id, { replace: true })
-                          }
+                          }*/
                         >
                           <VisibilityOutlinedIcon />
+                          <IconButton
+                            color="primary"
+                            aria-label="view entry type"
+                            onclick={(evt: Event) => {
+                              openDialogWith('editEntry');
+                            }}
+                          >
+                            <EditIcon />
+                          </IconButton>
                         </IconButton>
                       </TableCell>
                     </TableRow>

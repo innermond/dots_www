@@ -21,10 +21,14 @@ import {
   createResource,
   createComputed,
   createEffect,
+  batch,
+  onMount,
+  Suspense,
+  lazy,
 } from 'solid-js';
 import { Store, createStore, unwrap } from 'solid-js/store';
 import { Dynamic } from 'solid-js/web';
-import type { Accessor, Component } from 'solid-js';
+import type { Accessor, Component, Setter } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
 import type { EntryTypeData } from '@/pages/entry-types/types';
@@ -36,6 +40,8 @@ import { makeDefaults, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
+
+const editEntryType = lazy(() => import('../pages/entry-types/EntryTypeEdit'));
 
 const defaultTransition = function (
   props: TransitionProps & {
@@ -53,6 +59,7 @@ export type DialogSaveProps = {
   dyn?: Component<{
     inputs: Store<Validable<keyof Omit<EntryTypeData, 'id'>>>;
     isDisabled: Accessor<boolean>;
+    setValidation: Setter<InnerValidation<string>>;
   }>;
   names: string[];
 } & ParentProps;
@@ -65,11 +72,8 @@ const DialogSave = (props: DialogSaveProps) => {
     setOpen(false);
   };
 
-  // must be true or false
-  // it start as closed (false) when open() is undefined
   const closing = (): boolean => {
     const v = open();
-    if (v === undefined) return false;
     return !v;
   };
 
@@ -267,6 +271,19 @@ const DialogSave = (props: DialogSaveProps) => {
     }
   });
 
+  const propsAreReady = () => {
+    batch(() => {
+      if (!props.dyn) return false;
+      if (!isDisabled()) return false;
+      for (let name of props.names) {
+        if (inputs[name] === undefined) {
+          return false;
+        }
+      }
+      return true;
+    });
+  };
+
   const appBar = (
     <AppBar color="transparent" sx={{ position: 'relative' }}>
       <Toolbar sx={{ pr: 0 }}>
@@ -301,39 +318,45 @@ const DialogSave = (props: DialogSaveProps) => {
     </AppBar>
   );
 
-  const isOpen = () => open() ?? false;
+  onMount(() => {
+    console.log(props);
+  });
+
+  const dynamic = (
+    <Dynamic
+      inputs={inputs}
+      isDisabled={isDisabled}
+      setValidation={setValidation}
+      component={props.dyn}
+    />
+  );
+
+  console.log('dyn', dynamic);
+
   return (
     <Dialog
       fullWidth
       sx={{ alignItems: 'center' }}
-      open={isOpen()}
+      open={open() ?? false}
       onClose={handleCloseClick}
       TransitionComponent={props.transition ?? defaultTransition}
     >
-      <Show when={props.dyn}>
-        <Container
-          novalidate
-          autocomplete="off"
-          component="form"
-          onSubmit={handleSubmit}
-          onInput={handleInput}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            p: 0,
-          }}
-        >
-          {appBar}
-          <Dynamic
-            inputs={inputs}
-            isDisabled={isDisabled}
-            setValidation={setValidation}
-            component={props.dyn}
-          />
-        </Container>
-      </Show>
-      {props.children}
+      <Container
+        novalidate
+        autocomplete="off"
+        component="form"
+        onSubmit={handleSubmit}
+        onInput={handleInput}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          p: 0,
+        }}
+      >
+        {appBar}
+        {dynamic}
+      </Container>
     </Dialog>
   );
 };

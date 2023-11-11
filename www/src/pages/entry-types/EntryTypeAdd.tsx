@@ -46,8 +46,10 @@ export default function EntryTypeAdd(props: {
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
 }): JSX.Element {
-  createComputed(() => {
+  createComputed((prev: boolean | undefined) => {
+    if (prev === undefined) return true;
     props.setValidation({ validators, messages });
+    return true;
   });
 
   return (
@@ -75,10 +77,12 @@ export default function EntryTypeAdd(props: {
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
-          value={props.inputs.code.value}
-          error={props.inputs.code.error}
-          helperText={<HelperTextMultiline lines={props.inputs.code.message} />}
-          disabled={props.isDisabled()}
+          value={props?.inputs.code.value}
+          error={props?.inputs.code.error}
+          helperText={
+            <HelperTextMultiline lines={props?.inputs.code.message} />
+          }
+          disabled={props?.isDisabled()}
         />
         <TextField
           name="description"
@@ -87,19 +91,19 @@ export default function EntryTypeAdd(props: {
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
-          value={props.inputs.description.value}
-          error={props.inputs.description.error}
+          value={props?.inputs.description.value}
+          error={props?.inputs.description.error}
           helperText={
-            <HelperTextMultiline lines={props.inputs.description.message} />
+            <HelperTextMultiline lines={props?.inputs.description.message} />
           }
-          disabled={props.isDisabled()}
+          disabled={props?.isDisabled()}
         />
       </FormGroup>
       <InputOrSelect
         //notifyStore={validateInputUpdateStore}
         notifyStore={() => {}}
-        unit={props.inputs.unit}
-        disabled={props.isDisabled()}
+        unit={props?.inputs.unit}
+        disabled={props?.isDisabled()}
       />
     </Container>
   );

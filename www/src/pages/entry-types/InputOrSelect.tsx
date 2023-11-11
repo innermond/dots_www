@@ -22,7 +22,7 @@ const theme = useTheme();
 const InputOrSelect = (props: {
   unit: any;
   notifyStore: Function;
-  disabled: boolean;
+  disabled?: boolean;
 }) => {
   // open/close Select
   const [isOpen, setIsOpen] = createSignal(false);
@@ -79,7 +79,7 @@ const InputOrSelect = (props: {
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
         <FormControl disabled={props.disabled}>
-          <InputLabel shrink={props.unit.value} id="unit-label">
+          <InputLabel shrink={props.unit?.value} id="unit-label">
             Unit
           </InputLabel>
           <Select
@@ -91,7 +91,7 @@ const InputOrSelect = (props: {
               id: 'unit',
             }}
             defaultValue={''}
-            value={props.unit.value}
+            value={props.unit?.value}
             onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {
               if (props.disabled) {
@@ -106,7 +106,7 @@ const InputOrSelect = (props: {
               }
             }}
             open={isOpen()}
-            error={props.unit.error}
+            error={props.unit?.error}
           >
             <For each={units()}>
               {(u: string | Error) => {
