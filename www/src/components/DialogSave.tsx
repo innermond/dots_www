@@ -13,7 +13,6 @@ import {
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
 import {
-  Show,
   JSX,
   ParentProps,
   Signal,
@@ -21,10 +20,6 @@ import {
   createResource,
   createComputed,
   createEffect,
-  batch,
-  onMount,
-  Suspense,
-  lazy,
 } from 'solid-js';
 import { Store, createStore, unwrap } from 'solid-js/store';
 import { Dynamic } from 'solid-js/web';
@@ -33,15 +28,12 @@ import { AlertColor } from '@suid/material/Alert/AlertProps';
 
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
-import { apiEntryType } from '@/api';
 import type { InnerValidation, Validable } from '@/lib/form';
 import { validate } from '@/lib/form';
 import { makeDefaults, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
-
-const editEntryType = lazy(() => import('../pages/entry-types/EntryTypeEdit'));
 
 const defaultTransition = function (
   props: TransitionProps & {
@@ -56,12 +48,14 @@ export type DialogSaveProps = {
   title: string;
   textSave?: string;
   transition?: Component<TransitionProps & { children: JSX.Element }>;
-  dyn?: Component<{
-    inputs: Store<Validable<keyof Omit<EntryTypeData, 'id'>>>;
+  dyn: Component<{
+    inputs: Store<Validable<string>>;
     isDisabled: Accessor<boolean>;
     setValidation: Setter<InnerValidation<string>>;
   }>;
   names: string[];
+  sendRequestFn: Function;
+  intialInputs?: any;
 } & ParentProps;
 
 const DialogSave = (props: DialogSaveProps) => {
@@ -81,7 +75,9 @@ const DialogSave = (props: DialogSaveProps) => {
   type Names = FieldNames<typeof names>;
 
   // set up local state for the inputs named above
-  const defaultInputs = makeDefaults(...names);
+  let defaultInputs = makeDefaults(props.intialInputs, ...names);
+  if (props?.intialInputs) {
+  }
   const [inputs, setInputs] = createStore(defaultInputs);
   const inputsHasErrors = () => {
     for (const name of names) {
@@ -91,7 +87,8 @@ const DialogSave = (props: DialogSaveProps) => {
     }
     return false;
   };
-  const zeroingInputs = () => setInputs(makeDefaults(...names));
+  const zeroingInputs = () =>
+    setInputs(makeDefaults(props.intialInputs, ...names));
 
   const [validation, setValidation] = createSignal<InnerValidation<string>>();
 
@@ -158,7 +155,7 @@ const DialogSave = (props: DialogSaveProps) => {
   }
 
   // submit data
-  async function postEntryTypeData(e: Event) {
+  async function sendRequest(e: Event) {
     e.preventDefault();
     if (!e.target) return;
 
@@ -169,7 +166,7 @@ const DialogSave = (props: DialogSaveProps) => {
       names,
     );
     // fire request
-    const [remote, abort] = apiEntryType.add(requestData);
+    const [remote, abort] = props.sendRequestFn(requestData);
 
     // closing while loading trigger request abortion
     const cancelRequest = () => closing() && submitForm.loading;
@@ -185,7 +182,7 @@ const DialogSave = (props: DialogSaveProps) => {
 
   // submitting driven by signals
   const [startSubmit, setStartSubmit] = createSignal<Event | null>();
-  const [submitForm] = createResource(startSubmit, postEntryTypeData);
+  const [submitForm] = createResource(startSubmit, sendRequest);
 
   createComputed(() => {
     const v = closing();
@@ -271,19 +268,6 @@ const DialogSave = (props: DialogSaveProps) => {
     }
   });
 
-  const propsAreReady = () => {
-    batch(() => {
-      if (!props.dyn) return false;
-      if (!isDisabled()) return false;
-      for (let name of props.names) {
-        if (inputs[name] === undefined) {
-          return false;
-        }
-      }
-      return true;
-    });
-  };
-
   const appBar = (
     <AppBar color="transparent" sx={{ position: 'relative' }}>
       <Toolbar sx={{ pr: 0 }}>
@@ -318,10 +302,6 @@ const DialogSave = (props: DialogSaveProps) => {
     </AppBar>
   );
 
-  onMount(() => {
-    console.log(props);
-  });
-
   const dynamic = (
     <Dynamic
       inputs={inputs}
@@ -330,8 +310,6 @@ const DialogSave = (props: DialogSaveProps) => {
       component={props.dyn}
     />
   );
-
-  console.log('dyn', dynamic);
 
   return (
     <Dialog

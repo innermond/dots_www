@@ -1,5 +1,5 @@
 import { Container, TextField, useTheme, FormGroup } from '@suid/material';
-import { Show, createComputed, createMemo, onMount } from 'solid-js';
+import { Show } from 'solid-js';
 import type { Accessor, Setter, JSX } from 'solid-js';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import InputOrSelect from './InputOrSelect';
@@ -13,10 +13,9 @@ import type {
   Validators,
 } from '@/lib/form';
 import { required, minlen, maxlen } from '@/lib/form';
-import { Shop } from '@suid/icons-material';
 
 const theme = useTheme();
-const names = ['code', 'description', 'unit'];
+const names = ['id', 'code', 'description', 'unit'];
 type Names = FieldNames<typeof names>;
 
 // set up validation
@@ -47,8 +46,6 @@ export default function EntryTypeEdit(props: {
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
 }): JSX.Element {
-  onMount(() => console.log('edit', props ? props.setValidation : 'nothing'));
-
   props.setValidation({ validators, messages });
 
   return (
@@ -100,8 +97,6 @@ export default function EntryTypeEdit(props: {
           />
         </FormGroup>
         <InputOrSelect
-          //notifyStore={validateInputUpdateStore}
-          notifyStore={() => {}}
           unit={props?.inputs.unit}
           disabled={props?.isDisabled()}
         />

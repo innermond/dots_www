@@ -61,13 +61,18 @@ function validate<T extends string>(
 }
 
 const makeDefaults = (
+  initialInputs = null,
   ...names: string[]
 ): Validable<(typeof names)[number]> => {
   const defaults = {} as Validable<(typeof names)[number]>;
   let n: string;
   for (n of names) {
     // use value: null because undefined will make component uncontrolled
-    defaults[n] = { value: null, error: false, message: [] };
+    let v: any = null;
+    if (!!initialInputs && n in initialInputs) {
+      v = initialInputs[n];
+    }
+    defaults[n] = { value: v, error: false, message: [] };
   }
 
   return defaults;

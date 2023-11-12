@@ -5,8 +5,7 @@ import {
   For,
   createSignal,
   lazy,
-  getOwner,
-  runWithOwner,
+  batch,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -34,7 +33,6 @@ import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData } from './types';
 import DialogSave from '@/components/DialogSave';
-import { Dynamic } from 'solid-js/web';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -59,13 +57,23 @@ const EntryTypes: Component = (): JSX.Element => {
   const dialogSignal = createSignal<boolean | undefined>(undefined);
   const [openDialog, setOpenDialog] = dialogSignal;
 
-  const [dyn, setDyn] = createSignal<'editEntry' | 'addEntry'>();
+  type LazyWhat = 'editEntry' | 'addEntry';
+
+  const [dyn, setDyn] = createSignal<LazyWhat>();
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
 
-  const openDialogWith = (cmp: 'editEntry' | 'addEntry') => {
-    setOpenDialog(true);
-    setDyn(cmp);
+  const [intialInputs, setInitialInputs] = createSignal();
+  const handleDialogWith = (
+    args: { cmp: LazyWhat; data?: EntryTypeData },
+    evt: Event,
+  ) => {
+    const { cmp, data } = args;
+    batch(() => {
+      setOpenDialog(true);
+      setDyn(cmp);
+      setInitialInputs(data);
+    });
   };
 
   const theme = useTheme();
@@ -87,6 +95,12 @@ const EntryTypes: Component = (): JSX.Element => {
         open={dialogSignal}
         names={['code', 'description', 'unit']}
         dyn={(dyn() as string) === 'editEntry' ? editEntryType : addEntryType}
+        sendRequestFn={
+          (dyn() as string) === 'editEntry'
+            ? apiEntryType.edit
+            : apiEntryType.add
+        }
+        intialInputs={intialInputs()}
       />
     </Show>
   );
@@ -108,7 +122,7 @@ const EntryTypes: Component = (): JSX.Element => {
             <Button
               size="large"
               startIcon={<AddIcon />}
-              onClick={() => openDialogWith('addEntry')}
+              onClick={[handleDialogWith, { cmp: 'addEntry' }]}
             >
               Add Entry Type
             </Button>
@@ -154,9 +168,10 @@ const EntryTypes: Component = (): JSX.Element => {
                           <IconButton
                             color="primary"
                             aria-label="view entry type"
-                            onclick={(evt: Event) => {
-                              openDialogWith('editEntry');
-                            }}
+                            onClick={[
+                              handleDialogWith,
+                              { cmp: 'editEntry' as LazyWhat, data: c },
+                            ]}
                           >
                             <EditIcon />
                           </IconButton>

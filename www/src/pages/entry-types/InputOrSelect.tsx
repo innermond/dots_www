@@ -9,21 +9,15 @@ import {
   Typography,
   useTheme,
 } from '@suid/material';
-import { SelectChangeEvent } from '@suid/material/Select';
 import { Show, createSignal, createResource, For } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 import { apiEntryType } from '@/api';
-import { zero } from '@/lib/api';
 
 const theme = useTheme();
 
 // It is a component that can switch between a Select and a TextField
-const InputOrSelect = (props: {
-  unit: any;
-  notifyStore: Function;
-  disabled?: boolean;
-}) => {
+const InputOrSelect = (props: { unit: any; disabled?: boolean }) => {
   // open/close Select
   const [isOpen, setIsOpen] = createSignal(false);
   // switch to Text
@@ -41,14 +35,8 @@ const InputOrSelect = (props: {
     return n ? data : [];
   };
 
-  const handleSelectChange = (evt: SelectChangeEvent) => {
-    // trigger onInput
-    props.notifyStore({ name: 'unit', value: evt.target.value });
+  const handleSelectChange = () => {
     setIsOpen(false);
-  };
-
-  const handleNewUnitChange = (evt: Event) => {
-    props.notifyStore({ name: 'unit', value: (evt.target as any)?.value });
   };
 
   const switchNewUnit = (txt: string, openNewUnit: boolean) => {
@@ -62,7 +50,6 @@ const InputOrSelect = (props: {
             return;
           }
 
-          props.notifyStore({ name: 'unit', value: '' }, true);
           setNewUnit(openNewUnit);
           setIsOpen(!openNewUnit);
         }}
@@ -79,7 +66,7 @@ const InputOrSelect = (props: {
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
         <FormControl disabled={props.disabled}>
-          <InputLabel shrink={props.unit?.value} id="unit-label">
+          <InputLabel shrink={!!props.unit.value} id="unit-label">
             Unit
           </InputLabel>
           <Select
@@ -90,8 +77,8 @@ const InputOrSelect = (props: {
             inputProps={{
               id: 'unit',
             }}
-            defaultValue={''}
-            value={props.unit?.value}
+            renderValue={(v: any) => v}
+            value={props.unit.value ?? ''}
             onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {
               if (props.disabled) {
@@ -100,13 +87,10 @@ const InputOrSelect = (props: {
 
               const id = (evt.target as HTMLElement)?.id;
               const inside = id === 'unit-wrapper';
-              setIsOpen(() => inside);
-              if (!inside) {
-                setTimeout(props.notifyStore({ unit: zero(true) }));
-              }
+              setIsOpen(inside);
             }}
             open={isOpen()}
-            error={props.unit?.error}
+            error={props.unit.error}
           >
             <For each={units()}>
               {(u: string | Error) => {
@@ -128,7 +112,6 @@ const InputOrSelect = (props: {
           type="text"
           id="unit"
           autoComplete="off"
-          onChange={handleNewUnitChange}
           value={props.unit.value}
           error={props.unit.error}
           helperText={props.unit.message}
