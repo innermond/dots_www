@@ -45,12 +45,13 @@ class APIEntryType {
   }
 
   edit(data: EntryTypeData): ReturnType<typeof apix<typeof data>> {
+    const { id, ...idless } = data;
     const args = {
       hint: 'editing entry type',
       method: 'PATCH',
-      url: `/entry-types/${data.id}`,
+      url: `/entry-types/${id}`,
       isFn: isEntryTypeData,
-      data,
+      data: idless,
     } as ApiArgs<typeof data>;
 
     return apix<typeof data>(args);

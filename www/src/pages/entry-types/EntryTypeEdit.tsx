@@ -42,7 +42,7 @@ const messages: MessagesMap<Names> = {
 };
 
 export default function EntryTypeEdit(props: {
-  inputs: Store<Validable<keyof Omit<EntryTypeData, 'id'>>>;
+  inputs: Store<Validable<keyof EntryTypeData>>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
 }): JSX.Element {
@@ -67,6 +67,13 @@ export default function EntryTypeEdit(props: {
             columnGap: theme.spacing(1),
           }}
         >
+          <TextField
+            name="id"
+            label="Id"
+            type="hidden"
+            id="id"
+            value={props?.inputs.id.value}
+          />
           <TextField
             name="code"
             label="Code"
