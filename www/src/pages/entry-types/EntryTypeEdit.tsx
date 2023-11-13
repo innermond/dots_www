@@ -1,5 +1,4 @@
 import { Container, TextField, useTheme, FormGroup } from '@suid/material';
-import { Show } from 'solid-js';
 import type { Accessor, Setter, JSX } from 'solid-js';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import InputOrSelect from './InputOrSelect';
@@ -51,62 +50,58 @@ export default function EntryTypeEdit(props: {
   props.setValidation({ validators, messages });
 
   return (
-    <Show when={props !== undefined}>
-      <Container
+    <Container
+      sx={{
+        padding: theme.spacing(3),
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'column',
+        rowGap: theme.spacing(2),
+      }}
+    >
+      <FormGroup
         sx={{
-          padding: theme.spacing(3),
+          width: '100%',
           display: 'flex',
-          alignItems: 'center',
-          flexDirection: 'column',
-          rowGap: theme.spacing(2),
+          flexDirection: 'row',
+          columnGap: theme.spacing(1),
         }}
       >
-        <FormGroup
-          sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'row',
-            columnGap: theme.spacing(1),
-          }}
-        >
-          <TextField
-            name="id"
-            label="Id"
-            type="hidden"
-            id="id"
-            value={props.inputs.id.value}
-          />
-          <TextField
-            name="code"
-            label="Code"
-            type="text"
-            id="code"
-            autoComplete="off"
-            sx={{ width: '10rem' }}
-            value={props.inputs.code.value}
-            error={props.inputs.code.error}
-            helperText={
-              <HelperTextMultiline lines={props.inputs.code.message} />
-            }
-            disabled={props.isDisabled()}
-          />
-          <TextField
-            name="description"
-            label="Description"
-            type="text"
-            id="description"
-            autoComplete="off"
-            sx={{ flex: 1 }}
-            value={props.inputs.description.value}
-            error={props.inputs.description.error}
-            helperText={
-              <HelperTextMultiline lines={props.inputs.description.message} />
-            }
-            disabled={props.isDisabled()}
-          />
-        </FormGroup>
-        <InputOrSelect unit={props.inputs.unit} disabled={props.isDisabled()} />
-      </Container>
-    </Show>
+        <TextField
+          name="id"
+          label="Id"
+          type="hidden"
+          id="id"
+          value={props.inputs.id.value}
+        />
+        <TextField
+          name="code"
+          label="Code"
+          type="text"
+          id="code"
+          autoComplete="off"
+          sx={{ width: '10rem' }}
+          value={props.inputs.code.value}
+          error={props.inputs.code.error}
+          helperText={<HelperTextMultiline lines={props.inputs.code.message} />}
+          disabled={props.isDisabled()}
+        />
+        <TextField
+          name="description"
+          label="Description"
+          type="text"
+          id="description"
+          autoComplete="off"
+          sx={{ flex: 1 }}
+          value={props.inputs.description.value}
+          error={props.inputs.description.error}
+          helperText={
+            <HelperTextMultiline lines={props.inputs.description.message} />
+          }
+          disabled={props.isDisabled()}
+        />
+      </FormGroup>
+      <InputOrSelect unit={props.inputs.unit} disabled={props.isDisabled()} />
+    </Container>
   );
 }

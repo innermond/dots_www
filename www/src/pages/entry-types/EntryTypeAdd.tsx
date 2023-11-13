@@ -1,5 +1,4 @@
 import { Container, TextField, useTheme, FormGroup } from '@suid/material';
-import { createComputed } from 'solid-js';
 import type { Accessor, Setter, JSX } from 'solid-js';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import InputOrSelect from './InputOrSelect';
@@ -95,12 +94,7 @@ export default function EntryTypeAdd(props: {
           disabled={props?.isDisabled()}
         />
       </FormGroup>
-      <InputOrSelect
-        //notifyStore={validateInputUpdateStore}
-        notifyStore={() => {}}
-        unit={props?.inputs.unit}
-        disabled={props?.isDisabled()}
-      />
+      <InputOrSelect unit={props?.inputs.unit} disabled={props?.isDisabled()} />
     </Container>
   );
 }
