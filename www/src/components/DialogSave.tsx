@@ -9,6 +9,7 @@ import {
   Slide,
   Divider,
   Container,
+  useTheme,
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
@@ -34,6 +35,8 @@ import { makeDefaults, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
+
+const theme = useTheme();
 
 const defaultTransition = function (
   props: TransitionProps & {
@@ -266,7 +269,10 @@ const DialogSave = (props: DialogSaveProps) => {
   });
 
   const appBar = (
-    <AppBar color="transparent" sx={{ position: 'relative' }}>
+    <AppBar
+      color="transparent"
+      sx={{ position: 'relative', mt: theme.spacing(1) }}
+    >
       <Toolbar sx={{ pr: 0 }}>
         <IconButton
           edge="start"
@@ -326,7 +332,6 @@ const DialogSave = (props: DialogSaveProps) => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          p: 0,
         }}
       >
         {appBar}

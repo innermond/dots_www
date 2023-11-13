@@ -81,14 +81,15 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const theme = useTheme();
 
+  /*
   const dialogTransition = (
     props: TransitionProps & { children: JSX.Element },
-  ) => <Slide {...props} direction="left" />;
-
+  ) => <Slide {...props} direction="up" />;
+*/
   const dialogSave = () => (
     <Show when={openDialog()}>
       <DialogSave
-        transition={dialogTransition}
+        //transition={dialogTransition}
         title={
           (dyn() as string) === 'editEntry'
             ? 'Edit entry type'
