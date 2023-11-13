@@ -59,6 +59,13 @@ export default function EntryTypeEdit(props: {
         rowGap: theme.spacing(2),
       }}
     >
+      <TextField
+        name="id"
+        label="Id"
+        type="hidden"
+        id="id"
+        value={props.inputs.id.value}
+      />
       <FormGroup
         sx={{
           width: '100%',
@@ -67,13 +74,6 @@ export default function EntryTypeEdit(props: {
           columnGap: theme.spacing(1),
         }}
       >
-        <TextField
-          name="id"
-          label="Id"
-          type="hidden"
-          id="id"
-          value={props.inputs.id.value}
-        />
         <TextField
           name="code"
           label="Code"

@@ -29,6 +29,9 @@ import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
 import EditIcon from '@suid/icons-material/Edit';
 import { useNavigate } from '@solidjs/router';
 
+import { Grid } from '@suid/material';
+import Skeleton from '@suid/material/Skeleton';
+
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData } from './types';
@@ -109,10 +112,27 @@ const EntryTypes: Component = (): JSX.Element => {
     </Show>
   );
 
+  const dummy = (num: number, height: string = '1rem') => (
+    <Grid container rowSpacing={4.5}>
+      <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'end' }}>
+        <Skeleton width="10rem" height="5rem" variant="text" />
+      </Grid>
+      <For each={new Array(num)}>
+        {_ => {
+          return (
+            <Grid item xs={12}>
+              <Skeleton width="100%" height={height} variant="rectangular" />
+            </Grid>
+          );
+        }}
+      </For>
+    </Grid>
+  );
+
   return (
     <>
       {dialogSave}
-      <Show when={result.state === 'ready'}>
+      <Show when={result.state === 'ready'} fallback={dummy(20, '2rem')}>
         <TableContainer component={Paper}>
           <Stack
             direction="row"

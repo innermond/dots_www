@@ -321,7 +321,7 @@ const DialogSave = (props: DialogSaveProps) => {
         autocomplete="off"
         component="form"
         onSubmit={handleSubmit}
-        onInput={handleInput}
+        onChange={handleInput}
         sx={{
           display: 'flex',
           flexDirection: 'column',

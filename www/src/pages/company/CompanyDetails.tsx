@@ -27,8 +27,8 @@ import ListIcon from '@suid/icons-material/List';
 import StatisticsCard, {
   PropsStatisticsCard,
 } from '@/pages/dashboard/StatisticsCard';
-import Skeleton from '@suid/material/Skeleton';
 import { apiCompany } from '@/api';
+import SkeletonCounts from '@/components/Skeleton';
 
 const [, setState] = appstate;
 
@@ -163,7 +163,7 @@ const CompanyDetails: Component = (): JSX.Element => {
     <>
       <Show
         when={statsRes.state === 'ready'}
-        fallback={<SkeletonCounts num={3} />}
+        fallback={<SkeletonCounts num={3} height={'7rem'} />}
       >
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
           <Grid item xs={12} sx={{ mb: -2.25 }}>
@@ -227,31 +227,6 @@ const CompanyDetails: Component = (): JSX.Element => {
         </Grid>
       </Show>
     </>
-  );
-};
-
-type PropsSkeletonCounts = { num: number; height?: string };
-
-const SkeletonCounts: Component<PropsSkeletonCounts> = (props): JSX.Element => {
-  return (
-    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      <Grid item xs={12} sx={{ mb: -2.25 }}>
-        <Skeleton width="10rem" variant="text" />
-      </Grid>
-      <For each={new Array(props.num)}>
-        {_ => {
-          return (
-            <Grid item xs={12} sm={6} md={4} lg={3}>
-              <Skeleton
-                width="100%"
-                height={props?.height ?? '7rem'}
-                variant="rectangular"
-              />
-            </Grid>
-          );
-        }}
-      </For>
-    </Grid>
   );
 };
 
