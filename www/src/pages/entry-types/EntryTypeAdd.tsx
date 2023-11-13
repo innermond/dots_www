@@ -46,11 +46,7 @@ export default function EntryTypeAdd(props: {
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
 }): JSX.Element {
-  createComputed((prev: boolean | undefined) => {
-    if (prev === undefined) return true;
-    props.setValidation({ validators, messages });
-    return true;
-  });
+  props.setValidation({ validators, messages });
 
   return (
     <Container

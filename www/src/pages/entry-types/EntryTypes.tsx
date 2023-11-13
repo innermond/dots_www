@@ -91,7 +91,7 @@ const EntryTypes: Component = (): JSX.Element => {
             ? 'Edit entry type'
             : 'Add entry type'
         }
-        textSave="Add"
+        textSave={(dyn() as string) === 'editEntry' ? 'Edit' : 'Add'}
         open={dialogSignal}
         names={
           (dyn() as string) === 'editEntry'

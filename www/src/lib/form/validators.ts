@@ -1,11 +1,19 @@
 import { Func, FuncWithArgs } from './form';
 
+function optional(v: any): boolean {
+  return true;
+}
+
 function required(v: any): boolean {
   return !!v;
 }
 
 function likeemail(v: any): boolean {
   return v.includes('@');
+}
+
+function int(v: any): boolean {
+  return !isNaN(parseInt(v));
 }
 
 function minlen(len: number): FuncWithArgs {
@@ -88,4 +96,4 @@ function checkPasswordStrength(password: string): [number, string[]] {
   return [strength, tips];
 }
 
-export { required, minlen, maxlen, likeemail, checkpass };
+export { optional, required, int, minlen, maxlen, likeemail, checkpass };

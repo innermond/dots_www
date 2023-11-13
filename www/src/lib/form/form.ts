@@ -38,6 +38,14 @@ function validate<T extends string>(
 
   const multierrors: string[] = [];
   validators[name].forEach((validator: Validator, inx: number) => {
+    const missing = [null, undefined, ''].includes(value);
+    const isOptional =
+      validators[name].filter(
+        (v: Validator) => v instanceof Function && v.name === 'optional',
+      ).length !== 0;
+    if (missing && isOptional) {
+      return [];
+    }
     if (!validator(value)) {
       if (!(name in messages)) {
         multierrors.push(`${name} is not valid`);

@@ -76,8 +76,6 @@ const DialogSave = (props: DialogSaveProps) => {
 
   // set up local state for the inputs named above
   let defaultInputs = makeDefaults(props.intialInputs, ...names);
-  if (props?.intialInputs) {
-  }
   const [inputs, setInputs] = createStore(defaultInputs);
   const inputsHasErrors = () => {
     for (const name of names) {
@@ -90,7 +88,10 @@ const DialogSave = (props: DialogSaveProps) => {
   const zeroingInputs = () =>
     setInputs(makeDefaults(props.intialInputs, ...names));
 
-  const [validation, setValidation] = createSignal<InnerValidation<string>>();
+  const [validation, setValidation] = createSignal<InnerValidation<string>>({
+    validators: {},
+    messages: {},
+  });
 
   // validate named fields and then
   // update the local inputs store
@@ -120,7 +121,6 @@ const DialogSave = (props: DialogSaveProps) => {
 
   // respond to input events
   const handleInput = (e: Event): void => {
-    e.preventDefault();
     if (!e.target) return;
     if (e.target instanceof HTMLFormElement) {
       Array.from(e.target.elements)
@@ -161,10 +161,7 @@ const DialogSave = (props: DialogSaveProps) => {
 
     // prepare data from DOM
     // to pure data
-    const requestData = collectFormData<Omit<EntryTypeData, 'id'>>(
-      e.target as HTMLFormElement,
-      names,
-    );
+    const requestData = collectFormData(e.target as HTMLFormElement, names);
     // fire request
     const [remote, abort] = props.sendRequestFn(requestData);
 

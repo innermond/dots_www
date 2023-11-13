@@ -12,7 +12,7 @@ import type {
   Validable,
   Validators,
 } from '@/lib/form';
-import { required, minlen, maxlen } from '@/lib/form';
+import { required, minlen, maxlen, optional, int } from '@/lib/form';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
@@ -20,13 +20,15 @@ type Names = FieldNames<typeof names>;
 
 // set up validation
 const validators: Validators<Names> = {
+  id: [required, int],
   code: [required, minlen(7), maxlen(50)],
-  description: [required, minlen(7), maxlen(100)],
+  description: [optional, minlen(7), maxlen(100)],
   unit: [required, minlen(2), maxlen(20)],
 };
 
 // functions that prepare error messages
 const textmessages = [
+  (f: string) => `${f} is required`,
   (f: string) => `${f} is required`,
   (f: string, v: string, { len }: { len: number }) =>
     `${f} must be more than ${len} - has ${v.length}`,
@@ -37,7 +39,7 @@ const textmessages = [
 // map error messages with field names
 const messages: MessagesMap<Names> = {
   code: textmessages,
-  description: textmessages,
+  description: textmessages.slice(1, -1),
   unit: textmessages,
 };
 
@@ -72,7 +74,7 @@ export default function EntryTypeEdit(props: {
             label="Id"
             type="hidden"
             id="id"
-            value={props?.inputs.id.value}
+            value={props.inputs.id.value}
           />
           <TextField
             name="code"
@@ -81,12 +83,12 @@ export default function EntryTypeEdit(props: {
             id="code"
             autoComplete="off"
             sx={{ width: '10rem' }}
-            value={props?.inputs.code.value}
-            error={props?.inputs.code.error}
+            value={props.inputs.code.value}
+            error={props.inputs.code.error}
             helperText={
-              <HelperTextMultiline lines={props?.inputs.code.message} />
+              <HelperTextMultiline lines={props.inputs.code.message} />
             }
-            disabled={props?.isDisabled()}
+            disabled={props.isDisabled()}
           />
           <TextField
             name="description"
@@ -95,18 +97,15 @@ export default function EntryTypeEdit(props: {
             id="description"
             autoComplete="off"
             sx={{ flex: 1 }}
-            value={props?.inputs.description.value}
-            error={props?.inputs.description.error}
+            value={props.inputs.description.value}
+            error={props.inputs.description.error}
             helperText={
-              <HelperTextMultiline lines={props?.inputs.description.message} />
+              <HelperTextMultiline lines={props.inputs.description.message} />
             }
-            disabled={props?.isDisabled()}
+            disabled={props.isDisabled()}
           />
         </FormGroup>
-        <InputOrSelect
-          unit={props?.inputs.unit}
-          disabled={props?.isDisabled()}
-        />
+        <InputOrSelect unit={props.inputs.unit} disabled={props.isDisabled()} />
       </Container>
     </Show>
   );
