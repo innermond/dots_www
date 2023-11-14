@@ -30,18 +30,18 @@ const validators: Validators<Names> = {
 // functions that prepare error messages
 const textmessages = [
   (f: string) => `${f} is required`,
-  (f: string) => `${f} is required`,
-  (f: string, v: string, { len }: { len: number }) =>
-    `${f} must be more than ${len} - has ${v.length}`,
   (f: string, v: string, { len }: { len: number }) =>
     `${f} must be less than ${len} - has ${v.length}`,
+  (f: string, v: string, { len }: { len: number }) =>
+    `${f} must be more than ${len} - has ${v.length}`,
 ];
 
 // map error messages with field names
 const messages: MessagesMap<Names> = {
+  id: [textmessages[0], (f: string) => f + ' must be number'],
   code: textmessages,
-  description: textmessages.slice(1, -1),
-  unit: textmessages,
+  description: textmessages.slice(1),
+  unit: textmessages.slice(1, -1),
 };
 
 export default function EntryTypeEdit(props: {
