@@ -22,7 +22,7 @@ import {
   createComputed,
   createEffect,
 } from 'solid-js';
-import { Store, createStore, unwrap } from 'solid-js/store';
+import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
 import { Dynamic } from 'solid-js/web';
 import type { Accessor, Component, Setter } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
@@ -53,6 +53,7 @@ export type DialogSaveProps = {
   transition?: Component<TransitionProps & { children: JSX.Element }>;
   dyn: Component<{
     inputs: Store<Validable<string>>;
+    setInputs: SetStoreFunction<any>;
     isDisabled: Accessor<boolean>;
     setValidation: Setter<InnerValidation<string>>;
   }>;
@@ -308,6 +309,7 @@ const DialogSave = (props: DialogSaveProps) => {
   const dynamic = (
     <Dynamic
       inputs={inputs}
+      setInputs={setInputs}
       isDisabled={isDisabled}
       setValidation={setValidation}
       component={props.dyn}
@@ -327,7 +329,7 @@ const DialogSave = (props: DialogSaveProps) => {
         autocomplete="off"
         component="form"
         onSubmit={handleSubmit}
-        onChange={handleInput}
+        onInput={handleInput}
         sx={{
           display: 'flex',
           flexDirection: 'column',

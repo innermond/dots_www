@@ -8,16 +8,24 @@ import {
   Button,
   Typography,
   useTheme,
+  FormHelperText,
 } from '@suid/material';
-import { Show, createSignal, createResource, For } from 'solid-js';
+import { Show, createSignal, createResource, For, Accessor } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 import { apiEntryType } from '@/api';
+import { SelectChangeEvent } from '@suid/material/Select';
+import { Validation } from '@/lib/form';
+import HelperTextMultiline from '@/components/HelperTextMultiline';
 
 const theme = useTheme();
 
 // It is a component that can switch between a Select and a TextField
-const InputOrSelect = (props: { unit: any; disabled?: boolean }) => {
+const InputOrSelect = (props: {
+  unit: Validation;
+  setUnit: Setter<string>;
+  disabled?: boolean;
+}) => {
   // open/close Select
   const [isOpen, setIsOpen] = createSignal(false);
   // switch to Text
@@ -35,8 +43,11 @@ const InputOrSelect = (props: { unit: any; disabled?: boolean }) => {
     return n ? data : [];
   };
 
-  const handleSelectChange = () => {
+  const unit = props.unit.value;
+
+  const handleSelectChange = (evt: SelectChangeEvent) => {
     setIsOpen(false);
+    props.setUnit(evt.target.value);
   };
 
   const switchNewUnit = (txt: string, openNewUnit: boolean) => {
@@ -65,7 +76,7 @@ const InputOrSelect = (props: { unit: any; disabled?: boolean }) => {
   return (
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
-        <FormControl disabled={props.disabled}>
+        <FormControl error={props.unit.error} disabled={props.disabled}>
           <InputLabel shrink={!!props.unit.value} id="unit-label">
             Unit
           </InputLabel>
@@ -78,7 +89,8 @@ const InputOrSelect = (props: { unit: any; disabled?: boolean }) => {
               id: 'unit',
             }}
             renderValue={(v: any) => v}
-            value={props.unit.value ?? ''}
+            value={props.unit.value}
+            defaultValue={unit}
             onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {
               if (props.disabled) {
@@ -101,6 +113,9 @@ const InputOrSelect = (props: { unit: any; disabled?: boolean }) => {
               }}
             </For>
           </Select>
+          <Show when={props.unit.error}>
+            <HelperTextMultiline lines={props.unit.message} />
+          </Show>
         </FormControl>
         {switchNewUnit('or add a new unit', true)}
       </Show>
@@ -112,9 +127,8 @@ const InputOrSelect = (props: { unit: any; disabled?: boolean }) => {
           type="text"
           id="unit"
           autoComplete="off"
-          value={props.unit.value}
           error={props.unit.error}
-          helperText={props.unit.message}
+          helperText={<HelperTextMultiline lines={props.unit.message} />}
           disabled={props.disabled}
         />
         {switchNewUnit('or use existent unit', false)}

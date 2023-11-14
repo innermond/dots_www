@@ -3,13 +3,15 @@ import type { Accessor, Setter, JSX } from 'solid-js';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
-import { Store } from 'solid-js/store';
+import { isKeyofEntryTypeData } from '@/pages/entry-types/types';
+import { SetStoreFunction, Store } from 'solid-js/store';
 import type {
   FieldNames,
   MessagesMap,
   InnerValidation,
   Validable,
   Validators,
+  Validation,
 } from '@/lib/form';
 import { required, minlen, maxlen, optional, int } from '@/lib/form';
 
@@ -44,10 +46,28 @@ const messages: MessagesMap<Names> = {
 
 export default function EntryTypeEdit(props: {
   inputs: Store<Validable<keyof EntryTypeData>>;
+  setInputs: SetStoreFunction<Validable<keyof EntryTypeData>>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
 }): JSX.Element {
   props.setValidation({ validators, messages });
+
+  const handleInput = (e: InputEvent) => {
+    const name = (e.target as HTMLInputElement).name;
+    const value = (e.target as HTMLInputElement).value;
+    if (!name || value === undefined || isKeyofEntryTypeData(name)) {
+      return;
+    }
+
+    props.setInputs(
+      name as keyof EntryTypeData,
+      { value, error: false, message: [] } as Validation,
+    );
+  };
+
+  const id = props.inputs.id.value;
+  const code = props.inputs.code.value;
+  const description = props.inputs.description.value;
 
   return (
     <Container
@@ -59,13 +79,7 @@ export default function EntryTypeEdit(props: {
         rowGap: theme.spacing(2),
       }}
     >
-      <TextField
-        name="id"
-        label="Id"
-        type="hidden"
-        id="id"
-        value={props.inputs.id.value}
-      />
+      <TextField name="id" label="Id" type="hidden" id="id" defaultValue={id} />
       <FormGroup
         sx={{
           width: '100%',
@@ -81,7 +95,8 @@ export default function EntryTypeEdit(props: {
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
-          value={props.inputs.code.value}
+          defaultValue={code}
+          onInput={handleInput}
           error={props.inputs.code.error}
           helperText={<HelperTextMultiline lines={props.inputs.code.message} />}
           disabled={props.isDisabled()}
@@ -93,7 +108,8 @@ export default function EntryTypeEdit(props: {
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
-          value={props.inputs.description.value}
+          defaultValue={description}
+          onInput={handleInput}
           error={props.inputs.description.error}
           helperText={
             <HelperTextMultiline lines={props.inputs.description.message} />
@@ -101,7 +117,13 @@ export default function EntryTypeEdit(props: {
           disabled={props.isDisabled()}
         />
       </FormGroup>
-      <InputOrSelect unit={props.inputs.unit} disabled={props.isDisabled()} />
+      <InputOrSelect
+        unit={props.inputs.unit}
+        setUnit={(u: string) =>
+          props.setInputs('unit', { value: u, error: false, message: [] })
+        }
+        disabled={props.isDisabled()}
+      />
     </Container>
   );
 }
