@@ -15,7 +15,6 @@ import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined'
 import { apiEntryType } from '@/api';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { Validation } from '@/lib/form';
-import HelperTextMultiline from '@/components/HelperTextMultiline';
 import { FormHelperText } from '@suid/material';
 
 const theme = useTheme();
@@ -79,7 +78,11 @@ const InputOrSelect = (props: {
   return (
     <FormGroup sx={{ width: '100%' }}>
       <Show when={!newUnit()}>
-        <FormControl error={props.unit.error} disabled={props.disabled}>
+        <FormControl
+          sx={{ maxWidth: '100%' }}
+          error={props.unit.error}
+          disabled={props.disabled}
+        >
           <InputLabel shrink={!!props.unit.value} id="unit-label">
             Unit
           </InputLabel>
@@ -92,7 +95,11 @@ const InputOrSelect = (props: {
               id: 'unit',
             }}
             renderValue={(v: any) => v}
-            value={props.unit.value}
+            value={
+              <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {props.unit.value}
+              </Typography>
+            }
             defaultValue={unit}
             onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {

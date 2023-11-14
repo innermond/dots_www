@@ -40,7 +40,7 @@ const textmessages = [
 const messages: MessagesMap<Names> = {
   id: [textmessages[0], (f: string) => f + ' must be number'],
   code: textmessages,
-  description: [() => [], ...textmessages.slice(1)],
+  description: [() => '', ...textmessages.slice(1)],
   unit: textmessages,
 };
 
