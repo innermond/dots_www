@@ -19,7 +19,7 @@ type Validators<T extends string> = {
 type MessagesMap<T extends string> = {
   [key in T as string]: Messages;
 };
-type Messages = Array<(...params: any) => string | string[]>;
+type Messages = Array<(...params: any) => string>;
 
 type InnerValidation<T extends string> = {
   validators: Validators<T>;
@@ -31,28 +31,33 @@ function validate<T extends string>(
   value: any,
   validators: Validators<T>,
   messages: MessagesMap<T>,
-): string[] {
+): string {
   if (!(name in validators) || !(name in messages)) {
-    return [];
+    return '';
   }
 
-  const multierrors: string[] = [];
-  validators[name].forEach((validator: Validator, inx: number) => {
+  let hint: string = '';
+  let inx = -1;
+  for (const validator of validators[name]) {
+    inx++;
+
     const missing = [null, undefined, ''].includes(value);
     const isOptional =
       validators[name].filter(
         (v: Validator) => v instanceof Function && v.name === 'optional',
       ).length !== 0;
     if (missing && isOptional) {
-      return [];
+      hint = '';
+      break;
     }
+
     if (!validator(value)) {
       if (!(name in messages)) {
-        multierrors.push(`${name} is not valid`);
-        return;
+        hint = `${name} is not valid`;
+        break;
       }
       const fn = (messages[name] as Messages)[inx];
-      let msg: string | string[] = '';
+      let msg: string = '';
       let args = {};
       if ('args' in validator) {
         args = { ...validator.args };
@@ -62,10 +67,11 @@ function validate<T extends string>(
       } else {
         msg = fn(name, value, args);
       }
-      Array.isArray(msg) ? multierrors.push(...msg) : multierrors.push(msg);
+      hint = msg;
+      break;
     }
-  });
-  return multierrors;
+  }
+  return hint;
 }
 
 const makeDefaults = (

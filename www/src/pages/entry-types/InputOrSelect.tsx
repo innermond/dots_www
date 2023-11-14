@@ -8,22 +8,22 @@ import {
   Button,
   Typography,
   useTheme,
-  FormHelperText,
 } from '@suid/material';
-import { Show, createSignal, createResource, For, Accessor } from 'solid-js';
+import { Show, createSignal, createResource, For, Setter } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 import { apiEntryType } from '@/api';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { Validation } from '@/lib/form';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
+import { FormHelperText } from '@suid/material';
 
 const theme = useTheme();
 
 // It is a component that can switch between a Select and a TextField
 const InputOrSelect = (props: {
   unit: Validation;
-  setUnit: Setter<string>;
+  setUnit: (u: string) => void;
   disabled?: boolean;
 }) => {
   // open/close Select
@@ -63,6 +63,9 @@ const InputOrSelect = (props: {
 
           setNewUnit(openNewUnit);
           setIsOpen(!openNewUnit);
+          if (openNewUnit) {
+            props.setUnit('');
+          }
         }}
         disabled={props.disabled}
       >
@@ -114,7 +117,9 @@ const InputOrSelect = (props: {
             </For>
           </Select>
           <Show when={props.unit.error}>
-            <HelperTextMultiline lines={props.unit.message} />
+            <FormHelperText error={props.unit.error}>
+              {props.unit.message}
+            </FormHelperText>
           </Show>
         </FormControl>
         {switchNewUnit('or add a new unit', true)}
@@ -128,7 +133,7 @@ const InputOrSelect = (props: {
           id="unit"
           autoComplete="off"
           error={props.unit.error}
-          helperText={<HelperTextMultiline lines={props.unit.message} />}
+          helperText={props.unit.message}
           disabled={props.disabled}
         />
         {switchNewUnit('or use existent unit', false)}

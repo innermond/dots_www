@@ -40,8 +40,8 @@ const textmessages = [
 const messages: MessagesMap<Names> = {
   id: [textmessages[0], (f: string) => f + ' must be number'],
   code: textmessages,
-  description: textmessages.slice(1),
-  unit: textmessages.slice(1, -1),
+  description: [() => [], ...textmessages.slice(1)],
+  unit: textmessages,
 };
 
 export default function EntryTypeEdit(props: {
@@ -79,7 +79,14 @@ export default function EntryTypeEdit(props: {
         rowGap: theme.spacing(2),
       }}
     >
-      <TextField name="id" label="Id" type="hidden" id="id" defaultValue={id} />
+      <TextField
+        name="id"
+        label="Id"
+        type="hidden"
+        id="id"
+        defaultValue={id}
+        sx={{ display: 'none' }}
+      />
       <FormGroup
         sx={{
           width: '100%',
@@ -98,7 +105,7 @@ export default function EntryTypeEdit(props: {
           defaultValue={code}
           onInput={handleInput}
           error={props.inputs.code.error}
-          helperText={<HelperTextMultiline lines={props.inputs.code.message} />}
+          helperText={props.inputs.code.message}
           disabled={props.isDisabled()}
         />
         <TextField
@@ -111,9 +118,7 @@ export default function EntryTypeEdit(props: {
           defaultValue={description}
           onInput={handleInput}
           error={props.inputs.description.error}
-          helperText={
-            <HelperTextMultiline lines={props.inputs.description.message} />
-          }
+          helperText={props.inputs.description.message}
           disabled={props.isDisabled()}
         />
       </FormGroup>
