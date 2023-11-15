@@ -62,7 +62,7 @@ export default function EntryTypeEdit(props: {
 
     props.setInputs(
       name as keyof EntryTypeData,
-      { value, error: false, message: [] } as Validation,
+      { value, error: false, message: '' } as Validation,
     );
   };
 
@@ -126,7 +126,7 @@ export default function EntryTypeEdit(props: {
       <InputOrSelect
         unit={props.inputs.unit}
         setUnit={(u: string) =>
-          props.setInputs('unit', { value: u, error: false, message: [] })
+          props.setInputs('unit', { value: u, error: false, message: '' })
         }
         disabled={props.isDisabled()}
       />
