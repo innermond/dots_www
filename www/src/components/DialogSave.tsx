@@ -113,13 +113,13 @@ const DialogSave = (props: DialogSaveProps) => {
     const { name, value } = data as any;
     if (!names.includes(name)) return;
 
-    const multierrors: string[] = skipValidation
-      ? []
+    const errorstr: string = skipValidation
+      ? ''
       : validate<Names>(name, value, fail!.validators, fail!.messages);
     setInputs(name as Names, {
       value,
-      error: multierrors.length > 0,
-      message: multierrors,
+      error: errorstr.length > 0,
+      message: errorstr,
     });
   };
 

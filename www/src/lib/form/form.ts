@@ -5,7 +5,7 @@ type Validable<T extends string> = {
 type Validation = {
   value: any;
   error: boolean;
-  message: string[];
+  message: string;
 };
 
 type FuncWithArgs = Func & { args: object };
@@ -86,7 +86,7 @@ const makeDefaults = (
     if (!!initialInputs && n in initialInputs) {
       v = initialInputs[n];
     }
-    defaults[n] = { value: v, error: false, message: [] };
+    defaults[n] = { value: v, error: false, message: '' };
   }
 
   return defaults;
