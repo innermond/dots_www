@@ -1,6 +1,5 @@
 import CloseIcon from '@suid/icons-material/Close';
 import {
-  Button,
   Dialog,
   AppBar,
   Toolbar,
@@ -11,7 +10,6 @@ import {
   Container,
   useTheme,
 } from '@suid/material';
-import AddIcon from '@suid/icons-material/Add';
 import { TransitionProps } from '@suid/material/transitions';
 import {
   JSX,
@@ -35,6 +33,8 @@ import { makeDefaults, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
+import ActionButton from '@/components/ActionButton';
+import type { ActionButtonProps } from '@/components/ActionButton';
 
 const theme = useTheme();
 
@@ -293,14 +293,9 @@ const DialogSave = (props: DialogSaveProps) => {
         >
           {props.title}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          color="primary"
-          type="submit"
-        >
-          {props.textSave ?? 'save'}
-        </Button>
+        <ActionButton
+          kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
+        />
       </Toolbar>
       <Divider />
     </AppBar>
