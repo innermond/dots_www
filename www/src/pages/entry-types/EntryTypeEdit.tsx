@@ -1,9 +1,10 @@
-import { Container, TextField, useTheme, FormGroup } from '@suid/material';
+import { Container, useTheme, FormGroup } from '@suid/material';
 import type { Accessor, Setter, JSX } from 'solid-js';
-import HelperTextMultiline from '@/components/HelperTextMultiline';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isKeyofEntryTypeData } from '@/pages/entry-types/types';
+
+import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import { SetStoreFunction, Store } from 'solid-js/store';
 import type {
   FieldNames,
@@ -79,7 +80,7 @@ export default function EntryTypeEdit(props: {
         rowGap: theme.spacing(2),
       }}
     >
-      <TextField
+      <TextFieldEllipsis
         name="id"
         label="Id"
         type="hidden"
@@ -95,7 +96,7 @@ export default function EntryTypeEdit(props: {
           columnGap: theme.spacing(1),
         }}
       >
-        <TextField
+        <TextFieldEllipsis
           name="code"
           label="Code"
           type="text"
@@ -108,7 +109,7 @@ export default function EntryTypeEdit(props: {
           helperText={props.inputs.code.message}
           disabled={props.isDisabled()}
         />
-        <TextField
+        <TextFieldEllipsis
           name="description"
           label="Description"
           type="text"

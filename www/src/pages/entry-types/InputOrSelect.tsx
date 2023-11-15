@@ -1,6 +1,5 @@
 import {
   FormControl,
-  TextField,
   MenuItem,
   Select,
   InputLabel,
@@ -12,6 +11,7 @@ import {
 import { Show, createSignal, createResource, For, Setter } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
+import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import { apiEntryType } from '@/api';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { Validation } from '@/lib/form';
@@ -93,13 +93,10 @@ const InputOrSelect = (props: {
             name="unit"
             inputProps={{
               id: 'unit',
+              style: { overflow: 'hidden', 'text-overflow': 'ellipsis' },
             }}
             renderValue={(v: any) => v}
-            value={
-              <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {props.unit.value}
-              </Typography>
-            }
+            value={props.unit.value}
             defaultValue={unit}
             onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {
@@ -132,7 +129,7 @@ const InputOrSelect = (props: {
         {switchNewUnit('or add a new unit', true)}
       </Show>
       <Show when={newUnit()}>
-        <TextField
+        <TextFieldEllipsis
           inputRef={input => setTimeout(() => input.focus())}
           name="unit"
           label="Unit"
