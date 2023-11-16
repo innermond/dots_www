@@ -269,6 +269,9 @@ const DialogSave = (props: DialogSaveProps) => {
     }
   });
 
+  const isDisabledActionButton = () =>
+    inputs.code.error || inputs.description.error || inputs.unit.error;
+
   const appBar = (
     <AppBar
       color="transparent"
@@ -288,12 +291,13 @@ const DialogSave = (props: DialogSaveProps) => {
             ml: 2,
             flex: 1,
           }}
-          variant="h6"
+          variant="h5"
           component="div"
         >
           {props.title}
         </Typography>
         <ActionButton
+          disabled={isDisabledActionButton()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
         />
       </Toolbar>

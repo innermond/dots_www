@@ -94,6 +94,7 @@ export default function EntryTypeEdit(props: {
           display: 'flex',
           flexDirection: 'row',
           columnGap: theme.spacing(1),
+          rowGap: theme.spacing(2),
         }}
       >
         <TextFieldEllipsis
@@ -102,7 +103,7 @@ export default function EntryTypeEdit(props: {
           type="text"
           id="code"
           autoComplete="off"
-          sx={{ width: '10rem' }}
+          sx={{ maxWidth: '10rem' }}
           defaultValue={code}
           onInput={handleInput}
           error={props.inputs.code.error}
