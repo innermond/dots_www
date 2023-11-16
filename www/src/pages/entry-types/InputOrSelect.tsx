@@ -8,7 +8,7 @@ import {
   Typography,
   useTheme,
 } from '@suid/material';
-import { Show, createSignal, createResource, For, Setter } from 'solid-js';
+import { Show, createSignal, createResource, For } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
@@ -22,7 +22,7 @@ const theme = useTheme();
 // It is a component that can switch between a Select and a TextField
 const InputOrSelect = (props: {
   unit: Validation;
-  setUnit: (u: string) => void;
+  setUnit: (u: string | null) => void;
   disabled?: boolean;
 }) => {
   // open/close Select
@@ -139,6 +139,15 @@ const InputOrSelect = (props: {
           error={props.unit.error}
           helperText={props.unit.message}
           disabled={props.disabled}
+          value={props.unit.value}
+          onChange={(evt: Event) => {
+            props.setUnit((evt.target as HTMLInputElement).value ?? null);
+          }}
+          onBlur={(evt: Event) => {
+            let v: string | null = (evt.target as HTMLInputElement).value;
+            v = v === '' ? null : v;
+            props.setUnit(v);
+          }}
         />
         {switchNewUnit('or use existent unit', false)}
       </Show>

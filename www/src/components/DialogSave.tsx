@@ -213,6 +213,11 @@ const DialogSave = (props: DialogSaveProps) => {
     }
   });
 
+  // ensures "real-time" validation for burried unit inside InputOrSelect
+  createComputed(() => {
+    validateInputUpdateStore({ name: 'unit', value: inputs.unit.value });
+  });
+
   createEffect(() => {
     if (submitForm.loading) {
       toasting.dismiss();
