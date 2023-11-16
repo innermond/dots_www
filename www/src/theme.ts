@@ -57,6 +57,20 @@ const theme = createTheme({
         disableElevation: true,
       },
     },
+    /*MuiFormHelperText: {
+    defaultProps: {
+      sx: {
+        'root': {
+          transition: 'height 2s',
+          height: 0,
+          overflow: 'hidden',
+        },
+        '& .MuiFormHelperText-root.MuiFormHelperText-contained.Mui-error': {
+          height: '2rem!important',
+        }, 
+      }
+    },
+},*/
   },
   typography,
   //palette: {mode: 'dark'},
