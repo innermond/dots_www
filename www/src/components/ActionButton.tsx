@@ -4,7 +4,7 @@ import AddIcon from '@suid/icons-material/Add';
 import EditIcon from '@suid/icons-material/Edit';
 import DeleteIcon from '@suid/icons-material/Delete';
 import SaveIcon from '@suid/icons-material/Save';
-import { Show } from 'solid-js';
+import { splitProps } from 'solid-js';
 import type { JSX } from 'solid-js';
 
 type ActionButtonProps = ButtonProps & {
@@ -13,33 +13,49 @@ type ActionButtonProps = ButtonProps & {
   only?: 'text' | 'icon';
 };
 const ActionButton = (props: ActionButtonProps): JSX.Element => {
-  let icon =
-    props.kind === 'edit' ? (
-      <EditIcon />
-    ) : props.kind === 'add' ? (
-      <AddIcon />
-    ) : props.kind === 'delete' ? (
-      <DeleteIcon />
-    ) : (
-      <SaveIcon />
-    );
+  const [my, buttonProps] = splitProps(props, ['kind', 'text', 'only']);
 
-  let txt = props.text ?? props.kind ?? 'save';
-  if (props.only === 'icon') {
+  let icon = <SaveIcon />;
+  if (my.kind === 'edit') {
+    icon = <EditIcon />;
+  } else if (my.kind === 'add') {
+    icon = <AddIcon />;
+  } else if (my.kind === 'delete') {
+    icon = <DeleteIcon />;
+  }
+
+  let txt = my.text ?? my.kind ?? 'save';
+  if (my.only === 'icon') {
     txt = '';
   }
 
-  return props.only === 'text' ? (
-    <Button variant="text" color="primary" type="submit" {...props}>
-      {txt}
-    </Button>
-  ) : (
+  if (my.only === 'text') {
+    return (
+      <Button variant="text" color="primary" type="submit" {...buttonProps}>
+        {txt}
+      </Button>
+    );
+  }
+
+  if (my.only === 'icon') {
+    return (
+      <Button
+        variant="contained"
+        startIcon={icon}
+        color="primary"
+        type="submit"
+        {...buttonProps}
+      />
+    );
+  }
+
+  return (
     <Button
       variant="contained"
       startIcon={icon}
       color="primary"
       type="submit"
-      {...props}
+      {...buttonProps}
     >
       {txt}
     </Button>
