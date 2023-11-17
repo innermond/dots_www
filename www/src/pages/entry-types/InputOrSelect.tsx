@@ -107,6 +107,11 @@ const InputOrSelect = (props: {
               const id = (evt.target as HTMLElement)?.id;
               const inside = id === 'unit-wrapper';
               setIsOpen(inside);
+              // force unfocus of internal input after clicking away
+              // to make label looks right
+              if (!inside) {
+                (document.activeElement as HTMLInputElement)?.blur();
+              }
             }}
             open={isOpen()}
             error={props.unit.error}
