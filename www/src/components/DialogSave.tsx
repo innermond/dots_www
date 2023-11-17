@@ -331,6 +331,7 @@ const DialogSave = (props: DialogSaveProps) => {
       <Container
         novalidate
         autocomplete="off"
+        spellcheck={false}
         component="form"
         onSubmit={handleSubmit}
         onInput={handleInput}
