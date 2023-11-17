@@ -301,6 +301,7 @@ const DialogSave = (props: DialogSaveProps) => {
         >
           {props.title}
         </Typography>
+        <ActionButton kind="reset" only="icon" />
         <ActionButton
           disabled={isDisabledActionButton()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}

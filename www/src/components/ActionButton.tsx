@@ -8,11 +8,12 @@ import { Show } from 'solid-js';
 import type { JSX } from 'solid-js';
 
 type ActionButtonProps = ButtonProps & {
-  kind?: 'edit' | 'add' | 'delete';
+  kind?: 'edit' | 'add' | 'delete' | 'reset';
   text?: string;
+  only?: 'text' | 'icon';
 };
 const ActionButton = (props: ActionButtonProps): JSX.Element => {
-  const icon =
+  let icon =
     props.kind === 'edit' ? (
       <EditIcon />
     ) : props.kind === 'add' ? (
@@ -22,7 +23,17 @@ const ActionButton = (props: ActionButtonProps): JSX.Element => {
     ) : (
       <SaveIcon />
     );
-  return (
+
+  let txt = props.text ?? props.kind ?? 'save';
+  if (props.only === 'icon') {
+    txt = '';
+  }
+
+  return props.only === 'text' ? (
+    <Button variant="text" color="primary" type="submit" {...props}>
+      {txt}
+    </Button>
+  ) : (
     <Button
       variant="contained"
       startIcon={icon}
@@ -30,7 +41,7 @@ const ActionButton = (props: ActionButtonProps): JSX.Element => {
       type="submit"
       {...props}
     >
-      {props.text ?? props.kind ?? 'save'}
+      {txt}
     </Button>
   );
 };

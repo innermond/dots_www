@@ -6,6 +6,7 @@ import {
   createSignal,
   lazy,
   batch,
+  createMemo,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -84,32 +85,47 @@ const EntryTypes: Component = (): JSX.Element => {
     props: TransitionProps & { children: JSX.Element },
   ) => <Slide {...props} direction="up" />;
 */
-  const dialogSave = () => (
-    <Show when={openDialog()}>
-      <DialogSave
-        //transition={dialogTransition}
-        title={
-          (dyn() as string) === 'editEntry'
-            ? 'Edit entry type'
-            : 'Add entry type'
-        }
-        textSave={(dyn() as string) === 'editEntry' ? 'Edit' : 'Add'}
-        open={dialogSignal}
-        names={
-          (dyn() as string) === 'editEntry'
-            ? ['id', 'code', 'description', 'unit']
-            : ['code', 'description', 'unit']
-        }
-        dyn={(dyn() as string) === 'editEntry' ? editEntryType : addEntryType}
-        sendRequestFn={
-          (dyn() as string) === 'editEntry'
-            ? apiEntryType.edit
-            : apiEntryType.add
-        }
-        intialInputs={intialInputs()}
-      />
-    </Show>
-  );
+
+  const cmpname = createMemo(() => {
+    const cmp = dyn();
+    console.log(cmp);
+    return cmp;
+  });
+  const openable = () => !!cmpname() && openDialog();
+
+  const dialogSave = () => {
+    console.log(openable(), dyn());
+    <Show when={openable()} fallback={<p>loading...</p>}>
+      {cmpname()}
+    </Show>;
+    /* return (
+      <Show when={openable()} fallback={<p>loading...</p>}>
+{cmpname()}
+        /*<DialogSave
+          //transition={dialogTransition}
+          title={
+            (cmpname() as string) === 'editEntry'
+              ? 'Edit entry type'
+              : 'Add entry type'
+          }
+          textSave={(dyn() as string) === 'editEntry' ? 'Edit' : 'Add'}
+          open={dialogSignal}
+          names={
+            (cmpname() as string) === 'editEntry'
+              ? ['id', 'code', 'description', 'unit']
+              : ['code', 'description', 'unit']
+          }
+          dyn={(cmpname() as string) === 'editEntry' ? editEntryType : addEntryType}
+          sendRequestFn={
+            (cmpname() as string) === 'editEntry'
+              ? apiEntryType.edit
+              : apiEntryType.add
+          }
+          intialInputs={intialInputs()}
+        />
+      </Show>
+  )*/
+  };
 
   const dummy = (num: number, height: string = '1rem') => (
     <Grid container rowSpacing={4.5}>

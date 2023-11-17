@@ -126,7 +126,7 @@ export default function EntryTypeEdit(props: {
       </FormGroup>
       <InputOrSelect
         unit={props.inputs.unit}
-        setUnit={(u: string) =>
+        setUnit={(u: string | null) =>
           props.setInputs('unit', { value: u, error: false, message: '' })
         }
         disabled={props.isDisabled()}
