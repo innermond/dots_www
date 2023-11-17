@@ -1,6 +1,5 @@
 import { Container, TextField, useTheme, FormGroup } from '@suid/material';
 import type { Accessor, Setter, JSX } from 'solid-js';
-import HelperTextMultiline from '@/components/HelperTextMultiline';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { SetStoreFunction, Store } from 'solid-js/store';
@@ -12,6 +11,7 @@ import type {
   Validators,
 } from '@/lib/form';
 import { required, minlen, maxlen } from '@/lib/form';
+import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 
 const theme = useTheme();
 const names = ['code', 'description', 'unit'];
@@ -66,7 +66,8 @@ export default function EntryTypeAdd(props: {
           columnGap: theme.spacing(1),
         }}
       >
-        <TextField
+        <TextFieldEllipsis
+          InputLabelProps={{ shrink: !!props.inputs.code.value }}
           name="code"
           label="Code"
           type="text"
@@ -78,7 +79,8 @@ export default function EntryTypeAdd(props: {
           helperText={props?.inputs.code.message}
           disabled={props?.isDisabled()}
         />
-        <TextField
+        <TextFieldEllipsis
+          InputLabelProps={{ shrink: !!props.inputs.description.value }}
           name="description"
           label="Description"
           type="text"

@@ -136,6 +136,7 @@ const InputOrSelect = (props: {
       <Show when={newUnit()}>
         <TextFieldEllipsis
           inputRef={input => setTimeout(() => input.focus())}
+          InputLabelProps={{ shrink: !!props.unit.value }}
           name="unit"
           label="Unit"
           type="text"

@@ -218,7 +218,7 @@ const DialogSave = (props: DialogSaveProps) => {
   });
 
   // ensures "real-time" validation for burried unit inside InputOrSelect
-  createComputed(() => {
+  createComputed((v: any) => {
     validateInputUpdateStore({ name: 'unit', value: inputs.unit.value });
   });
 
