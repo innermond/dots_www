@@ -98,6 +98,7 @@ export default function EntryTypeEdit(props: {
         }}
       >
         <TextFieldEllipsis
+          InputLabelProps={{ shrink: !!props.inputs.code.value }}
           name="code"
           label="Code"
           type="text"
@@ -111,6 +112,7 @@ export default function EntryTypeEdit(props: {
           disabled={props.isDisabled()}
         />
         <TextFieldEllipsis
+          InputLabelProps={{ shrink: !!props.inputs.description.value }}
           name="description"
           label="Description"
           type="text"

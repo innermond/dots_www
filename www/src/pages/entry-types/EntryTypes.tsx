@@ -6,7 +6,6 @@ import {
   createSignal,
   lazy,
   batch,
-  createMemo,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -86,36 +85,37 @@ const EntryTypes: Component = (): JSX.Element => {
   ) => <Slide {...props} direction="up" />;
 */
 
-  const cmpname = createMemo(() => {
+  const cmpname = () => {
     const cmp = dyn();
-    console.log(cmp);
     return cmp;
-  });
-  const openable = () => !!cmpname() && openDialog();
+  };
+  const openable = () => {
+    const cmp = cmpname();
+    const dlg = openDialog();
+    const op = !!cmp && dlg;
+    return op;
+  };
 
   const dialogSave = () => {
-    console.log(openable(), dyn());
-    <Show when={openable()} fallback={<p>loading...</p>}>
-      {cmpname()}
-    </Show>;
-    /* return (
-      <Show when={openable()} fallback={<p>loading...</p>}>
-{cmpname()}
-        /*<DialogSave
+    return (
+      <Show when={openable()}>
+        <DialogSave
           //transition={dialogTransition}
           title={
             (cmpname() as string) === 'editEntry'
               ? 'Edit entry type'
               : 'Add entry type'
           }
-          textSave={(dyn() as string) === 'editEntry' ? 'Edit' : 'Add'}
+          textSave={(cmpname() as string) === 'editEntry' ? 'Edit' : 'Add'}
           open={dialogSignal}
           names={
             (cmpname() as string) === 'editEntry'
               ? ['id', 'code', 'description', 'unit']
               : ['code', 'description', 'unit']
           }
-          dyn={(cmpname() as string) === 'editEntry' ? editEntryType : addEntryType}
+          dyn={
+            (cmpname() as string) === 'editEntry' ? editEntryType : addEntryType
+          }
           sendRequestFn={
             (cmpname() as string) === 'editEntry'
               ? apiEntryType.edit
@@ -124,7 +124,7 @@ const EntryTypes: Component = (): JSX.Element => {
           intialInputs={intialInputs()}
         />
       </Show>
-  )*/
+    );
   };
 
   const dummy = (num: number, height: string = '1rem') => (

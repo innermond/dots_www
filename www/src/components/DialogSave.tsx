@@ -135,6 +135,10 @@ const DialogSave = (props: DialogSaveProps) => {
     validateInputUpdateStore(e.target);
   };
 
+  const handleReset = (): void => {
+    zeroingInputs();
+  };
+
   // collect data from event
   function collectFormData<T>(
     form: HTMLFormElement,
@@ -301,7 +305,13 @@ const DialogSave = (props: DialogSaveProps) => {
         >
           {props.title}
         </Typography>
-        <ActionButton kind="reset" only="icon" />
+        <ActionButton
+          kind="reset"
+          only="text"
+          type="reset"
+          color="error"
+          size="small"
+        />
         <ActionButton
           disabled={isDisabledActionButton()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
@@ -336,6 +346,7 @@ const DialogSave = (props: DialogSaveProps) => {
         component="form"
         onSubmit={handleSubmit}
         onInput={handleInput}
+        onReset={handleReset}
         sx={{
           display: 'flex',
           flexDirection: 'column',

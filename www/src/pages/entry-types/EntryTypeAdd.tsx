@@ -3,7 +3,7 @@ import type { Accessor, Setter, JSX } from 'solid-js';
 import HelperTextMultiline from '@/components/HelperTextMultiline';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
-import { Store } from 'solid-js/store';
+import { SetStoreFunction, Store } from 'solid-js/store';
 import type {
   FieldNames,
   MessagesMap,
@@ -42,6 +42,7 @@ const messages: MessagesMap<Names> = {
 
 export default function EntryTypeAdd(props: {
   inputs: Store<Validable<keyof Omit<EntryTypeData, 'id'>>>;
+  setInputs: SetStoreFunction<Validable<keyof EntryTypeData>>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
 }): JSX.Element {
@@ -74,9 +75,7 @@ export default function EntryTypeAdd(props: {
           sx={{ width: '10rem' }}
           value={props?.inputs.code.value}
           error={props?.inputs.code.error}
-          helperText={
-            <HelperTextMultiline lines={props?.inputs.code.message} />
-          }
+          helperText={props?.inputs.code.message}
           disabled={props?.isDisabled()}
         />
         <TextField
@@ -88,13 +87,17 @@ export default function EntryTypeAdd(props: {
           sx={{ flex: 1 }}
           value={props?.inputs.description.value}
           error={props?.inputs.description.error}
-          helperText={
-            <HelperTextMultiline lines={props?.inputs.description.message} />
-          }
+          helperText={props?.inputs.description.message}
           disabled={props?.isDisabled()}
         />
       </FormGroup>
-      <InputOrSelect unit={props?.inputs.unit} disabled={props?.isDisabled()} />
+      <InputOrSelect
+        unit={props?.inputs.unit}
+        disabled={props?.isDisabled()}
+        setUnit={(u: string | null) =>
+          props.setInputs('unit', { value: u, error: false, message: '' })
+        }
+      />
     </Container>
   );
 }
