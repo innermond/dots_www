@@ -151,6 +151,7 @@ const InputOrSelect = (props: {
           }}
           onBlur={(evt: Event) => {
             let v: string | null = (evt.target as HTMLInputElement).value;
+            if (props.unit.error) return;
             v = v === '' ? null : v;
             props.setUnit(v);
           }}

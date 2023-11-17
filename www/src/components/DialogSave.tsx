@@ -219,7 +219,9 @@ const DialogSave = (props: DialogSaveProps) => {
 
   // ensures "real-time" validation for burried unit inside InputOrSelect
   createComputed((v: any) => {
+    if (v === undefined) return;
     validateInputUpdateStore({ name: 'unit', value: inputs.unit.value });
+    return Math.random();
   });
 
   createEffect(() => {
