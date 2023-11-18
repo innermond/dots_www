@@ -44,9 +44,9 @@ const Palette = (mode: PaletteOptions['mode']): DeepPartial<PaletteOptions> => {
       disabled: paletteColor.grey[400],
     },
     action: {
-      disabled: paletteColor.grey[300],
+      disabled: paletteColor.grey[50],
     },
-    divider: paletteColor.grey[200],
+    divider: paletteColor.grey[300],
     background: {
       paper: paletteColor.grey[0],
       default: paletteColor.grey.A50,

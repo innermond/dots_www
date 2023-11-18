@@ -36,7 +36,7 @@ const Typography = (fontFamily: string): Partial<TypographyOptions> => ({
     fontSize: '0.875rem',
     lineHeight: 1.57,
   },
-  /*caption: {
+  caption: {
     fontWeight: 400,
     fontSize: '0.75rem',
     lineHeight: 1.66,
@@ -64,7 +64,7 @@ const Typography = (fontFamily: string): Partial<TypographyOptions> => ({
   },
   button: {
     textTransform: 'capitalize',
-  },*/
+  },
 });
 
 export default Typography;
