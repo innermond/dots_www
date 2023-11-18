@@ -6,6 +6,7 @@ import {
   ListItemIcon,
   ListItemText,
   ListSubheader,
+  Typography,
 } from '@suid/material';
 
 import { useNavigate } from '@solidjs/router';
@@ -27,7 +28,10 @@ const listItem = (icon: any, text: string, path: string): JSX.Element => {
       <ListItemIcon>
         <Show when={true}>{icon}</Show>
       </ListItemIcon>
-      <ListItemText primary={text} />
+      <ListItemText
+        disableTypography={true}
+        primary={<Typography variant="h5">{text}</Typography>}
+      />
     </ListItemButton>
   );
 };

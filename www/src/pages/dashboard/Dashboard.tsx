@@ -284,7 +284,7 @@ const Dashboard: Component = () => {
           <ChevronLeftIcon />
         </IconButton>
       </Toolbar>
-      <Divider sx={{ my: 1 }} />
+      <Divider />
       <List component="nav" on:refetchItem={refetchCompany}>
         <ListItems />
         <Divider />
@@ -299,7 +299,10 @@ const Dashboard: Component = () => {
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
-          <ListItemText primary="Logout" />
+          <ListItemText
+            disableTypography={true}
+            primary={<Typography variant="h5">Logout</Typography>}
+          />
         </ListItemButton>
       </List>
     </Drawer>

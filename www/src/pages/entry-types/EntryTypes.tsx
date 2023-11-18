@@ -200,26 +200,24 @@ const EntryTypes: Component = (): JSX.Element => {
                           title="view entry type"
                           color="primary"
                           size="small"
-                          sx={{ '& svg': { fontSize: '1em' } }}
                           aria-label="view entry type"
                           /*onclick={() =>
                             navigate('./' + c.id, { replace: true })
                           }*/
                         >
-                          <VisibilityOutlinedIcon />
+                          <VisibilityOutlinedIcon fontSize="small" />
                         </IconButton>
                         <IconButton
                           title="edit entry type"
                           color="primary"
                           size="small"
-                          sx={{ '& svg': { fontSize: '1em' } }}
                           aria-label="edit entry type"
                           onClick={[
                             handleDialogWith,
                             { cmp: 'editEntry' as LazyWhat, data: c },
                           ]}
                         >
-                          <EditIcon />
+                          <EditIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>

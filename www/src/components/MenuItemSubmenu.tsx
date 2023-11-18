@@ -26,6 +26,7 @@ import {
   ListItemText,
   SvgIcon,
   IconButton,
+  Typography,
 } from '@suid/material';
 import { SvgIconTypeMap } from '@suid/material/SvgIcon';
 
@@ -73,7 +74,10 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
           fontSize="small"
         />
       </ListItemIcon>
-      <ListItemText primary={props.headtext} />
+      <ListItemText
+        disableTypography={true}
+        primary={<Typography variant="h5">{props.headtext}</Typography>}
+      />
       {open() ? <ExpandLessIcon /> : <ExpandMoreIcon />}
     </ListItemButton>
   );
@@ -168,8 +172,12 @@ function MenuItemSubmenu<T>(props: PropsMenuItemSubmenu<T>): JSX.Element {
                     ) : (
                       <ListItemButton onClick={[handleSubmenuClick, d]}>
                         <ListItemText
-                          secondary={(d as any)[titlekey]}
-                          sx={{ ml: '.5em' }}
+                          disableTypography={true}
+                          primary={
+                            <Typography variant="body1">
+                              {(d as any)[titlekey]}
+                            </Typography>
+                          }
                         />
                         <ListItemIcon
                           sx={{
