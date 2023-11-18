@@ -42,7 +42,7 @@ const InputOrSelect = (props: {
     return n ? data : [];
   };
 
-  const unit = props.unit.value;
+  const unitValueDefault = props.unit.value;
 
   const handleSelectChange = (evt: SelectChangeEvent) => {
     setIsOpen(false);
@@ -54,7 +54,7 @@ const InputOrSelect = (props: {
     return (
       <Button
         endIcon={<ChangeCircleOutlinedIcon color="action" />}
-        sx={{ width: 'fit-content', alignSelf: 'flex-end' }}
+        sx={{ alignSelf: 'flex-end' }}
         onClick={() => {
           if (props.disabled) {
             return;
@@ -97,7 +97,7 @@ const InputOrSelect = (props: {
             }}
             renderValue={(v: any) => v}
             value={props.unit.value}
-            defaultValue={unit}
+            defaultValue={unitValueDefault}
             onChange={handleSelectChange}
             onClick={(evt: MouseEvent) => {
               if (props.disabled) {
@@ -146,14 +146,17 @@ const InputOrSelect = (props: {
           helperText={props.unit.message}
           disabled={props.disabled}
           value={props.unit.value}
+          defaultValue={unitValueDefault}
           onChange={(evt: Event) => {
-            props.setUnit((evt.target as HTMLInputElement).value ?? null);
+            props.setUnit((evt.target as HTMLInputElement).value);
           }}
           onBlur={(evt: Event) => {
             let v: string | null = (evt.target as HTMLInputElement).value;
             if (props.unit.error) return;
-            v = v === '' ? null : v;
-            props.setUnit(v);
+            // try to force an update on store
+            if (v === '') {
+              props.setUnit(null);
+            }
           }}
         />
         {switchNewUnit('or use existent unit', false)}

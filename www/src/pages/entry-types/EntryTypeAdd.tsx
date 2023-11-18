@@ -10,7 +10,7 @@ import type {
   Validable,
   Validators,
 } from '@/lib/form';
-import { required, minlen, maxlen } from '@/lib/form';
+import { required, minlen, maxlen, optional } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 
 const theme = useTheme();
@@ -20,7 +20,7 @@ type Names = FieldNames<typeof names>;
 // set up validation
 const validators: Validators<Names> = {
   code: [required, minlen(7), maxlen(50)],
-  description: [required, minlen(7), maxlen(100)],
+  description: [optional, minlen(7), maxlen(100)],
   unit: [required, minlen(2), maxlen(20)],
 };
 
@@ -36,7 +36,7 @@ const textmessages = [
 // map error messages with field names
 const messages: MessagesMap<Names> = {
   code: textmessages,
-  description: textmessages,
+  description: [() => '', ...textmessages.slice(1)],
   unit: textmessages,
 };
 

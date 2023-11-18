@@ -5,7 +5,7 @@ import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isKeyofEntryTypeData } from '@/pages/entry-types/types';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
-import { SetStoreFunction, Store } from 'solid-js/store';
+import { SetStoreFunction, Store, produce } from 'solid-js/store';
 import type {
   FieldNames,
   MessagesMap,
@@ -129,7 +129,11 @@ export default function EntryTypeEdit(props: {
       <InputOrSelect
         unit={props.inputs.unit}
         setUnit={(u: string | null) =>
-          props.setInputs('unit', { value: u, error: false, message: '' })
+          props.setInputs(
+            produce(
+              (s: any) => (s.unit = { value: u, error: false, message: '' }),
+            ),
+          )
         }
         disabled={props.isDisabled()}
       />

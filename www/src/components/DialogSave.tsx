@@ -217,13 +217,6 @@ const DialogSave = (props: DialogSaveProps) => {
     }
   });
 
-  // ensures "real-time" validation for burried unit inside InputOrSelect
-  createComputed((v: any) => {
-    if (v === undefined) return;
-    validateInputUpdateStore({ name: 'unit', value: inputs.unit.value });
-    return Math.random();
-  });
-
   createEffect(() => {
     if (submitForm.loading) {
       toasting.dismiss();
@@ -280,9 +273,6 @@ const DialogSave = (props: DialogSaveProps) => {
     }
   });
 
-  const isDisabledActionButton = () =>
-    inputs.code.error || inputs.description.error || inputs.unit.error;
-
   const appBar = (
     <AppBar
       color="transparent"
@@ -315,7 +305,7 @@ const DialogSave = (props: DialogSaveProps) => {
           size="small"
         />
         <ActionButton
-          disabled={isDisabledActionButton()}
+          disabled={inputsHasErrors()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
         />
       </Toolbar>

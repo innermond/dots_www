@@ -24,7 +24,7 @@ const ActionButton = (props: ActionButtonProps): JSX.Element => {
     icon = <DeleteIcon />;
   }
 
-  let txt = my.text ?? my.kind ?? 'save';
+  let txt = buttonProps?.children ?? my.text ?? my.kind ?? 'save';
   if (my.only === 'icon') {
     txt = '';
   }
@@ -38,6 +38,7 @@ const ActionButton = (props: ActionButtonProps): JSX.Element => {
   }
 
   if (my.only === 'icon') {
+    icon = buttonProps?.startIcon ?? icon;
     return (
       <Button
         variant="contained"

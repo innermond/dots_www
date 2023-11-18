@@ -18,7 +18,6 @@ import {
   TableRow,
   Checkbox,
   Stack,
-  Button,
   useTheme,
   IconButton,
 } from '@suid/material';
@@ -34,6 +33,8 @@ import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData } from './types';
 import DialogSave from '@/components/DialogSave';
+import ActionButton from '@/components/ActionButton';
+import { zero } from '@/lib/api';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -152,24 +153,23 @@ const EntryTypes: Component = (): JSX.Element => {
           <Stack
             direction="row"
             sx={{
-              p: 1,
               display: 'flex',
               justifyContent: 'end',
-              backgroundColor: theme.palette.grey[200],
             }}
           >
-            <Button
+            <ActionButton
               size="large"
+              variant="text"
               startIcon={<AddIcon />}
-              onClick={[handleDialogWith, { cmp: 'addEntry' }]}
+              onClick={[handleDialogWith, { cmp: 'addEntry', data: zero() }]}
             >
               Add Entry Type
-            </Button>
+            </ActionButton>
           </Stack>
           <Table size="small" aria-label="simple table">
             <TableHead>
               <TableRow hover>
-                <TableCell>
+                <TableCell component="th">
                   <Checkbox />
                 </TableCell>
                 <TableCell component="th">Code</TableCell>
@@ -197,23 +197,29 @@ const EntryTypes: Component = (): JSX.Element => {
                       <TableCell align="right">{c.unit}</TableCell>
                       <TableCell align="right">
                         <IconButton
+                          title="view entry type"
                           color="primary"
+                          size="small"
+                          sx={{ '& svg': { fontSize: '1em' } }}
                           aria-label="view entry type"
                           /*onclick={() =>
                             navigate('./' + c.id, { replace: true })
                           }*/
                         >
                           <VisibilityOutlinedIcon />
-                          <IconButton
-                            color="primary"
-                            aria-label="view entry type"
-                            onClick={[
-                              handleDialogWith,
-                              { cmp: 'editEntry' as LazyWhat, data: c },
-                            ]}
-                          >
-                            <EditIcon />
-                          </IconButton>
+                        </IconButton>
+                        <IconButton
+                          title="edit entry type"
+                          color="primary"
+                          size="small"
+                          sx={{ '& svg': { fontSize: '1em' } }}
+                          aria-label="edit entry type"
+                          onClick={[
+                            handleDialogWith,
+                            { cmp: 'editEntry' as LazyWhat, data: c },
+                          ]}
+                        >
+                          <EditIcon />
                         </IconButton>
                       </TableCell>
                     </TableRow>
