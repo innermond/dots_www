@@ -180,7 +180,7 @@ const EntryTypes: Component = (): JSX.Element => {
                   Unit
                 </TableCell>
                 <TableCell component="th" align="right">
-                  Action
+                  &nbsp;
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -196,29 +196,31 @@ const EntryTypes: Component = (): JSX.Element => {
                       <TableCell align="right">{c.description}</TableCell>
                       <TableCell align="right">{c.unit}</TableCell>
                       <TableCell align="right">
-                        <IconButton
-                          title="view entry type"
-                          color="primary"
-                          size="small"
-                          aria-label="view entry type"
-                          /*onclick={() =>
+                        <Stack direction="row" paddingLeft={theme.spacing(2)}>
+                          <IconButton
+                            title="view entry type"
+                            color="primary"
+                            size="small"
+                            aria-label="view entry type"
+                            /*onclick={() =>
                             navigate('./' + c.id, { replace: true })
                           }*/
-                        >
-                          <VisibilityOutlinedIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          title="edit entry type"
-                          color="primary"
-                          size="small"
-                          aria-label="edit entry type"
-                          onClick={[
-                            handleDialogWith,
-                            { cmp: 'editEntry' as LazyWhat, data: c },
-                          ]}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
+                          >
+                            <VisibilityOutlinedIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            title="edit entry type"
+                            color="primary"
+                            size="small"
+                            aria-label="edit entry type"
+                            onClick={[
+                              handleDialogWith,
+                              { cmp: 'editEntry' as LazyWhat, data: c },
+                            ]}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   );
