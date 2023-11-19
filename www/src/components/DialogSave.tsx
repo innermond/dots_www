@@ -25,8 +25,10 @@ import { Dynamic } from 'solid-js/web';
 import type { Accessor, Component, Setter } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
+// TODO: remove specific types
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
+
 import type { InnerValidation, Validable } from '@/lib/form';
 import { validate } from '@/lib/form';
 import { makeDefaults, FieldNames } from '@/lib/form';
@@ -163,13 +165,7 @@ const DialogSave = (props: DialogSaveProps) => {
   }
 
   // submit data
-  async function sendRequest(e: Event) {
-    e.preventDefault();
-    if (!e.target) return;
-
-    // prepare data from DOM
-    // to pure data
-    const requestData = collectFormData(e.target as HTMLFormElement, names);
+  async function sendRequest(requestData: any) {
     // fire request
     const [remote, abort] = props.sendRequestFn(requestData);
 
@@ -186,7 +182,7 @@ const DialogSave = (props: DialogSaveProps) => {
   }
 
   // submitting driven by signals
-  const [startSubmit, setStartSubmit] = createSignal<Event | null>();
+  const [startSubmit, setStartSubmit] = createSignal<any | null>();
   const [submitForm] = createResource(startSubmit, sendRequest);
 
   createComputed(() => {
@@ -206,7 +202,22 @@ const DialogSave = (props: DialogSaveProps) => {
       return;
     }
 
-    setStartSubmit(evt);
+    const requestData = collectFormData(evt.target as HTMLFormElement, names);
+    let changed = false;
+    for (const n of names) {
+      // != ensure strings like numbers are equal with numbers
+      if (props.intialInputs[n] != (requestData as any)[n]) {
+        changed = true;
+        break;
+      }
+    }
+
+    if (!changed) {
+      toasting('no change', 'info' as AlertColor);
+      return;
+    }
+
+    setStartSubmit(requestData);
   };
 
   const isDisabled = () => submitForm.loading;
@@ -242,6 +253,7 @@ const DialogSave = (props: DialogSaveProps) => {
         navigate('/');
       }
 
+      // TODO: specific type REMOVE!!!
       if (!isEntryTypeData(result)) {
         throw new Error('data received is not an entry type');
       }
