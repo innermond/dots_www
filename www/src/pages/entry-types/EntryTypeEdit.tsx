@@ -1,8 +1,17 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import type { Accessor, Setter, JSX } from 'solid-js';
+import {
+  type Accessor,
+  type Setter,
+  type JSX,
+  createEffect,
+  Resource,
+} from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
-import { isKeyofEntryTypeData } from '@/pages/entry-types/types';
+import {
+  isEntryTypeData,
+  isKeyofEntryTypeData,
+} from '@/pages/entry-types/types';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import { SetStoreFunction, Store, produce } from 'solid-js/store';
@@ -15,6 +24,7 @@ import type {
   Validation,
 } from '@/lib/form';
 import { required, minlen, maxlen, optional, int } from '@/lib/form';
+import toasting from '@/lib/toast';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
@@ -50,6 +60,7 @@ export default function EntryTypeEdit(props: {
   setInputs: SetStoreFunction<Validable<keyof EntryTypeData>>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
+  submitForm: Resource<EntryTypeData>;
 }): JSX.Element {
   props.setValidation({ validators, messages });
 
@@ -65,6 +76,17 @@ export default function EntryTypeEdit(props: {
       { value, error: false, message: '' } as Validation,
     );
   };
+
+  createEffect(() => {
+    if (props.submitForm.state === 'ready') {
+      const result = props.submitForm() as EntryTypeData;
+      if (!isEntryTypeData(result)) {
+        throw new Error('data received is not an entry type');
+      }
+      const { code } = result;
+      toasting(`entry type "${code}" has been edited`);
+    }
+  });
 
   const id = props.inputs.id.value;
   const code = props.inputs.code.value;

@@ -22,12 +22,8 @@ import {
 } from 'solid-js';
 import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
 import { Dynamic } from 'solid-js/web';
-import type { Accessor, Component, Setter } from 'solid-js';
+import type { Accessor, Component, Resource, Setter } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
-
-// TODO: remove specific types
-import type { EntryTypeData } from '@/pages/entry-types/types';
-import { isEntryTypeData } from '@/pages/entry-types/types';
 
 import type { InnerValidation, Validable } from '@/lib/form';
 import { validate } from '@/lib/form';
@@ -48,23 +44,26 @@ const defaultTransition = function (
   return <Slide direction="up" {...props} />;
 };
 
-export type DialogSaveProps = {
+export type Dyn<T> = Component<{
+  inputs: Store<Validable<string>>;
+  setInputs: SetStoreFunction<any>;
+  isDisabled: Accessor<boolean>;
+  setValidation: Setter<InnerValidation<string>>;
+  submitForm: Resource<T>;
+}>;
+
+export type DialogSaveProps<T> = {
   open: Signal<boolean | undefined>;
   title: string;
   textSave?: string;
   transition?: Component<TransitionProps & { children: JSX.Element }>;
-  dyn: Component<{
-    inputs: Store<Validable<string>>;
-    setInputs: SetStoreFunction<any>;
-    isDisabled: Accessor<boolean>;
-    setValidation: Setter<InnerValidation<string>>;
-  }>;
+  dyn: Dyn<T>;
   names: string[];
   sendRequestFn: Function;
   intialInputs?: any;
 } & ParentProps;
 
-const DialogSave = (props: DialogSaveProps) => {
+const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
   // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
 
@@ -182,7 +181,7 @@ const DialogSave = (props: DialogSaveProps) => {
   }
 
   // submitting driven by signals
-  const [startSubmit, setStartSubmit] = createSignal<any | null>();
+  const [startSubmit, setStartSubmit] = createSignal<T | null>();
   const [submitForm] = createResource(startSubmit, sendRequest);
 
   createComputed(() => {
@@ -252,13 +251,6 @@ const DialogSave = (props: DialogSaveProps) => {
         sessionStorage.setItem(key, token_access);
         navigate('/');
       }
-
-      // TODO: specific type REMOVE!!!
-      if (!isEntryTypeData(result)) {
-        throw new Error('data received is not an entry type');
-      }
-      const { code } = result as EntryTypeData;
-      toasting(`entry type "${code}" has been added`);
     }
   });
 
@@ -331,6 +323,7 @@ const DialogSave = (props: DialogSaveProps) => {
       setInputs={setInputs}
       isDisabled={isDisabled}
       setValidation={setValidation}
+      submitForm={submitForm}
       component={props.dyn}
     />
   );

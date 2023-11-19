@@ -1,7 +1,13 @@
 import { Container, TextField, useTheme, FormGroup } from '@suid/material';
-import type { Accessor, Setter, JSX } from 'solid-js';
+import {
+  type Accessor,
+  type Setter,
+  type JSX,
+  type Resource,
+  createEffect,
+} from 'solid-js';
 import InputOrSelect from './InputOrSelect';
-import type { EntryTypeData } from '@/pages/entry-types/types';
+import { isEntryTypeData, type EntryTypeData } from '@/pages/entry-types/types';
 import { SetStoreFunction, Store } from 'solid-js/store';
 import type {
   FieldNames,
@@ -12,6 +18,7 @@ import type {
 } from '@/lib/form';
 import { required, minlen, maxlen, optional } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
+import toasting from '@/lib/toast';
 
 const theme = useTheme();
 const names = ['code', 'description', 'unit'];
@@ -45,8 +52,20 @@ export default function EntryTypeAdd(props: {
   setInputs: SetStoreFunction<Validable<keyof EntryTypeData>>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
+  submitForm: Resource<EntryTypeData>;
 }): JSX.Element {
   props.setValidation({ validators, messages });
+
+  createEffect(() => {
+    if (props.submitForm.state === 'ready') {
+      const result = props.submitForm() as EntryTypeData;
+      if (!isEntryTypeData(result)) {
+        throw new Error('data received is not an entry type');
+      }
+      const { code } = result;
+      toasting(`entry type "${code}" has been added`);
+    }
+  });
 
   return (
     <Container
