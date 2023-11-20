@@ -7,18 +7,24 @@ import {
   createEffect,
 } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
-import { isEntryTypeData, type EntryTypeData } from '@/pages/entry-types/types';
-import { SetStoreFunction, Store } from 'solid-js/store';
+import {
+  isEntryTypeData,
+  type EntryTypeData,
+  isKeyofEntryTypeData,
+} from '@/pages/entry-types/types';
+import { SetStoreFunction, Store, produce } from 'solid-js/store';
 import type {
   FieldNames,
   MessagesMap,
   InnerValidation,
   Validable,
   Validators,
+  Validation,
 } from '@/lib/form';
 import { required, minlen, maxlen, optional } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import toasting from '@/lib/toast';
+import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 
 const theme = useTheme();
 const names = ['code', 'description', 'unit'];
@@ -47,18 +53,28 @@ const messages: MessagesMap<Names> = {
   unit: textmessages,
 };
 
-export default function EntryTypeAdd(props: {
-  inputs: Store<Validable<keyof Omit<EntryTypeData, 'id'>>>;
-  setInputs: SetStoreFunction<Validable<keyof EntryTypeData>>;
-  isDisabled: Accessor<boolean>;
-  setValidation: Setter<InnerValidation<string>>;
-  submitForm: Resource<EntryTypeData>;
-}): JSX.Element {
-  props.setValidation({ validators, messages });
+export default function EntryTypeAdd(): JSX.Element {
+  const { inputs, setInputs, isDisabled, setValidation, submitForm } =
+    useDialog() as DialogProviderValue<EntryTypeData>;
+
+  setValidation({ validators, messages });
+
+  const handleInput = (e: InputEvent) => {
+    const name = (e.target as HTMLInputElement).name;
+    const value = (e.target as HTMLInputElement).value;
+    if (!name || value === undefined || isKeyofEntryTypeData(name)) {
+      return;
+    }
+
+    setInputs(
+      name as keyof EntryTypeData,
+      { value, error: false, message: '' } as Validation,
+    );
+  };
 
   createEffect(() => {
-    if (props.submitForm.state === 'ready') {
-      const result = props.submitForm() as EntryTypeData;
+    if (submitForm.state === 'ready') {
+      const result = submitForm() as EntryTypeData;
       if (!isEntryTypeData(result)) {
         throw new Error('data received is not an entry type');
       }
@@ -86,37 +102,41 @@ export default function EntryTypeAdd(props: {
         }}
       >
         <TextFieldEllipsis
-          InputLabelProps={{ shrink: !!props.inputs.code.value }}
+          InputLabelProps={{ shrink: !!inputs.code.value }}
           name="code"
           label="Code"
           type="text"
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
-          value={props?.inputs.code.value}
-          error={props?.inputs.code.error}
-          helperText={props?.inputs.code.message}
-          disabled={props?.isDisabled()}
+          onInput={handleInput}
+          error={inputs.code.error}
+          helperText={inputs.code.message}
+          disabled={isDisabled()}
         />
         <TextFieldEllipsis
-          InputLabelProps={{ shrink: !!props.inputs.description.value }}
+          InputLabelProps={{ shrink: !!inputs.description.value }}
           name="description"
           label="Description"
           type="text"
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
-          value={props?.inputs.description.value}
-          error={props?.inputs.description.error}
-          helperText={props?.inputs.description.message}
-          disabled={props?.isDisabled()}
+          onInput={handleInput}
+          error={inputs.description.error}
+          helperText={inputs.description.message}
+          disabled={isDisabled()}
         />
       </FormGroup>
       <InputOrSelect
-        unit={props?.inputs.unit}
-        disabled={props?.isDisabled()}
+        unit={inputs.unit}
+        disabled={isDisabled()}
         setUnit={(u: string | null) =>
-          props.setInputs('unit', { value: u, error: false, message: '' })
+          setInputs(
+            produce(
+              (s: any) => (s.unit = { value: u, error: false, message: '' }),
+            ),
+          )
         }
       />
     </Container>

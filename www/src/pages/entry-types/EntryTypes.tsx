@@ -31,10 +31,11 @@ import Skeleton from '@suid/material/Skeleton';
 
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
-import { EntryTypeData } from './types';
-import DialogSave from '@/components/DialogSave';
+import { EntryTypeData, entryTypeZero } from './types';
 import ActionButton from '@/components/ActionButton';
 import { zero } from '@/lib/api';
+import DialogProvider from '@/contexts/DialogContext';
+import { Dynamic } from 'solid-js/web';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -90,40 +91,53 @@ const EntryTypes: Component = (): JSX.Element => {
     const cmp = dyn();
     return cmp;
   };
+  const cmp = () => {
+    if ((cmpname() as string) === 'editEntry') {
+      return editEntryType;
+    }
+    if ((cmpname() as string) === 'addEntry') {
+      return addEntryType;
+    }
+  };
   const openable = () => {
     const cmp = cmpname();
     const dlg = openDialog();
     const op = !!cmp && dlg;
     return op;
   };
+  const title = () => {
+    return (cmpname() as string) === 'editEntry'
+      ? 'Edit entry type'
+      : 'Add entry type';
+  };
+  const textSave = () => {
+    return (cmpname() as string) === 'editEntry' ? 'Edit' : 'Add';
+  };
+  const fields = () => {
+    return (cmpname() as string) === 'editEntry'
+      ? ['id', 'code', 'description', 'unit']
+      : ['code', 'description', 'unit'];
+  };
+  const sendRequestFn = () => {
+    return (cmpname() as string) === 'editEntry'
+      ? apiEntryType.edit
+      : apiEntryType.add;
+  };
 
   const dialogSave = () => {
     return (
       <Show when={openable()}>
-        <DialogSave
+        <DialogProvider
           //transition={dialogTransition}
-          title={
-            (cmpname() as string) === 'editEntry'
-              ? 'Edit entry type'
-              : 'Add entry type'
-          }
-          textSave={(cmpname() as string) === 'editEntry' ? 'Edit' : 'Add'}
+          title={title()}
+          textSave={textSave()}
           open={dialogSignal}
-          names={
-            (cmpname() as string) === 'editEntry'
-              ? ['id', 'code', 'description', 'unit']
-              : ['code', 'description', 'unit']
-          }
-          dyn={
-            (cmpname() as string) === 'editEntry' ? editEntryType : addEntryType
-          }
-          sendRequestFn={
-            (cmpname() as string) === 'editEntry'
-              ? apiEntryType.edit
-              : apiEntryType.add
-          }
+          names={fields()}
+          sendRequestFn={sendRequestFn()}
           intialInputs={intialInputs()}
-        />
+        >
+          <Dynamic component={cmp()} />
+        </DialogProvider>
       </Show>
     );
   };
@@ -161,7 +175,10 @@ const EntryTypes: Component = (): JSX.Element => {
               size="large"
               variant="text"
               startIcon={<AddIcon />}
-              onClick={[handleDialogWith, { cmp: 'addEntry', data: zero() }]}
+              onClick={[
+                handleDialogWith,
+                { cmp: 'addEntry', data: entryTypeZero },
+              ]}
             >
               Add Entry Type
             </ActionButton>

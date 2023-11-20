@@ -25,6 +25,7 @@ import type {
 } from '@/lib/form';
 import { required, minlen, maxlen, optional, int } from '@/lib/form';
 import toasting from '@/lib/toast';
+import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
@@ -55,14 +56,11 @@ const messages: MessagesMap<Names> = {
   unit: textmessages,
 };
 
-export default function EntryTypeEdit(props: {
-  inputs: Store<Validable<keyof EntryTypeData>>;
-  setInputs: SetStoreFunction<Validable<keyof EntryTypeData>>;
-  isDisabled: Accessor<boolean>;
-  setValidation: Setter<InnerValidation<string>>;
-  submitForm: Resource<EntryTypeData>;
-}): JSX.Element {
-  props.setValidation({ validators, messages });
+export default function EntryTypeEdit(): JSX.Element {
+  const { inputs, setInputs, isDisabled, setValidation, submitForm } =
+    useDialog() as DialogProviderValue<EntryTypeData>;
+
+  setValidation({ validators, messages });
 
   const handleInput = (e: InputEvent) => {
     const name = (e.target as HTMLInputElement).name;
@@ -71,15 +69,15 @@ export default function EntryTypeEdit(props: {
       return;
     }
 
-    props.setInputs(
+    setInputs(
       name as keyof EntryTypeData,
       { value, error: false, message: '' } as Validation,
     );
   };
 
   createEffect(() => {
-    if (props.submitForm.state === 'ready') {
-      const result = props.submitForm() as EntryTypeData;
+    if (submitForm.state === 'ready') {
+      const result = submitForm() as EntryTypeData;
       if (!isEntryTypeData(result)) {
         throw new Error('data received is not an entry type');
       }
@@ -88,9 +86,9 @@ export default function EntryTypeEdit(props: {
     }
   });
 
-  const id = props.inputs.id.value;
-  const code = props.inputs.code.value;
-  const description = props.inputs.description.value;
+  const id = inputs.id.value;
+  const code = inputs.code.value;
+  const description = inputs.description.value;
 
   return (
     <Container
@@ -120,7 +118,7 @@ export default function EntryTypeEdit(props: {
         }}
       >
         <TextFieldEllipsis
-          InputLabelProps={{ shrink: !!props.inputs.code.value }}
+          InputLabelProps={{ shrink: !!inputs.code.value }}
           name="code"
           label="Code"
           type="text"
@@ -129,12 +127,12 @@ export default function EntryTypeEdit(props: {
           sx={{ maxWidth: '10rem' }}
           defaultValue={code}
           onInput={handleInput}
-          error={props.inputs.code.error}
-          helperText={props.inputs.code.message}
-          disabled={props.isDisabled()}
+          error={inputs.code.error}
+          helperText={inputs.code.message}
+          disabled={isDisabled()}
         />
         <TextFieldEllipsis
-          InputLabelProps={{ shrink: !!props.inputs.description.value }}
+          InputLabelProps={{ shrink: !!inputs.description.value }}
           name="description"
           label="Description"
           type="text"
@@ -143,21 +141,21 @@ export default function EntryTypeEdit(props: {
           sx={{ flex: 1 }}
           defaultValue={description}
           onInput={handleInput}
-          error={props.inputs.description.error}
-          helperText={props.inputs.description.message}
-          disabled={props.isDisabled()}
+          error={inputs.description.error}
+          helperText={inputs.description.message}
+          disabled={isDisabled()}
         />
       </FormGroup>
       <InputOrSelect
-        unit={props.inputs.unit}
+        unit={inputs.unit}
         setUnit={(u: string | null) =>
-          props.setInputs(
+          setInputs(
             produce(
               (s: any) => (s.unit = { value: u, error: false, message: '' }),
             ),
           )
         }
-        disabled={props.isDisabled()}
+        disabled={isDisabled()}
       />
     </Container>
   );
