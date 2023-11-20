@@ -83,8 +83,12 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
   const initialValues = unwrap(props.intialInputs);
   // set up local state for the inputs named above
-  let defaultInputs = makeDefaults(initialValues, ...names);
-  const [inputs, setInputs] = createStore(defaultInputs);
+  const defaultInputs = makeDefaults(initialValues, ...names);
+
+  // spread defaultInputs as being a store means it is modified
+  // by operations done over store
+  // and defaultInputs will unexpectedly by changed
+  const [inputs, setInputs] = createStore({ ...defaultInputs });
   const inputsHasErrors = () => {
     for (const name of names) {
       if (inputs[name].error) {

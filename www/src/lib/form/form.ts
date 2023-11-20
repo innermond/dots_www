@@ -83,7 +83,8 @@ const makeDefaults = (
   for (n of names) {
     // use value: null because undefined will make component uncontrolled
     let v: any = null;
-    if (!!initialInputs && n in initialInputs) {
+    const override = initialInputs !== null && n in initialInputs;
+    if (override) {
       v = initialInputs[n];
     }
     defaults[n] = { value: v, error: false, message: '' };
