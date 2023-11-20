@@ -33,7 +33,6 @@ import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData, entryTypeZero } from './types';
 import ActionButton from '@/components/ActionButton';
-import { zero } from '@/lib/api';
 import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
 
@@ -66,7 +65,7 @@ const EntryTypes: Component = (): JSX.Element => {
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
 
-  const [intialInputs, setInitialInputs] = createSignal();
+  const [intialInputs, setInitialInputs] = createSignal(entryTypeZero);
   const handleDialogWith = (
     args: { cmp: LazyWhat; data?: EntryTypeData },
     evt: Event,
@@ -75,7 +74,7 @@ const EntryTypes: Component = (): JSX.Element => {
     batch(() => {
       setOpenDialog(true);
       setDyn(cmp);
-      setInitialInputs(data);
+      setInitialInputs(data as EntryTypeData);
     });
   };
 
@@ -127,7 +126,7 @@ const EntryTypes: Component = (): JSX.Element => {
   const dialogSave = () => {
     return (
       <Show when={openable()}>
-        <DialogProvider
+        <DialogProvider<EntryTypeData | Omit<EntryTypeData, 'id'>>
           //transition={dialogTransition}
           title={title()}
           textSave={textSave()}

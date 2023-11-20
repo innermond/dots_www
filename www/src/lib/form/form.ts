@@ -1,11 +1,11 @@
-type Validable<T extends string> = {
-  [key in T]: Validation;
-};
-
-type Validation = {
-  value: any;
+type Validation<T> = {
+  value: T;
   error: boolean;
   message: string;
+};
+
+type Validable<V> = {
+  [key in keyof V]: Validation<V[key]>;
 };
 
 type FuncWithArgs = Func & { args: object };
@@ -74,23 +74,46 @@ function validate<T extends string>(
   return hint;
 }
 
+const isEmptyObject = (value: unknown): value is Record<string, any> => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype &&
+    Object.keys(value).length === 0
+  );
+};
+
+type ExcludeEmptyObject<T> = T extends {} ? never : T;
+// this function never returns {}
+// it will returns either a muscular object or it will throw
 const makeDefaults = (
-  initialInputs = null,
+  initialInputs = {},
   ...names: string[]
-): Validable<(typeof names)[number]> => {
-  const defaults = {} as Validable<(typeof names)[number]>;
+): ExcludeEmptyObject<Validable<typeof initialInputs>> => {
+  if (!names?.length) {
+    throw new Error('names for default values are not specified');
+  }
+
+  const defaults = {} as any;
   let n: string;
   for (n of names) {
     // use value: null because undefined will make component uncontrolled
-    let v: any = null;
+    let v: (typeof initialInputs)[keyof typeof initialInputs] | null = null;
     const override = initialInputs !== null && n in initialInputs;
     if (override) {
-      v = initialInputs[n];
+      v = initialInputs[n as keyof typeof initialInputs];
     }
-    defaults[n] = { value: v, error: false, message: '' };
+    defaults[n] = { value: v, error: false, message: '' } as Validation<
+      (typeof initialInputs)[keyof typeof initialInputs] | null
+    >;
   }
 
-  return defaults;
+  if (isEmptyObject(defaults)) {
+    throw new Error('cannot figure out defaults values');
+  }
+
+  return defaults as ReturnType<typeof makeDefaults>;
 };
 
 type ValuableFormControl =

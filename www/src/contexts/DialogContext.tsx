@@ -45,26 +45,26 @@ const defaultTransition = function (
   return <Slide direction="up" {...props} />;
 };
 
-export type DialogProviderValue<T> = {
-  inputs: Store<Validable<string>>;
-  setInputs: SetStoreFunction<any>;
+export type DialogProviderValue<T extends {}> = {
+  inputs: Store<Validable<T>>;
+  setInputs: SetStoreFunction<Validable<T>>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
   submitForm: Resource<T>;
 };
 
-export type DialogSaveProps<T> = {
+export type DialogSaveProps<T extends {}> = {
   open: Signal<boolean | undefined>;
   title: string;
   textSave?: string;
   transition?: Component<TransitionProps & { children: JSX.Element }>;
   names: string[];
   sendRequestFn: Function;
-  intialInputs?: any;
+  intialInputs: T;
 } & ParentProps;
 
 const DialogContext = createContext();
-
+// T is typeof data to be sent
 const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
@@ -83,15 +83,20 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
   const initialValues = unwrap(props.intialInputs);
   // set up local state for the inputs named above
-  const defaultInputs = makeDefaults(initialValues, ...names);
-
+  let defaultInputs: Validable<typeof initialValues>;
+  try {
+    defaultInputs = makeDefaults(initialValues, ...names);
+  } catch (err) {
+    toasting((err as any).error, 'error');
+    return;
+  }
   // spread defaultInputs as being a store means it is modified
   // by operations done over store
   // and defaultInputs will unexpectedly by changed
   const [inputs, setInputs] = createStore({ ...defaultInputs });
   const inputsHasErrors = () => {
     for (const name of names) {
-      if (inputs[name].error) {
+      if (name in inputs && inputs[name as keyof typeof inputs].error) {
         return true;
       }
     }
@@ -211,7 +216,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     let changed = false;
     for (const n of names) {
       // != ensure strings like numbers are equal with numbers
-      if (props.intialInputs[n] != (requestData as any)[n]) {
+      if (
+        props.intialInputs[n as keyof typeof props.intialInputs] !=
+        (requestData as any)[n]
+      ) {
         changed = true;
         break;
       }
@@ -222,7 +230,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
       return;
     }
 
-    setStartSubmit(requestData);
+    setStartSubmit(requestData as T);
   };
 
   const isDisabled = () => submitForm.loading;
