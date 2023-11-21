@@ -1,23 +1,15 @@
 import { Container, TextField, useTheme, FormGroup } from '@suid/material';
-import {
-  type Accessor,
-  type Setter,
-  type JSX,
-  type Resource,
-  createEffect,
-} from 'solid-js';
+import { JSX, createEffect } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import {
   isEntryTypeData,
-  type EntryTypeData,
   isKeyofEntryTypeData,
 } from '@/pages/entry-types/types';
-import { SetStoreFunction, Store, produce } from 'solid-js/store';
+import type { EntryTypeData } from '@/pages/entry-types/types';
+import { produce } from 'solid-js/store';
 import type {
   FieldNames,
   MessagesMap,
-  InnerValidation,
-  Validable,
   Validators,
   Validation,
 } from '@/lib/form';
@@ -33,7 +25,7 @@ type Names = FieldNames<typeof names>;
 // set up validation
 const validators: Validators<Names> = {
   code: [required, minlen(7), maxlen(50)],
-  description: [optional, minlen(7), maxlen(100)],
+  description: [required, minlen(7), maxlen(100)],
   unit: [required, minlen(2), maxlen(20)],
 };
 
@@ -49,7 +41,7 @@ const textmessages = [
 // map error messages with field names
 const messages: MessagesMap<Names> = {
   code: textmessages,
-  description: [() => '', ...textmessages.slice(1)],
+  description: textmessages,
   unit: textmessages,
 };
 
@@ -62,7 +54,7 @@ export default function EntryTypeAdd(): JSX.Element {
   const handleInput = (e: InputEvent) => {
     const name = (e.target as HTMLInputElement).name;
     const value = (e.target as HTMLInputElement).value;
-    if (!name || value === undefined || isKeyofEntryTypeData(name)) {
+    if (!name || value === undefined || !isKeyofEntryTypeData(name)) {
       return;
     }
 

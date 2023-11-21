@@ -78,13 +78,16 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     return !v;
   };
 
+  // abort request
+  const [cut, setCut] = createSignal(false);
+
   const names = props.names;
   type Names = FieldNames<typeof names>;
 
   const initialValues = unwrap(props.intialInputs);
   // set up local state for the inputs named above
   let defaultInputs = makeDefaults(initialValues, ...names);
-  const [inputs, setInputs] = createStore(defaultInputs);
+  const [inputs, setInputs] = createStore({ ...defaultInputs });
   const inputsHasErrors = () => {
     for (const name of names) {
       if (inputs[name].error) {
@@ -139,7 +142,12 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   };
 
   const handleReset = (): void => {
-    zeroingInputs();
+    try {
+      setCut(true);
+      zeroingInputs();
+    } finally {
+      setCut(false);
+    }
   };
 
   // collect data from event
@@ -166,12 +174,14 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   }
 
   // submit data
-  async function sendRequest(requestData: any) {
+  async function sendRequest<T>(requestData: T) {
     // fire request
     const [remote, abort] = props.sendRequestFn(requestData);
 
     // closing while loading trigger request abortion
-    const cancelRequest = () => closing() && submitForm.loading;
+    const cancelRequest = () => {
+      return submitForm.loading && (closing() || cut());
+    };
 
     createEffect(() => {
       if (cancelRequest()) {
@@ -183,7 +193,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   }
 
   // submitting driven by signals
-  const [startSubmit, setStartSubmit] = createSignal<T | null>();
+  const [startSubmit, setStartSubmit] = createSignal<T>();
   const [submitForm] = createResource(startSubmit, sendRequest);
 
   createComputed(() => {
@@ -203,7 +213,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
       return;
     }
 
-    const requestData = collectFormData(evt.target as HTMLFormElement, names);
+    const requestData: T = collectFormData(
+      evt.target as HTMLFormElement,
+      names,
+    );
     let changed = false;
     for (const n of names) {
       // != ensure strings like numbers are equal with numbers
@@ -218,7 +231,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
       return;
     }
 
-    setStartSubmit(requestData);
+    setStartSubmit(requestData as any);
   };
 
   const isDisabled = () => submitForm.loading;
@@ -311,7 +324,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
           size="small"
         />
         <ActionButton
-          disabled={inputsHasErrors()}
+          disabled={inputsHasErrors() || isDisabled()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
         />
       </Toolbar>

@@ -1,11 +1,5 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import {
-  type Accessor,
-  type Setter,
-  type JSX,
-  createEffect,
-  Resource,
-} from 'solid-js';
+import { JSX, createEffect } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import {
@@ -14,12 +8,10 @@ import {
 } from '@/pages/entry-types/types';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
-import { SetStoreFunction, Store, produce } from 'solid-js/store';
+import { produce } from 'solid-js/store';
 import type {
   FieldNames,
   MessagesMap,
-  InnerValidation,
-  Validable,
   Validators,
   Validation,
 } from '@/lib/form';
@@ -65,7 +57,7 @@ export default function EntryTypeEdit(): JSX.Element {
   const handleInput = (e: InputEvent) => {
     const name = (e.target as HTMLInputElement).name;
     const value = (e.target as HTMLInputElement).value;
-    if (!name || value === undefined || isKeyofEntryTypeData(name)) {
+    if (!name || value === undefined || !isKeyofEntryTypeData(name)) {
       return;
     }
 

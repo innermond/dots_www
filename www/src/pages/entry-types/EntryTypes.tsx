@@ -33,7 +33,6 @@ import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData, entryTypeZero } from './types';
 import ActionButton from '@/components/ActionButton';
-import { zero } from '@/lib/api';
 import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
 
