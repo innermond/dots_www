@@ -27,7 +27,7 @@ import { AlertColor } from '@suid/material/Alert/AlertProps';
 
 import type { InnerValidation, Validable } from '@/lib/form';
 import { validate } from '@/lib/form';
-import { makeDefaults, FieldNames } from '@/lib/form';
+import { makeDefaults } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
@@ -45,26 +45,26 @@ const defaultTransition = function (
   return <Slide direction="up" {...props} />;
 };
 
-export type DialogProviderValue<T> = {
-  inputs: Store<Validable<string>>;
-  setInputs: SetStoreFunction<any>;
+export type DialogProviderValue<T extends {}> = {
+  inputs: Store<Validable<T>>;
+  setInputs: SetStoreFunction<Validable<T>>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
   submitForm: Resource<T>;
 };
 
-export type DialogSaveProps<T> = {
+export type DialogSaveProps<T extends {}> = {
   open: Signal<boolean | undefined>;
   title: string;
   textSave?: string;
   transition?: Component<TransitionProps & { children: JSX.Element }>;
   names: string[];
   sendRequestFn: Function;
-  intialInputs?: any;
+  intialInputs: T;
 } & ParentProps;
 
 const DialogContext = createContext();
-
+// T is typeof data to be sent
 const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
@@ -82,21 +82,34 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const [cut, setCut] = createSignal(false);
 
   const names = props.names;
-  type Names = FieldNames<typeof names>;
+  type Names = (typeof names)[number];
 
-  const initialValues = unwrap(props.intialInputs);
+  const initialValues: T = unwrap(props.intialInputs);
   // set up local state for the inputs named above
-  let defaultInputs = makeDefaults(initialValues, ...names);
-  const [inputs, setInputs] = createStore({ ...defaultInputs });
+  // TODO make it unchangebla - currently is flawed
+  let defaultInputs: Validable<typeof initialValues>;
+  try {
+    defaultInputs = makeDefaults(initialValues, ...names);
+  } catch (err) {
+    toasting((err as any).error, 'error');
+    return;
+  }
+  // spread defaultInputs as being a store means it is modified
+  // by operations done over store
+  // and defaultInputs will unexpectedly by changed
+  const [inputs, setInputs] = createStore<Validable<T>>({ ...defaultInputs });
   const inputsHasErrors = () => {
     for (const name of names) {
-      if (inputs[name].error) {
+      if (name in inputs && inputs[name as keyof T].error) {
         return true;
       }
     }
     return false;
   };
-  const zeroingInputs = () => setInputs(defaultInputs);
+  const zeroingInputs = () => setInputs(makeDefaults(initialValues, ...names));
+  createComputed(() => {
+    console.log(defaultInputs);
+  });
 
   const [validation, setValidation] = createSignal<InnerValidation<string>>({
     validators: {},
@@ -116,17 +129,25 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
     const fail = unwrap(validation());
 
-    const { name, value } = data as any;
-    if (!names.includes(name)) return;
+    type KeyValfromT = { name: keyof T; value: T[typeof name] };
+    const { name, value } = data as KeyValfromT;
+
+    if (!names.includes(name as string)) return;
 
     const errorstr: string = skipValidation
       ? ''
-      : validate<Names>(name, value, fail!.validators, fail!.messages);
-    setInputs(name as Names, {
-      value,
+      : validate<Names>(
+          name as string,
+          value,
+          fail!.validators,
+          fail!.messages,
+        );
+    const v = {
+      value: value as T[keyof T],
       error: errorstr.length > 0,
       message: errorstr,
-    });
+    };
+    setInputs((prev: Validable<T>) => ({ ...prev, [name]: v }));
   };
 
   // respond to input events
@@ -220,7 +241,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     let changed = false;
     for (const n of names) {
       // != ensure strings like numbers are equal with numbers
-      if (props.intialInputs[n] != (requestData as any)[n]) {
+      if (
+        props.intialInputs[n as keyof typeof props.intialInputs] !=
+        (requestData as any)[n]
+      ) {
         changed = true;
         break;
       }

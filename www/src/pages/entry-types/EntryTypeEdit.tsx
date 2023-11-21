@@ -1,5 +1,6 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import { JSX, createEffect } from 'solid-js';
+import { createEffect } from 'solid-js';
+import type { JSX } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import {
@@ -63,7 +64,7 @@ export default function EntryTypeEdit(): JSX.Element {
 
     setInputs(
       name as keyof EntryTypeData,
-      { value, error: false, message: '' } as Validation,
+      { value, error: false, message: '' } as Validation<typeof value>,
     );
   };
 

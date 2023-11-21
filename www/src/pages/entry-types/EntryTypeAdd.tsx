@@ -1,4 +1,4 @@
-import { Container, TextField, useTheme, FormGroup } from '@suid/material';
+import { Container, useTheme, FormGroup } from '@suid/material';
 import { JSX, createEffect } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import {
@@ -13,7 +13,7 @@ import type {
   Validators,
   Validation,
 } from '@/lib/form';
-import { required, minlen, maxlen, optional } from '@/lib/form';
+import { required, minlen, maxlen } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
@@ -60,7 +60,7 @@ export default function EntryTypeAdd(): JSX.Element {
 
     setInputs(
       name as keyof EntryTypeData,
-      { value, error: false, message: '' } as Validation,
+      { value, error: false, message: '' } as Validation<typeof value>,
     );
   };
 
