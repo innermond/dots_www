@@ -1,4 +1,5 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
+import type { ChangeEvent } from '@suid/types';
 import { JSX, createEffect } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import {
@@ -51,9 +52,9 @@ export default function EntryTypeAdd(): JSX.Element {
 
   setValidation({ validators, messages });
 
-  const handleInput = (e: InputEvent) => {
-    const name = (e.target as HTMLInputElement).name;
-    const value = (e.target as HTMLInputElement).value;
+  const handleInput = (event: ChangeEvent) => {
+    const name = (event.target as HTMLInputElement).name;
+    const value = (event.target as HTMLInputElement).value;
     if (!name || value === undefined || !isKeyofEntryTypeData(name)) {
       return;
     }
@@ -102,6 +103,7 @@ export default function EntryTypeAdd(): JSX.Element {
           autoComplete="off"
           sx={{ width: '10rem' }}
           onInput={handleInput}
+          value={inputs.code.value}
           error={inputs.code.error}
           helperText={inputs.code.message}
           disabled={isDisabled()}
@@ -115,6 +117,7 @@ export default function EntryTypeAdd(): JSX.Element {
           autoComplete="off"
           sx={{ flex: 1 }}
           onInput={handleInput}
+          value={inputs.description.value}
           error={inputs.description.error}
           helperText={inputs.description.message}
           disabled={isDisabled()}

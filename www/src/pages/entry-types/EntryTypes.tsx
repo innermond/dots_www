@@ -6,6 +6,7 @@ import {
   createSignal,
   lazy,
   batch,
+  createMemo,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -86,10 +87,10 @@ const EntryTypes: Component = (): JSX.Element => {
   ) => <Slide {...props} direction="up" />;
 */
 
-  const cmpname = () => {
+  const cmpname = createMemo(() => {
     const cmp = dyn();
     return cmp;
-  };
+  });
   const cmp = () => {
     if ((cmpname() as string) === 'editEntry') {
       return editEntryType;

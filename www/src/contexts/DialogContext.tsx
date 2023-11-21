@@ -10,6 +10,7 @@ import {
   Container,
   useTheme,
 } from '@suid/material';
+import type { ChangeEvent } from '@suid/types';
 import { TransitionProps } from '@suid/material/transitions';
 import {
   JSX,
@@ -20,6 +21,7 @@ import {
   createComputed,
   createEffect,
   useContext,
+  Show,
 } from 'solid-js';
 import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
 import type { Accessor, Component, Resource, Setter } from 'solid-js';
@@ -106,10 +108,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     }
     return false;
   };
-  const zeroingInputs = () => setInputs(makeDefaults(initialValues, ...names));
-  createComputed(() => {
-    console.log(defaultInputs);
-  });
+  const zeroingInputs = () => {
+    const init = makeDefaults(initialValues, ...names);
+    setInputs(init);
+  };
 
   const [validation, setValidation] = createSignal<InnerValidation<string>>({
     validators: {},
@@ -151,24 +153,25 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   };
 
   // respond to input events
-  const handleInput = (e: Event): void => {
-    if (!e.target) return;
-    if (e.target instanceof HTMLFormElement) {
-      Array.from(e.target.elements)
+  const handleInput = (event: ChangeEvent | SubmitEvent): void => {
+    if (!event.target) return;
+    if (event.target instanceof HTMLFormElement) {
+      Array.from(event.target.elements)
         .filter((t: Element) => 'id' in t && names.includes(t.id))
         .map((t: unknown) => validateInputUpdateStore(t));
       return;
     }
-    validateInputUpdateStore(e.target);
+    validateInputUpdateStore(event.target);
   };
 
   const handleReset = (): void => {
-    try {
-      setCut(true);
-      zeroingInputs();
-    } finally {
-      setCut(false);
-    }
+    zeroingInputs();
+  };
+
+  const handleStop = (evt: Event): void => {
+    evt.preventDefault();
+    setCut(true);
+    setTimeout(() => setCut(false), 0);
   };
 
   // collect data from event
@@ -340,13 +343,25 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
         >
           {props.title}
         </Typography>
-        <ActionButton
-          kind="reset"
-          only="text"
-          type="reset"
-          color="error"
-          size="small"
-        />
+        <Show when={submitForm.loading}>
+          <ActionButton
+            text="stop"
+            only="text"
+            type="button"
+            color="error"
+            size="small"
+            onClick={handleStop}
+          />
+        </Show>
+        <Show when={!submitForm.loading}>
+          <ActionButton
+            kind="reset"
+            only="text"
+            type="reset"
+            color="error"
+            size="small"
+          />
+        </Show>
         <ActionButton
           disabled={inputsHasErrors() || isDisabled()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
