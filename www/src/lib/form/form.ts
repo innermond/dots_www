@@ -4,6 +4,10 @@ type Validation<T> = {
   message: string;
 };
 
+type NonEmpty<V> = {
+  [key in keyof V]: V[key];
+};
+
 type Validable<V> = {
   [key in keyof V]: Validation<V[key]>;
 };
@@ -124,6 +128,7 @@ type FieldNames<T extends string[]> = T[number];
 
 export type {
   Validable,
+  NonEmpty,
   Validation,
   Validator,
   Validators,

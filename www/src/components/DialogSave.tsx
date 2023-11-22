@@ -25,7 +25,12 @@ import { Dynamic } from 'solid-js/web';
 import type { Accessor, Component, Resource, Setter } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
-import type { InnerValidation, Validable } from '@/lib/form';
+import type {
+  InnerValidation,
+  NonEmpty,
+  Validable,
+  Validation,
+} from '@/lib/form';
 import { validate } from '@/lib/form';
 import { makeDefaults, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
@@ -44,8 +49,8 @@ const defaultTransition = function (
   return <Slide direction="up" {...props} />;
 };
 
-export type Dyn<T> = Component<{
-  inputs: Store<Validable<string>>;
+export type Dyn<T extends NonEmpty<T>> = Component<{
+  inputs: Store<Validable<T>>;
   setInputs: SetStoreFunction<any>;
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
@@ -81,10 +86,10 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
 
   // set up local state for the inputs named above
   let defaultInputs = makeDefaults(props.intialInputs, ...names);
-  const [inputs, setInputs] = createStore(defaultInputs);
+  const [inputs, setInputs] = createStore<Validable<T>>(defaultInputs);
   const inputsHasErrors = () => {
     for (const name of names) {
-      if (inputs[name].error) {
+      if (name in inputs && inputs[name as keyof T].error) {
         return true;
       }
     }
@@ -117,11 +122,15 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
     const errorstr: string = skipValidation
       ? ''
       : validate<Names>(name, value, fail!.validators, fail!.messages);
-    setInputs(name as Names, {
-      value,
-      error: errorstr.length > 0,
-      message: errorstr,
-    });
+    name in inputs &&
+      setInputs(
+        name as keyof T,
+        {
+          value,
+          error: errorstr.length > 0,
+          message: errorstr,
+        } as Validation<T[typeof name]>,
+      );
   };
 
   // respond to input events
@@ -181,7 +190,7 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
   }
 
   // submitting driven by signals
-  const [startSubmit, setStartSubmit] = createSignal<T | null>();
+  const [startSubmit, setStartSubmit] = createSignal<T>();
   const [submitForm] = createResource(startSubmit, sendRequest);
 
   createComputed(() => {
@@ -201,7 +210,10 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
       return;
     }
 
-    const requestData = collectFormData(evt.target as HTMLFormElement, names);
+    const requestData = collectFormData(
+      evt.target as HTMLFormElement,
+      names,
+    ) as T;
     let changed = false;
     for (const n of names) {
       // != ensure strings like numbers are equal with numbers
