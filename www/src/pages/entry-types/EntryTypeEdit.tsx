@@ -1,5 +1,5 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import { createEffect } from 'solid-js';
+import { createEffect, batch } from 'solid-js';
 import type { JSX } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import type { EntryTypeData } from '@/pages/entry-types/types';
@@ -11,7 +11,7 @@ import type { FieldNames, MessagesMap, Validators } from '@/lib/form';
 import { required, minlen, maxlen, optional, int } from '@/lib/form';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
-import { makeDefaults } from '@/lib/form/form';
+import { makeValidable } from '@/lib/form/form';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
@@ -43,8 +43,15 @@ const messages: MessagesMap<Names> = {
 };
 
 export default function EntryTypeEdit(): JSX.Element {
-  const { inputs, setInputs, isDisabled, setValidation, submitForm } =
-    useDialog() as DialogProviderValue<EntryTypeData>;
+  const {
+    inputs,
+    setInputs,
+    isDisabled,
+    setValidation,
+    submitForm,
+    handleChange,
+    setInitialInputs,
+  } = useDialog() as DialogProviderValue<EntryTypeData>;
 
   setValidation({ validators, messages });
 
@@ -57,9 +64,12 @@ export default function EntryTypeEdit(): JSX.Element {
       const { code } = result;
       toasting(`entry type "${code}" has been edited`);
 
-      const names = ['code', 'description', 'unit'];
-      const edited = makeDefaults(result, ...names);
-      setInputs(edited);
+      batch(() => {
+        setInitialInputs(result);
+        const names = ['code', 'description', 'unit'];
+        const edited = makeValidable(result, ...names);
+        setInputs(edited);
+      });
     }
   });
 
@@ -102,7 +112,9 @@ export default function EntryTypeEdit(): JSX.Element {
           id="code"
           autoComplete="off"
           sx={{ maxWidth: '10rem' }}
+          onChange={handleChange}
           defaultValue={code}
+          value={inputs.code.value}
           error={inputs.code.error}
           helperText={inputs.code.message}
           disabled={isDisabled()}
@@ -115,7 +127,9 @@ export default function EntryTypeEdit(): JSX.Element {
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
+          onChange={handleChange}
           defaultValue={description}
+          value={inputs.description.value}
           error={inputs.description.error}
           helperText={inputs.description.message}
           disabled={isDisabled()}

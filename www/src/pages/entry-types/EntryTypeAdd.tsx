@@ -7,6 +7,8 @@ import {
   isKeyofEntryTypeData,
 } from '@/pages/entry-types/types';
 import type { EntryTypeData } from '@/pages/entry-types/types';
+
+import { entryTypeZero } from '@/pages/entry-types/types';
 import { produce } from 'solid-js/store';
 import type {
   FieldNames,
@@ -14,7 +16,7 @@ import type {
   Validators,
   Validation,
 } from '@/lib/form';
-import { required, minlen, maxlen } from '@/lib/form';
+import { required, minlen, maxlen, makeValidable } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
@@ -47,23 +49,16 @@ const messages: MessagesMap<Names> = {
 };
 
 export default function EntryTypeAdd(): JSX.Element {
-  const { inputs, setInputs, isDisabled, setValidation, submitForm } =
-    useDialog() as DialogProviderValue<EntryTypeData>;
+  const {
+    inputs,
+    setInputs,
+    isDisabled,
+    setValidation,
+    submitForm,
+    handleChange,
+  } = useDialog() as DialogProviderValue<EntryTypeData>;
 
   setValidation({ validators, messages });
-
-  const handleInput = (event: ChangeEvent) => {
-    const name = (event.target as HTMLInputElement).name;
-    const value = (event.target as HTMLInputElement).value;
-    if (!name || value === undefined || !isKeyofEntryTypeData(name)) {
-      return;
-    }
-
-    setInputs(
-      name as keyof EntryTypeData,
-      { value, error: false, message: '' } as Validation<typeof value>,
-    );
-  };
 
   createEffect(() => {
     if (submitForm.state === 'ready') {
@@ -73,8 +68,13 @@ export default function EntryTypeAdd(): JSX.Element {
       }
       const { code } = result;
       toasting(`entry type "${code}" has been added`);
+
+      setInputs(makeValidable(entryTypeZero));
     }
   });
+
+  const code = inputs.code.value;
+  const description = inputs.description.value;
 
   return (
     <Container
@@ -102,8 +102,9 @@ export default function EntryTypeAdd(): JSX.Element {
           id="code"
           autoComplete="off"
           sx={{ width: '10rem' }}
-          onInput={handleInput}
+          onChange={handleChange}
           value={inputs.code.value}
+          defaultValue={code}
           error={inputs.code.error}
           helperText={inputs.code.message}
           disabled={isDisabled()}
@@ -116,7 +117,8 @@ export default function EntryTypeAdd(): JSX.Element {
           id="description"
           autoComplete="off"
           sx={{ flex: 1 }}
-          onInput={handleInput}
+          onChange={handleChange}
+          defaultValue={description}
           value={inputs.description.value}
           error={inputs.description.error}
           helperText={inputs.description.message}

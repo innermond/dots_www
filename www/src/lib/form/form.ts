@@ -91,12 +91,12 @@ const isEmptyObject = (value: unknown): value is Record<string, any> => {
 type ExcludeEmptyObject<T> = T extends {} ? never : T;
 // this function never returns {}
 // it will returns either a muscular object or it will throw
-const makeDefaults = (
+const makeValidable = (
   initialInputs = {},
   ...names: string[]
 ): ExcludeEmptyObject<Validable<typeof initialInputs>> => {
   if (!names?.length) {
-    throw new Error('names for default values are not specified');
+    names = Object.keys(initialInputs);
   }
 
   const defaults = {} as any;
@@ -117,7 +117,7 @@ const makeDefaults = (
     throw new Error('cannot figure out defaults values');
   }
 
-  return defaults as ReturnType<typeof makeDefaults>;
+  return defaults as ReturnType<typeof makeValidable>;
 };
 
 type ValuableFormControl =
@@ -141,4 +141,4 @@ export type {
   InnerValidation,
 };
 
-export { validate, makeDefaults };
+export { validate, makeValidable };

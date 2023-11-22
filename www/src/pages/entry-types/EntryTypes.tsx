@@ -34,7 +34,7 @@ import Skeleton from '@suid/material/Skeleton';
 
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
-import { EntryTypeData, entryTypeZero, entryTypesZero } from './types';
+import { EntryTypeData, entryTypeZero } from './types';
 import ActionButton from '@/components/ActionButton';
 import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
@@ -68,7 +68,8 @@ const EntryTypes: Component = (): JSX.Element => {
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
 
-  const [intialInputs, setInitialInputs] = createSignal(entryTypeZero);
+  const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
+
   const handleDialogWith = (
     args: { whatToLoad: LazyWhat; data?: EntryTypeData },
     evt: Event,
@@ -132,14 +133,15 @@ const EntryTypes: Component = (): JSX.Element => {
   const dialogSave = () => {
     return (
       <Show when={openDialog()}>
-        <DialogProvider<EntryTypeData | Omit<EntryTypeData, 'id'>>
+        <DialogProvider<EntryTypeData>
           //transition={dialogTransition}
           title={title()}
           textSave={textSave()}
           open={dialogSignal}
           names={fields()}
           sendRequestFn={sendRequestFn()}
-          intialInputs={intialInputs()}
+          initialInputs={initialInputs()}
+          setInitialInputs={setInitialInputs}
         >
           <Dynamic component={cmp()} />
         </DialogProvider>

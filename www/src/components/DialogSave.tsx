@@ -32,7 +32,7 @@ import type {
   Validation,
 } from '@/lib/form';
 import { validate } from '@/lib/form';
-import { makeDefaults, FieldNames } from '@/lib/form';
+import { makeValidable, FieldNames } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
@@ -85,7 +85,7 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
   type Names = FieldNames<typeof names>;
 
   // set up local state for the inputs named above
-  let defaultInputs = makeDefaults(props.intialInputs, ...names);
+  let defaultInputs = makeValidable(props.intialInputs, ...names);
   const [inputs, setInputs] = createStore<Validable<T>>(defaultInputs);
   const inputsHasErrors = () => {
     for (const name of names) {
@@ -96,7 +96,7 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
     return false;
   };
   const zeroingInputs = () =>
-    setInputs(makeDefaults(props.intialInputs, ...names));
+    setInputs(makeValidable(props.intialInputs, ...names));
 
   const [validation, setValidation] = createSignal<InnerValidation<string>>({
     validators: {},
