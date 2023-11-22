@@ -56,7 +56,7 @@ export type DialogProviderValue<T extends {}> = {
 };
 
 export type DialogSaveProps<T extends {}> = {
-  open: Signal<boolean | undefined>;
+  open: Signal<boolean>;
   title: string;
   textSave?: string;
   transition?: Component<TransitionProps & { children: JSX.Element }>;

@@ -7,6 +7,8 @@ import {
   lazy,
   batch,
   createMemo,
+  createEffect,
+  createComputed,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -32,7 +34,7 @@ import Skeleton from '@suid/material/Skeleton';
 
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
-import { EntryTypeData, entryTypeZero } from './types';
+import { EntryTypeData, entryTypeZero, entryTypesZero } from './types';
 import ActionButton from '@/components/ActionButton';
 import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
@@ -57,10 +59,10 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const dialogSignal = createSignal<boolean | undefined>(undefined);
+  const dialogSignal = createSignal(false);
   const [openDialog, setOpenDialog] = dialogSignal;
 
-  type LazyWhat = 'editEntry' | 'addEntry';
+  type LazyWhat = 'editEntry' | 'addEntry' | undefined;
 
   const [dyn, setDyn] = createSignal<LazyWhat>();
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
@@ -68,13 +70,13 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const [intialInputs, setInitialInputs] = createSignal(entryTypeZero);
   const handleDialogWith = (
-    args: { cmp: LazyWhat; data?: EntryTypeData },
+    args: { whatToLoad: LazyWhat; data?: EntryTypeData },
     evt: Event,
   ) => {
-    const { cmp, data } = args;
+    const { whatToLoad, data } = args;
     batch(() => {
       setOpenDialog(true);
-      setDyn(cmp);
+      setDyn(whatToLoad);
       setInitialInputs(data as EntryTypeData);
     });
   };
@@ -98,12 +100,7 @@ const EntryTypes: Component = (): JSX.Element => {
     if ((cmpname() as string) === 'addEntry') {
       return addEntryType;
     }
-  };
-  const openable = () => {
-    const cmp = cmpname();
-    const dlg = openDialog();
-    const op = !!cmp && dlg;
-    return op;
+    return undefined;
   };
   const title = () => {
     return (cmpname() as string) === 'editEntry'
@@ -124,9 +121,17 @@ const EntryTypes: Component = (): JSX.Element => {
       : apiEntryType.add;
   };
 
+  createComputed(() => {
+    if (!openDialog()) {
+      // reset
+      setDyn(undefined);
+      setInitialInputs(entryTypeZero);
+    }
+  });
+
   const dialogSave = () => {
     return (
-      <Show when={openable()}>
+      <Show when={openDialog()}>
         <DialogProvider<EntryTypeData | Omit<EntryTypeData, 'id'>>
           //transition={dialogTransition}
           title={title()}
@@ -177,7 +182,7 @@ const EntryTypes: Component = (): JSX.Element => {
               startIcon={<AddIcon />}
               onClick={[
                 handleDialogWith,
-                { cmp: 'addEntry', data: entryTypeZero },
+                { whatToLoad: 'addEntry', data: entryTypeZero },
               ]}
             >
               Add Entry Type
@@ -232,7 +237,7 @@ const EntryTypes: Component = (): JSX.Element => {
                             aria-label="edit entry type"
                             onClick={[
                               handleDialogWith,
-                              { cmp: 'editEntry' as LazyWhat, data: c },
+                              { whatToLoad: 'editEntry' as LazyWhat, data: c },
                             ]}
                           >
                             <EditIcon fontSize="small" />
