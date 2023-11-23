@@ -11,7 +11,7 @@ import {
   useTheme,
   CircularProgress,
 } from '@suid/material';
-import type { ChangeEvent } from '@suid/types';
+import type { ChangeEvent, ChangeEventHandler } from '@suid/types';
 import { TransitionProps } from '@suid/material/transitions';
 import {
   JSX,
@@ -56,7 +56,7 @@ export type DialogProviderValue<T extends {}> = {
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
   submitForm: Resource<T>;
-  handleChange: Function;
+  handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 };
 
 export type DialogSaveProps<T extends {}> = {

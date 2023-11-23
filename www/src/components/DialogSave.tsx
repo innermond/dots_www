@@ -190,7 +190,7 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
   }
 
   // submitting driven by signals
-  const [startSubmit, setStartSubmit] = createSignal<T>();
+  const [startSubmit, setStartSubmit] = createSignal<T | undefined>();
   const [submitForm] = createResource(startSubmit, sendRequest);
 
   createComputed(() => {
@@ -228,7 +228,7 @@ const DialogSave = <T extends {}>(props: DialogSaveProps<T>) => {
       return;
     }
 
-    setStartSubmit(requestData);
+    setStartSubmit((prev: T | undefined) => requestData as T);
   };
 
   const isDisabled = () => submitForm.loading;
