@@ -1,8 +1,17 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import { createEffect, batch, createResource } from 'solid-js';
+import {
+  createEffect,
+  batch,
+  createResource,
+  untrack,
+  createMemo,
+} from 'solid-js';
 import type { JSX } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
-import type { EntryTypeData } from '@/pages/entry-types/types';
+import type {
+  DataEntryTypeUnits,
+  EntryTypeData,
+} from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
@@ -45,8 +54,8 @@ const messages: MessagesMap<Names> = {
 };
 
 // list of units
-const [unitsResource] = createResource(apiEntryType.units);
-const units = (): InputOrSelectOption[] => {
+const [unitsResource, { mutate }] = createResource(apiEntryType.units);
+const units = createMemo((): InputOrSelectOption[] => {
   const info = unitsResource(); // <- this gives us string[]
   if (!info) {
     return [];
@@ -54,7 +63,7 @@ const units = (): InputOrSelectOption[] => {
 
   const { data, n } = info as any;
   return n ? data.map((u: string) => ({ value: u, label: u })) : [];
-};
+});
 
 export default function EntryTypeEdit(): JSX.Element {
   const {
@@ -77,6 +86,26 @@ export default function EntryTypeEdit(): JSX.Element {
       }
       const { code } = result;
       toasting(`entry type "${code}" has been edited`);
+
+      untrack(() => {
+        if (result.unit !== inputs.unit.value) {
+          mutate((prev: DataEntryTypeUnits | Error | undefined) => {
+            if (prev === undefined) {
+              return prev;
+            }
+            if (prev instanceof Error) {
+              return prev;
+            }
+
+            let { data, n } = prev;
+            if (!data.includes(result.unit)) {
+              data.push(result.unit);
+              n++;
+            }
+            return { data, n };
+          });
+        }
+      });
 
       batch(() => {
         setInitialInputs(result);
