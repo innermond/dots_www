@@ -9,6 +9,7 @@ import {
   Divider,
   Container,
   useTheme,
+  CircularProgress,
 } from '@suid/material';
 import type { ChangeEvent } from '@suid/types';
 import { TransitionProps } from '@suid/material/transitions';
@@ -22,12 +23,13 @@ import {
   createEffect,
   useContext,
   Show,
+  Suspense,
 } from 'solid-js';
 import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
 import type { Accessor, Component, Resource, Setter } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
-import type { InnerValidation, Validable, Validation } from '@/lib/form';
+import type { InnerValidation, Validable } from '@/lib/form';
 import { validate } from '@/lib/form';
 import { makeValidable } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
@@ -412,7 +414,11 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
           }}
         >
           {appBar}
-          {props.children}
+          <Suspense
+            fallback={<CircularProgress size="3rem" sx={{ m: '5rem' }} />}
+          >
+            {props.children}
+          </Suspense>
         </Container>
       </Dialog>
     </DialogContext.Provider>

@@ -7,7 +7,6 @@ import {
   lazy,
   batch,
   createMemo,
-  createEffect,
   createComputed,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
