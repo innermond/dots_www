@@ -1,44 +1,51 @@
-import { Func, FuncWithArgs } from './form';
+import { Validator } from './form';
 
-function optional(v: any): boolean {
+function optional(): boolean {
   return true;
 }
 
-function required(v: any): boolean {
-  return !!v;
+function required(): Validator {
+  const fn = (v: any) => !!v;
+  fn.tpl = 'is required';
+  return fn;
 }
 
-function likeemail(v: any): boolean {
-  return v.includes('@');
+function likeemail(): Validator {
+  const fn = (v: any) => v.includes('@');
+  fn.tpl = 'is not an email';
+  return fn;
 }
 
-function int(v: any): boolean {
+const int: Validator = (v: any): boolean => {
+  int.tpl = `${v} is not an integer`;
   return !isNaN(parseInt(v));
-}
+};
 
-function minlen(len: number): FuncWithArgs {
+function minlen(len: number): Validator {
   const fn = (v: any) => {
     const ok = (v?.length ?? 0) >= len;
     return ok;
   };
 
   fn.args = { len };
+  fn.tpl = `must be more than ${len}`;
 
   return fn;
 }
 
-function maxlen(len: number): Func {
+function maxlen(len: number): Validator {
   const fn = (v: any) => {
     const ok = (v?.length ?? 0) <= len;
     return ok;
   };
 
   fn.args = { len };
+  fn.tpl = `must be less than ${len}`;
 
   return fn;
 }
 
-function checkpass(tips: string[] = ['']): Func {
+function checkpass(tips: string[] = ['']): Validator {
   const fn = (v: string) => {
     const [strength, tips] = checkPasswordStrength(v);
     fn.args = { tips };

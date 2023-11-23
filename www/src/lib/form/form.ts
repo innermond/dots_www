@@ -12,9 +12,10 @@ type Validable<V> = {
   [key in keyof V]: Validation<V[key]>;
 };
 
-type FuncWithArgs = Func & { args: object };
-type Func = (...params: any) => boolean;
-type Validator = Func | FuncWithArgs;
+type Validator = ((...params: any) => boolean) & {
+  args?: object;
+  tpl?: string;
+};
 
 type Validators<T extends string> = {
   [key in T as string]: Validator[];
@@ -34,9 +35,9 @@ function validate<T extends string>(
   name: string,
   value: any,
   validators: Validators<T>,
-  messages: MessagesMap<T>,
+  messages?: MessagesMap<T>,
 ): string {
-  if (!(name in validators) || !(name in messages)) {
+  if (!(name in validators)) {
     return '';
   }
 
@@ -55,25 +56,32 @@ function validate<T extends string>(
       break;
     }
 
-    if (!validator(value)) {
-      if (!(name in messages)) {
-        hint = `${name} is not valid`;
-        break;
-      }
-      const fn = (messages[name] as Messages)[inx];
-      let msg: string = '';
-      let args = {};
-      if ('args' in validator) {
-        args = { ...validator.args };
-      }
-      if (Object.keys(args).length === 0) {
-        msg = fn(name, value);
-      } else {
-        msg = fn(name, value, args);
-      }
-      hint = msg;
+    if (validator(value)) {
+      continue;
+    }
+
+    if (!messages || !(name in messages)) {
+      hint = `${name} ${'tpl' in validator ? validator.tpl : 'invalid'}`;
       break;
     }
+
+    if (!messages) {
+      continue;
+    }
+
+    const fn = (messages[name] as Messages)[inx];
+    let msg: string = '';
+    let args = {};
+    if ('args' in validator) {
+      args = { ...validator.args };
+    }
+    if (Object.keys(args).length === 0) {
+      msg = fn(name, value);
+    } else {
+      msg = fn(name, value, args);
+    }
+    hint = msg;
+    break;
   }
   return hint;
 }
@@ -132,8 +140,6 @@ export type {
   Validation,
   Validator,
   Validators,
-  Func,
-  FuncWithArgs,
   MessagesMap,
   Messages,
   ValuableFormControl,

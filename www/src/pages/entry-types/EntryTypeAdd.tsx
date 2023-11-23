@@ -7,7 +7,10 @@ import {
   untrack,
 } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
-import { isEntryTypeData } from '@/pages/entry-types/types';
+import {
+  isEntryTypeData,
+  isDataEntryTypeUnits,
+} from '@/pages/entry-types/types';
 import type {
   DataEntryTypeUnits,
   EntryTypeData,
@@ -29,38 +32,10 @@ type Names = FieldNames<typeof names>;
 
 // set up validation
 const validators: Validators<Names> = {
-  code: [required, minlen(7), maxlen(50)],
-  description: [required, minlen(7), maxlen(100)],
-  unit: [required, minlen(2), maxlen(20)],
+  code: [required(), minlen(7), maxlen(50)],
+  description: [required(), minlen(7), maxlen(100)],
+  unit: [required(), minlen(2), maxlen(20)],
 };
-
-// functions that prepare error messages
-const textmessages = [
-  (f: string) => `${f} is required`,
-  (f: string, v: string, { len }: { len: number }) =>
-    `${f} must be more than ${len} - has ${v.length}`,
-  (f: string, v: string, { len }: { len: number }) =>
-    `${f} must be less than ${len} - has ${v.length}`,
-];
-
-// map error messages with field names
-const messages: MessagesMap<Names> = {
-  code: textmessages,
-  description: textmessages,
-  unit: textmessages,
-};
-
-// list of units
-const [unitsResource, { mutate }] = createResource(apiEntryType.units);
-const units = createMemo((): InputOrSelectOption[] => {
-  const info = unitsResource(); // <- this gives us string[]
-  if (!info) {
-    return [];
-  }
-
-  const { data, n } = info as any;
-  return n ? data.map((u: string) => ({ value: u, label: u })) : [];
-});
 
 export default function EntryTypeAdd(): JSX.Element {
   const {
@@ -72,7 +47,24 @@ export default function EntryTypeAdd(): JSX.Element {
     handleChange,
   } = useDialog() as DialogProviderValue<EntryTypeData>;
 
-  setValidation({ validators, messages });
+  // list of units
+  const [unitsResource, { mutate }] = createResource(apiEntryType.units);
+  const units = createMemo((): InputOrSelectOption[] => {
+    if (unitsResource.state !== 'ready') {
+      return [];
+    }
+
+    const info = unitsResource(); // <- this gives us string[]
+    if (!isDataEntryTypeUnits(info)) {
+      toasting('expected units like data from server', 'error');
+      return [];
+    }
+
+    const { data, n } = info as any;
+    return n ? data.map((u: string) => ({ value: u, label: u })) : [];
+  });
+
+  setValidation({ validators });
 
   createEffect(() => {
     if (submitForm.state === 'ready') {
