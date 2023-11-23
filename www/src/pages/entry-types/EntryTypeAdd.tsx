@@ -1,8 +1,17 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import { JSX, createEffect, createResource } from 'solid-js';
+import {
+  JSX,
+  createEffect,
+  createResource,
+  createMemo,
+  untrack,
+} from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import { isEntryTypeData } from '@/pages/entry-types/types';
-import type { EntryTypeData } from '@/pages/entry-types/types';
+import type {
+  DataEntryTypeUnits,
+  EntryTypeData,
+} from '@/pages/entry-types/types';
 
 import { entryTypeZero } from '@/pages/entry-types/types';
 import { produce } from 'solid-js/store';
@@ -42,8 +51,8 @@ const messages: MessagesMap<Names> = {
 };
 
 // list of units
-const [unitsResource] = createResource(apiEntryType.units);
-const units = (): InputOrSelectOption[] => {
+const [unitsResource, { mutate }] = createResource(apiEntryType.units);
+const units = createMemo((): InputOrSelectOption[] => {
   const info = unitsResource(); // <- this gives us string[]
   if (!info) {
     return [];
@@ -51,7 +60,7 @@ const units = (): InputOrSelectOption[] => {
 
   const { data, n } = info as any;
   return n ? data.map((u: string) => ({ value: u, label: u })) : [];
-};
+});
 
 export default function EntryTypeAdd(): JSX.Element {
   const {
@@ -73,6 +82,26 @@ export default function EntryTypeAdd(): JSX.Element {
       }
       const { code } = result;
       toasting(`entry type "${code}" has been added`);
+
+      untrack(() => {
+        if (result.unit !== inputs.unit.value) {
+          mutate((prev: DataEntryTypeUnits | Error | undefined) => {
+            if (prev === undefined) {
+              return prev;
+            }
+            if (prev instanceof Error) {
+              return prev;
+            }
+
+            let { data, n } = prev;
+            if (!data.includes(result.unit)) {
+              data.push(result.unit);
+              n++;
+            }
+            return { data, n };
+          });
+        }
+      });
 
       setInputs(makeValidable(entryTypeZero));
     }
