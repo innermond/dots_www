@@ -8,39 +8,28 @@ import {
   Typography,
   useTheme,
 } from '@suid/material';
-import { Show, createSignal, createResource, For } from 'solid-js';
+import { Show, createSignal, For } from 'solid-js';
 import ChangeCircleOutlinedIcon from '@suid/icons-material/ChangeCircleOutlined';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
-import { apiEntryType } from '@/api';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { Validation } from '@/lib/form';
 import { FormHelperText } from '@suid/material';
 
 const theme = useTheme();
-
-// It is a component that can switch between a Select and a TextField
-const InputOrSelect = (props: {
-  unit: Validation;
+export type InputOrSelectOption = { value: string; label: string };
+type InputOrSelectProps = {
+  unit: Validation<string>;
+  units: Array<InputOrSelectOption>;
   setUnit: (u: string | null) => void;
   disabled?: boolean;
-}) => {
+};
+// It is a component that can switch between a Select and a TextField
+const InputOrSelect = <T extends {}>(props: InputOrSelectProps) => {
   // open/close Select
   const [isOpen, setIsOpen] = createSignal(false);
   // switch to Text
   const [newUnit, setNewUnit] = createSignal(false);
-
-  // list of units
-  const [unitsResource] = createResource(apiEntryType.units);
-  const units = (): (string | Error)[] => {
-    const info = unitsResource();
-    if (info instanceof Error || !info) {
-      return [];
-    }
-
-    const { data, n } = info as any;
-    return n ? data : [];
-  };
 
   const unitValueDefault = props.unit.value;
 
@@ -116,12 +105,9 @@ const InputOrSelect = (props: {
             open={isOpen()}
             error={props.unit.error}
           >
-            <For each={units()}>
-              {(u: string | Error) => {
-                if (u instanceof Error) {
-                  return <MenuItem value={u.message}>{u.message}</MenuItem>;
-                }
-                return <MenuItem value={u}>{u}</MenuItem>;
+            <For each={props.units}>
+              {(u: InputOrSelectOption) => {
+                return <MenuItem value={u.value}>{u.label}</MenuItem>;
               }}
             </For>
           </Select>

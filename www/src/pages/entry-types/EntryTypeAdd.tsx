@@ -1,25 +1,18 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import type { ChangeEvent } from '@suid/types';
-import { JSX, createEffect } from 'solid-js';
+import { JSX, createEffect, createResource } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
-import {
-  isEntryTypeData,
-  isKeyofEntryTypeData,
-} from '@/pages/entry-types/types';
+import { isEntryTypeData } from '@/pages/entry-types/types';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 
 import { entryTypeZero } from '@/pages/entry-types/types';
 import { produce } from 'solid-js/store';
-import type {
-  FieldNames,
-  MessagesMap,
-  Validators,
-  Validation,
-} from '@/lib/form';
+import type { FieldNames, MessagesMap, Validators } from '@/lib/form';
 import { required, minlen, maxlen, makeValidable } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
+import { InputOrSelectOption } from './InputOrSelect';
+import { apiEntryType } from '@/api';
 
 const theme = useTheme();
 const names = ['code', 'description', 'unit'];
@@ -46,6 +39,18 @@ const messages: MessagesMap<Names> = {
   code: textmessages,
   description: textmessages,
   unit: textmessages,
+};
+
+// list of units
+const [unitsResource] = createResource(apiEntryType.units);
+const units = (): InputOrSelectOption[] => {
+  const info = unitsResource(); // <- this gives us string[]
+  if (!info) {
+    return [];
+  }
+
+  const { data, n } = info as any;
+  return n ? data.map((u: string) => ({ value: u, label: u })) : [];
 };
 
 export default function EntryTypeAdd(): JSX.Element {
@@ -127,6 +132,7 @@ export default function EntryTypeAdd(): JSX.Element {
       </FormGroup>
       <InputOrSelect
         unit={inputs.unit}
+        units={units()}
         disabled={isDisabled()}
         setUnit={(u: string | null) =>
           setInputs(

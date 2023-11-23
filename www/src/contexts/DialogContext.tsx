@@ -193,6 +193,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
   // submit data
   async function sendRequest<T>(requestData: T) {
+    if (requestData === undefined) {
+      return;
+    }
+
     // fire request
     const [remote, abort] = props.sendRequestFn(requestData);
 
@@ -259,7 +263,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
       return;
     }
 
-    setStartSubmit(requestData as any);
+    setStartSubmit((prev: T | undefined) => requestData);
   };
 
   const isDisabled = () => submitForm.loading;
