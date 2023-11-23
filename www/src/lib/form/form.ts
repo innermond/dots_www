@@ -28,7 +28,7 @@ type Messages = Array<(...params: any) => string>;
 
 type InnerValidation<T extends string> = {
   validators: Validators<T>;
-  messages: MessagesMap<T>;
+  messages?: MessagesMap<T>;
 };
 
 function validate<T extends string>(
