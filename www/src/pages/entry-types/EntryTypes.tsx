@@ -41,6 +41,8 @@ import { Dynamic } from 'solid-js/web';
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
 
+  const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
+
   const [result] = createResource(apiEntryType.all);
   const entryTypes = (): EntryTypeData[] => {
     const info = result();
@@ -50,6 +52,23 @@ const EntryTypes: Component = (): JSX.Element => {
 
     const { data, n } = info as any;
     return n ? data : [];
+  };
+
+  const rows = (): EntryTypeData[] => {
+    const changed = initialInputs();
+    const data = entryTypes();
+
+    if (data === undefined || data === null) {
+      return [];
+    }
+
+    let inx = -1;
+    if (!!changed) {
+      inx = data.findIndex((et: EntryTypeData) => et.id == changed.id);
+      data[inx] = changed;
+    }
+    const again = data.find((et: EntryTypeData) => et.id == changed.id);
+    return [...data];
   };
 
   onMount(() => {
@@ -66,8 +85,6 @@ const EntryTypes: Component = (): JSX.Element => {
   const [dyn, setDyn] = createSignal<LazyWhat>();
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
-
-  const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
 
   const handleDialogWith = (
     args: { whatToLoad: LazyWhat; data?: EntryTypeData },
@@ -208,16 +225,16 @@ const EntryTypes: Component = (): JSX.Element => {
               </TableRow>
             </TableHead>
             <TableBody>
-              <For each={entryTypes()}>
-                {(c: EntryTypeData) => {
+              <For each={rows()}>
+                {(et: EntryTypeData) => {
                   return (
                     <TableRow>
                       <TableCell>
                         <Checkbox />
                       </TableCell>
-                      <TableCell>{c.code}</TableCell>
-                      <TableCell align="right">{c.description}</TableCell>
-                      <TableCell align="right">{c.unit}</TableCell>
+                      <TableCell>{et.code}</TableCell>
+                      <TableCell align="right">{et.description}</TableCell>
+                      <TableCell align="right">{et.unit}</TableCell>
                       <TableCell align="right">
                         <Stack direction="row" paddingLeft={theme.spacing(2)}>
                           <IconButton
@@ -238,7 +255,7 @@ const EntryTypes: Component = (): JSX.Element => {
                             aria-label="edit entry type"
                             onClick={[
                               handleDialogWith,
-                              { whatToLoad: 'editEntry' as LazyWhat, data: c },
+                              { whatToLoad: 'editEntry' as LazyWhat, data: et },
                             ]}
                           >
                             <EditIcon fontSize="small" />
