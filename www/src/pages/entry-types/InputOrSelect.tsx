@@ -38,6 +38,21 @@ const InputOrSelect = <T extends {}>(props: InputOrSelectProps) => {
     props.setUnit(evt.target.value);
   };
 
+  const handleClick = (evt: MouseEvent) => {
+    if (props.disabled) {
+      return;
+    }
+
+    const id = (evt.target as HTMLElement)?.id;
+    const inside = id === 'unit-wrapper';
+    setIsOpen(inside);
+    // force unfocus of internal input after clicking away
+    // to make label looks right
+    if (!inside) {
+      (document.activeElement as HTMLInputElement)?.blur();
+    }
+  };
+
   const switchNewUnit = (txt: string, openNewUnit: boolean) => {
     const color = theme.palette.text.secondary;
     return (
@@ -88,20 +103,7 @@ const InputOrSelect = <T extends {}>(props: InputOrSelectProps) => {
             value={props.unit.value}
             defaultValue={unitValueDefault}
             onChange={handleSelectChange}
-            onClick={(evt: MouseEvent) => {
-              if (props.disabled) {
-                return;
-              }
-
-              const id = (evt.target as HTMLElement)?.id;
-              const inside = id === 'unit-wrapper';
-              setIsOpen(inside);
-              // force unfocus of internal input after clicking away
-              // to make label looks right
-              if (!inside) {
-                (document.activeElement as HTMLInputElement)?.blur();
-              }
-            }}
+            onClick={handleClick}
             open={isOpen()}
             error={props.unit.error}
           >
@@ -135,14 +137,6 @@ const InputOrSelect = <T extends {}>(props: InputOrSelectProps) => {
           defaultValue={unitValueDefault}
           onChange={(evt: Event) => {
             props.setUnit((evt.target as HTMLInputElement).value);
-          }}
-          onBlur={(evt: Event) => {
-            let v: string | null = (evt.target as HTMLInputElement).value;
-            if (props.unit.error) return;
-            // try to force an update on store
-            if (v === '') {
-              props.setUnit(null);
-            }
           }}
         />
         {switchNewUnit('or use existent unit', false)}

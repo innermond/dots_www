@@ -139,7 +139,7 @@ const EntryTypes: Component = (): JSX.Element => {
           open={dialogSignal}
           names={fields()}
           sendRequestFn={sendRequestFn()}
-          initialInputs={initialInputs()}
+          initialInputs={initialInputs}
           setInitialInputs={setInitialInputs}
         >
           <Dynamic component={cmp()} />

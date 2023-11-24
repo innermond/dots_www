@@ -11,7 +11,7 @@ import {
   useTheme,
   CircularProgress,
 } from '@suid/material';
-import type { ChangeEvent, ChangeEventHandler } from '@suid/types';
+import type { ChangeEvent } from '@suid/types';
 import { TransitionProps } from '@suid/material/transitions';
 import {
   JSX,
@@ -56,7 +56,7 @@ export type DialogProviderValue<T extends {}> = {
   isDisabled: Accessor<boolean>;
   setValidation: Setter<InnerValidation<string>>;
   submitForm: Resource<T>;
-  handleChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+  validateInputUpdateStore: (data: unknown, skipValidation?: boolean) => void;
 };
 
 export type DialogSaveProps<T extends {}> = {
@@ -66,7 +66,7 @@ export type DialogSaveProps<T extends {}> = {
   transition?: Component<TransitionProps & { children: JSX.Element }>;
   names: string[];
   sendRequestFn: Function;
-  initialInputs: T;
+  initialInputs: Accessor<T>;
   setInitialInputs: Setter<T>;
 } & ParentProps;
 
@@ -91,7 +91,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const names = props.names;
   type Names = (typeof names)[number];
 
-  const initialValues: T = unwrap(props.initialInputs);
+  const initialValues: T = props.initialInputs();
   // set up local state for the inputs named above
   // TODO make it unchangebla - currently is flawed
   let defaultInputs: Validable<typeof initialValues>;
@@ -114,7 +114,8 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     return false;
   };
   const zeroingInputs = () => {
-    const init = makeValidable(props.initialInputs, ...names);
+    const initial = initialValues;
+    const init = makeValidable(initial, ...names);
     setInputs(init);
   };
 
@@ -250,7 +251,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     for (const n of names) {
       // != ensure strings like numbers are equal with numbers
       if (
-        props.initialInputs[n as keyof typeof props.initialInputs] !=
+        props.initialInputs()[n as keyof typeof props.initialInputs] !=
         (requestData as any)[n]
       ) {
         changed = true;
@@ -269,13 +270,29 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const isDisabled = () => submitForm.loading;
 
   // utility to help form's inputs be controlled components
-  const handleChange = (event: ChangeEvent, value: any) => {
-    const name = (event.target as HTMLInputElement).name;
-    if (!name || value === undefined) {
+  const handleChange = (evtOrname: object | string, value: any) => {
+    let name: string;
+    if (typeof evtOrname === 'object') {
+      if (!('target' in evtOrname) || 'name' in (evtOrname.target as any)) {
+        return;
+      }
+      name = (evtOrname.target as any)!.name;
+    } else if (typeof evtOrname === 'string') {
+      name = evtOrname;
+    } else {
+      // TODO maybe throw?
       return;
     }
+
     validateInputUpdateStore({ name, value });
   };
+
+  createComputed(() => {
+    const initial = props.initialInputs();
+    if (initial !== undefined) {
+      setInputs(makeValidable(initial));
+    }
+  });
 
   createComputed(() => {
     if (submitForm.loading) {
@@ -391,8 +408,9 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     isDisabled,
     setValidation,
     submitForm,
-    handleChange,
+    validateInputUpdateStore,
     setInitialInputs: props.setInitialInputs,
+    handleChange,
   };
 
   return (

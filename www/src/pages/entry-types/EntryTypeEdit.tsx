@@ -1,11 +1,5 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import {
-  createEffect,
-  batch,
-  createResource,
-  untrack,
-  createMemo,
-} from 'solid-js';
+import { createEffect, createResource, untrack, createMemo } from 'solid-js';
 import type { JSX } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import type {
@@ -15,12 +9,10 @@ import type {
 import { isEntryTypeData } from '@/pages/entry-types/types';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
-import { produce } from 'solid-js/store';
 import type { FieldNames, MessagesMap, Validators } from '@/lib/form';
 import { required, minlen, maxlen, optional, int } from '@/lib/form';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
-import { makeValidable } from '@/lib/form/form';
 import { InputOrSelectOption } from './InputOrSelect';
 import { apiEntryType } from '@/api';
 
@@ -30,10 +22,10 @@ type Names = FieldNames<typeof names>;
 
 // set up validation
 const validators: Validators<Names> = {
-  id: [required, int],
-  code: [required, minlen(7), maxlen(50)],
+  id: [required(), int],
+  code: [required(), minlen(7), maxlen(50)],
   description: [optional, minlen(7), maxlen(100)],
-  unit: [required, minlen(3), maxlen(20)],
+  unit: [required(), minlen(3), maxlen(20)],
 };
 
 // functions that prepare error messages
@@ -68,11 +60,10 @@ const units = createMemo((): InputOrSelectOption[] => {
 export default function EntryTypeEdit(): JSX.Element {
   const {
     inputs,
-    setInputs,
     isDisabled,
     setValidation,
     submitForm,
-    handleChange,
+    validateInputUpdateStore,
     setInitialInputs,
   } = useDialog() as DialogProviderValue<EntryTypeData>;
 
@@ -107,18 +98,23 @@ export default function EntryTypeEdit(): JSX.Element {
         }
       });
 
-      batch(() => {
-        setInitialInputs(result);
-        const names = ['code', 'description', 'unit'];
-        const edited = makeValidable(result, ...names);
-        setInputs(edited);
-      });
+      setInitialInputs(result);
     }
   });
 
   const id = inputs.id.value;
   const code = inputs.code.value;
   const description = inputs.description.value;
+
+  const handleChange = (evt: any, value: any) => {
+    if (!evt?.target?.name) {
+      return;
+    }
+    validateInputUpdateStore({ name: evt.target.name, value });
+  };
+
+  const setUnit = (u: string | null) =>
+    validateInputUpdateStore({ name: 'unit', value: u });
 
   return (
     <Container
@@ -181,13 +177,7 @@ export default function EntryTypeEdit(): JSX.Element {
       <InputOrSelect
         unit={inputs.unit}
         units={units()}
-        setUnit={(u: string | null) =>
-          setInputs(
-            produce(
-              (s: any) => (s.unit = { value: u, error: false, message: '' }),
-            ),
-          )
-        }
+        setUnit={setUnit}
         disabled={isDisabled()}
       />
     </Container>

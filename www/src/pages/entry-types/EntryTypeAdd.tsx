@@ -17,9 +17,8 @@ import type {
 } from '@/pages/entry-types/types';
 
 import { entryTypeZero } from '@/pages/entry-types/types';
-import { produce } from 'solid-js/store';
-import type { FieldNames, MessagesMap, Validators } from '@/lib/form';
-import { required, minlen, maxlen, makeValidable } from '@/lib/form';
+import type { FieldNames, Validators } from '@/lib/form';
+import { required, minlen, maxlen } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
@@ -40,11 +39,11 @@ const validators: Validators<Names> = {
 export default function EntryTypeAdd(): JSX.Element {
   const {
     inputs,
-    setInputs,
+    setInitialInputs,
     isDisabled,
     setValidation,
     submitForm,
-    handleChange,
+    validateInputUpdateStore,
   } = useDialog() as DialogProviderValue<EntryTypeData>;
 
   // list of units
@@ -95,12 +94,23 @@ export default function EntryTypeAdd(): JSX.Element {
         }
       });
 
-      setInputs(makeValidable(entryTypeZero));
+      setInitialInputs(entryTypeZero);
     }
   });
 
   const code = inputs.code.value;
   const description = inputs.description.value;
+
+  const handleChange = (evt: any, value: any) => {
+    console.log(typeof evt);
+    if (!evt?.target?.name) {
+      return;
+    }
+    validateInputUpdateStore({ name: evt.target.name, value });
+  };
+
+  const setUnit = (u: string | null) =>
+    validateInputUpdateStore({ name: 'unit', value: u });
 
   return (
     <Container
@@ -155,13 +165,7 @@ export default function EntryTypeAdd(): JSX.Element {
         unit={inputs.unit}
         units={units()}
         disabled={isDisabled()}
-        setUnit={(u: string | null) =>
-          setInputs(
-            produce(
-              (s: any) => (s.unit = { value: u, error: false, message: '' }),
-            ),
-          )
-        }
+        setUnit={setUnit}
       />
     </Container>
   );
