@@ -15,6 +15,7 @@ import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { InputOrSelectOption } from './InputOrSelect';
 import { apiEntryType } from '@/api';
+import { dispatch } from '@/lib/customevent';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
@@ -100,12 +101,7 @@ export default function EntryTypeEdit(): JSX.Element {
       });
 
       setInitialInputs(result);
-      document.dispatchEvent(
-        new CustomEvent('dots:fresh:EntryType', {
-          bubbles: true,
-          detail: result,
-        }),
-      );
+      dispatch('dots:fresh:EntryType', result);
     }
   });
 

@@ -39,6 +39,7 @@ import ActionButton from '@/components/ActionButton';
 import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
 import toasting from '@/lib/toast';
+import { listen, unlisten } from '@/lib/customevent';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -91,16 +92,10 @@ const EntryTypes: Component = (): JSX.Element => {
 
   onMount(() => {
     setState('currentPageTitle', "Entry types's list");
-    document.addEventListener(
-      'dots:fresh:EntryType',
-      handleFreshEntryType as EventListener,
-    );
+    listen('dots:fresh:EntryType', handleFreshEntryType as EventListener);
   });
   onCleanup(() => {
-    document.removeEventListener(
-      'dots:fresh:EntryType',
-      handleFreshEntryType as EventListener,
-    );
+    unlisten('dots:fresh:EntryType', handleFreshEntryType as EventListener);
   });
 
   const navigate = useNavigate();
