@@ -11,7 +11,6 @@ import {
   useTheme,
   CircularProgress,
 } from '@suid/material';
-import type { ChangeEvent } from '@suid/types';
 import { TransitionProps } from '@suid/material/transitions';
 import {
   JSX,
@@ -57,6 +56,7 @@ export type DialogProviderValue<T extends {}> = {
   setValidation: Setter<InnerValidation<string>>;
   submitForm: Resource<T>;
   validateInputUpdateStore: (data: unknown, skipValidation?: boolean) => void;
+  handleChange: any;
 };
 
 export type DialogSaveProps<T extends {}> = {
@@ -114,7 +114,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     return false;
   };
   const zeroingInputs = () => {
-    const initial = initialValues;
+    const initial = props.initialInputs();
     const init = makeValidable(initial, ...names);
     setInputs(init);
   };
@@ -273,7 +273,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const handleChange = (evtOrname: object | string, value: any) => {
     let name: string;
     if (typeof evtOrname === 'object') {
-      if (!('target' in evtOrname) || 'name' in (evtOrname.target as any)) {
+      if (!('target' in evtOrname && 'name' in (evtOrname.target as any))) {
         return;
       }
       name = (evtOrname.target as any)!.name;

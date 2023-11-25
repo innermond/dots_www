@@ -8,6 +8,7 @@ import {
   batch,
   createMemo,
   createComputed,
+  onCleanup,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -33,10 +34,11 @@ import Skeleton from '@suid/material/Skeleton';
 
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
-import { EntryTypeData, entryTypeZero } from './types';
+import { EntryTypeData, entryTypeZero, isEntryTypeData } from './types';
 import ActionButton from '@/components/ActionButton';
 import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
+import toasting from '@/lib/toast';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -54,8 +56,21 @@ const EntryTypes: Component = (): JSX.Element => {
     return n ? data : [];
   };
 
+  const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
+
+  const handleFreshEntryType = (evt: CustomEvent) => {
+    if (!isEntryTypeData(evt.detail)) {
+      toasting(
+        'Updating screen of entry types table did not happen. Unexpected format of data received from server',
+        'warning',
+      );
+      return;
+    }
+    setFreshEntryType(evt.detail);
+  };
+
   const rows = (): EntryTypeData[] => {
-    const changed = initialInputs();
+    const changed = freshEntryType() as EntryTypeData;
     const data = entryTypes();
 
     if (data === undefined || data === null) {
@@ -65,14 +80,27 @@ const EntryTypes: Component = (): JSX.Element => {
     let inx = -1;
     if (!!changed) {
       inx = data.findIndex((et: EntryTypeData) => et.id == changed.id);
-      data[inx] = changed;
+      if (inx === -1) {
+        data.unshift(changed);
+      } else {
+        data[inx] = changed;
+      }
     }
-    const again = data.find((et: EntryTypeData) => et.id == changed.id);
-    return [...data];
+    return data;
   };
 
   onMount(() => {
     setState('currentPageTitle', "Entry types's list");
+    document.addEventListener(
+      'dots:fresh:EntryType',
+      handleFreshEntryType as EventListener,
+    );
+  });
+  onCleanup(() => {
+    document.removeEventListener(
+      'dots:fresh:EntryType',
+      handleFreshEntryType as EventListener,
+    );
   });
 
   const navigate = useNavigate();

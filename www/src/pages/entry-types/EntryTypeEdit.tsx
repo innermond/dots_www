@@ -45,18 +45,6 @@ const messages: MessagesMap<Names> = {
   unit: textmessages,
 };
 
-// list of units
-const [unitsResource, { mutate }] = createResource(apiEntryType.units);
-const units = createMemo((): InputOrSelectOption[] => {
-  const info = unitsResource(); // <- this gives us string[]
-  if (!info) {
-    return [];
-  }
-
-  const { data, n } = info as any;
-  return n ? data.map((u: string) => ({ value: u, label: u })) : [];
-});
-
 export default function EntryTypeEdit(): JSX.Element {
   const {
     inputs,
@@ -65,7 +53,20 @@ export default function EntryTypeEdit(): JSX.Element {
     submitForm,
     validateInputUpdateStore,
     setInitialInputs,
+    handleChange,
   } = useDialog() as DialogProviderValue<EntryTypeData>;
+
+  // list of units
+  const [unitsResource, { mutate }] = createResource(apiEntryType.units);
+  const units = createMemo((): InputOrSelectOption[] => {
+    const info = unitsResource(); // <- this gives us string[]
+    if (!info) {
+      return [];
+    }
+
+    const { data, n } = info as any;
+    return n ? data.map((u: string) => ({ value: u, label: u })) : [];
+  });
 
   setValidation({ validators, messages });
 
@@ -99,19 +100,18 @@ export default function EntryTypeEdit(): JSX.Element {
       });
 
       setInitialInputs(result);
+      document.dispatchEvent(
+        new CustomEvent('dots:fresh:EntryType', {
+          bubbles: true,
+          detail: result,
+        }),
+      );
     }
   });
 
   const id = inputs.id.value;
   const code = inputs.code.value;
   const description = inputs.description.value;
-
-  const handleChange = (evt: any, value: any) => {
-    if (!evt?.target?.name) {
-      return;
-    }
-    validateInputUpdateStore({ name: evt.target.name, value });
-  };
 
   const setUnit = (u: string | null) =>
     validateInputUpdateStore({ name: 'unit', value: u });

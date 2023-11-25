@@ -44,6 +44,7 @@ export default function EntryTypeAdd(): JSX.Element {
     setValidation,
     submitForm,
     validateInputUpdateStore,
+    handleChange,
   } = useDialog() as DialogProviderValue<EntryTypeData>;
 
   // list of units
@@ -95,19 +96,17 @@ export default function EntryTypeAdd(): JSX.Element {
       });
 
       setInitialInputs(entryTypeZero);
+      document.dispatchEvent(
+        new CustomEvent('dots:fresh:EntryType', {
+          bubbles: true,
+          detail: result,
+        }),
+      );
     }
   });
 
   const code = inputs.code.value;
   const description = inputs.description.value;
-
-  const handleChange = (evt: any, value: any) => {
-    console.log(typeof evt);
-    if (!evt?.target?.name) {
-      return;
-    }
-    validateInputUpdateStore({ name: evt.target.name, value });
-  };
 
   const setUnit = (u: string | null) =>
     validateInputUpdateStore({ name: 'unit', value: u });
