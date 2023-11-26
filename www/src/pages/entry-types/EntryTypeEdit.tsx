@@ -21,28 +21,33 @@ const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
 type Names = FieldNames<typeof names>;
 
+// sample custom validators
+/*const  alphabetic = () => {
+  const fn = (v: any) => (/^[a-z]+$/i).test(v);
+  fn.tpl = 'made of letters only';
+  return fn;
+}*/
+// dummy custom validator
+const numeric = (v: any) => /^[0-9]+$/i.test(v);
+//numeric.tpl = 'made of numbers only';
+numeric.tpl = (f: string, v: string) => `${f}[${v}] not made of numbers only`;
+
 // set up validation
 const validators: Validators<Names> = {
   id: [required(), int],
   code: [required(), minlen(7), maxlen(50)],
   description: [optional, minlen(7), maxlen(100)],
-  unit: [required(), minlen(3), maxlen(20)],
+  unit: [required(), numeric, minlen(3), maxlen(20)],
 };
 
 // functions that prepare error messages
 const textmessages = [
-  (f: string) => `${f} is required`,
-  (f: string, v: string, { len }: { len: number }) =>
-    `${f} must be more than ${len} - has ${v.length}`,
-  (f: string, v: string, { len }: { len: number }) =>
-    `${f} must be less than ${len} - has ${v.length}`,
+  (f: string) => `${f} is compulsory`,
+  //(f: string, v: string, { len }: { len: number }) => `${f} must be more than ${len} - has ${v.length}`,
 ];
 
 // map error messages with field names
 const messages: MessagesMap<Names> = {
-  id: [textmessages[0], (f: string) => f + ' must be number'],
-  code: textmessages,
-  description: [() => '', ...textmessages.slice(1)],
   unit: textmessages,
 };
 

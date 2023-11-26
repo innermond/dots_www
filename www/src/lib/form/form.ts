@@ -14,7 +14,7 @@ type Validable<V> = {
 
 type Validator = ((...params: any) => boolean) & {
   args?: object;
-  tpl?: string;
+  tpl?: string | Function;
 };
 
 type Validators<T extends string> = {
@@ -61,7 +61,7 @@ function validate<T extends string>(
     }
 
     if (!messages || !(name in messages)) {
-      hint = `${name} ${'tpl' in validator ? validator.tpl : 'invalid'}`;
+      hint = `${name} ${'tpl' in validator ? validator.tpl : 'is invalid'}`;
       break;
     }
 
@@ -69,7 +69,19 @@ function validate<T extends string>(
       continue;
     }
 
-    const fn = (messages[name] as Messages)[inx];
+    let fn = (messages[name] as Messages)[inx];
+    if (!(fn instanceof Function)) {
+      fn = (name, value, args?) => {
+        if (typeof validator.tpl === 'string') {
+          return validator.tpl;
+        }
+        if ((validator.tpl as any) instanceof Function) {
+          return (validator.tpl as any)(...arguments);
+        }
+        return 'is invalid';
+      };
+      //fn = (name: string): string => `${name} ${validator?.tpl ?? 'is invalid'}`;
+    }
     let msg: string = '';
     let args = {};
     if ('args' in validator) {
