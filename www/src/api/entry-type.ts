@@ -32,6 +32,17 @@ class APIEntryType {
     return api(args);
   }
 
+  async stats(id: number): Promise<Record<string, string> | Error> {
+    const args = {
+      hint: 'loading entry type stats',
+      method: 'GET',
+      url: `/entry-types?stats&id=${id}&kind=default`,
+      isFn: (_: Record<string, string>) => true,
+    } as ApiArgs<Record<string, string>>;
+
+    return api(args);
+  }
+
   add(data: Omit<EntryTypeData, 'id'>): ReturnType<typeof apix<typeof data>> {
     const args = {
       hint: 'adding entry type',

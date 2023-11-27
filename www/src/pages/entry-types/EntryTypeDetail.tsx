@@ -8,7 +8,7 @@ import {
   Typography,
   Button,
 } from '@suid/material';
-import { createEffect } from 'solid-js';
+import { createEffect, createResource, createMemo } from 'solid-js';
 import type { JSX } from 'solid-js';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
@@ -18,6 +18,7 @@ import { required, int } from '@/lib/form';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { dispatch } from '@/lib/customevent';
+import { apiEntryType } from '@/api';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
@@ -42,6 +43,20 @@ const validators: Validators<Names> = {
 export default function EntryTypeEdit(): JSX.Element {
   const { inputs, setValidation, submitForm } =
     useDialog() as DialogProviderValue<EntryTypeData>;
+
+  // get stats
+  const apicall = () => apiEntryType.stats(inputs.id.value);
+  const [statsResource] = createResource(apicall);
+  const stats = createMemo((): Record<string, string> => {
+    if (statsResource.state !== 'ready') {
+      return {};
+    }
+
+    const info = statsResource(); // <- this gives us string[]
+
+    const { data, n } = info as any;
+    return n ? data : {};
+  });
 
   setValidation({ validators });
 
@@ -93,6 +108,7 @@ export default function EntryTypeEdit(): JSX.Element {
           <Button size="small">Learn More</Button>
         </CardActions>
       </Card>
+      {JSON.stringify(stats())}
     </Container>
   );
 }
