@@ -23,7 +23,7 @@ const int: Validator = (v: any): boolean => {
 
 function minlen(len: number): Validator {
   const fn = (v: any) => {
-    const ok = (v?.length ?? 0) >= len;
+    const ok = (v?.length ?? 0) > len;
     return ok;
   };
 
@@ -35,7 +35,7 @@ function minlen(len: number): Validator {
 
 function maxlen(len: number): Validator {
   const fn = (v: any) => {
-    const ok = (v?.length ?? 0) <= len;
+    const ok = (v?.length ?? 0) < len;
     return ok;
   };
 

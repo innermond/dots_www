@@ -24,7 +24,7 @@ type Validators<T extends string> = {
 type MessagesMap<T extends string> = {
   [key in T as string]: Messages;
 };
-type Messages = Array<(...params: any) => string>;
+type Messages = Array<((...params: any) => string) | string | null>;
 
 type InnerValidation<T extends string> = {
   validators: Validators<T>;
@@ -70,6 +70,9 @@ function validate<T extends string>(
     }
 
     let fn = (messages[name] as Messages)[inx];
+    if (typeof fn === 'string') {
+      return fn;
+    }
     if (!(fn instanceof Function)) {
       fn = (name, value, args?) => {
         if (typeof validator.tpl === 'string') {
@@ -87,7 +90,10 @@ function validate<T extends string>(
     if ('args' in validator) {
       args = { ...validator.args };
     }
-    if (Object.keys(args).length === 0) {
+    if (
+      Object.keys(args).length === 0 &&
+      typeof args[Symbol.iterator as keyof typeof args] !== 'function'
+    ) {
       msg = fn(name, value);
     } else {
       msg = fn(name, value, args);
