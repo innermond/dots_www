@@ -54,6 +54,7 @@ const validators: Validators<Names> = {
   unit: [required(), minlen(2), maxlen(9), alphaPosibleUppercase()],
 };
 
+// messages if they are sparse, must be in sync with validators
 const messages = {
   unit: [
     'put something in it',

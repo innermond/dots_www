@@ -27,7 +27,6 @@ import {
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
 import EditIcon from '@suid/icons-material/Edit';
-import { useNavigate } from '@solidjs/router';
 
 import { Grid } from '@suid/material';
 import Skeleton from '@suid/material/Skeleton';
@@ -98,16 +97,15 @@ const EntryTypes: Component = (): JSX.Element => {
     unlisten('dots:fresh:EntryType', handleFreshEntryType as EventListener);
   });
 
-  const navigate = useNavigate();
-
   const dialogSignal = createSignal(false);
   const [openDialog, setOpenDialog] = dialogSignal;
 
-  type LazyWhat = 'editEntry' | 'addEntry' | undefined;
+  type LazyWhat = 'editEntry' | 'addEntry' | 'detailEntry' | undefined;
 
   const [dyn, setDyn] = createSignal<LazyWhat>();
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
+  const detailEntryType = lazy(() => import('./EntryTypeDetail'));
 
   const handleDialogWith = (
     args: { whatToLoad: LazyWhat; data?: EntryTypeData },
@@ -140,15 +138,34 @@ const EntryTypes: Component = (): JSX.Element => {
     if ((cmpname() as string) === 'addEntry') {
       return addEntryType;
     }
+    if ((cmpname() as string) === 'detailEntry') {
+      return detailEntryType;
+    }
     return undefined;
   };
   const title = () => {
-    return (cmpname() as string) === 'editEntry'
-      ? 'Edit entry type'
-      : 'Add entry type';
+    if ((cmpname() as string) === 'editEntry') {
+      return 'Edit entry types';
+    }
+    if ((cmpname() as string) === 'addEntry') {
+      return 'Add entry types';
+    }
+    if ((cmpname() as string) === 'detailEntry') {
+      return 'Details of entry type';
+    }
+    return undefined;
   };
   const textSave = () => {
-    return (cmpname() as string) === 'editEntry' ? 'Edit' : 'Add';
+    if ((cmpname() as string) === 'editEntry') {
+      return 'Edit';
+    }
+    if ((cmpname() as string) === 'addEntry') {
+      return 'Add';
+    }
+    if ((cmpname() as string) === 'detailEntry') {
+      return 'Delete';
+    }
+    return undefined;
   };
   const fields = () => {
     return (cmpname() as string) === 'editEntry'
@@ -265,9 +282,13 @@ const EntryTypes: Component = (): JSX.Element => {
                             color="primary"
                             size="small"
                             aria-label="view entry type"
-                            /*onclick={() =>
-                            navigate('./' + c.id, { replace: true })
-                          }*/
+                            onClick={[
+                              handleDialogWith,
+                              {
+                                whatToLoad: 'detailEntry' as LazyWhat,
+                                data: et,
+                              },
+                            ]}
                           >
                             <VisibilityOutlinedIcon fontSize="small" />
                           </IconButton>
