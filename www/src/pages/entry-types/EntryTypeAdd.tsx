@@ -30,11 +30,41 @@ const theme = useTheme();
 const names = ['code', 'description', 'unit'];
 type Names = FieldNames<typeof names>;
 
+// sample custom validators
+const alphaPosibleUppercase = (uppercase?: boolean) => {
+  let rx = /^[a-z]+$/i;
+  if (uppercase) {
+    rx = /^[A-Z]+$/;
+  }
+  const fn = (v: any) => rx.test(v);
+  fn.tpl = 'made of letters only';
+  fn.args = {
+    *[Symbol.iterator]() {
+      yield uppercase;
+      yield new Date();
+    },
+  };
+  return fn;
+};
+
 // set up validation
 const validators: Validators<Names> = {
   code: [required(), minlen(7), maxlen(50)],
   description: [required(), minlen(7), maxlen(100)],
-  unit: [required(), minlen(2), maxlen(20)],
+  unit: [required(), minlen(2), maxlen(9), alphaPosibleUppercase()],
+};
+
+const messages = {
+  unit: [
+    'put something in it',
+    null,
+    //(f: string, v: string, { len }: { len: number }) => `${f} must be less than ${len} - has ${v.length}`,
+    null,
+    (f: string, v: string, [up, date]: [boolean, Date]) =>
+      `${f} expects only letters,${
+        up ? ' upcased' : ''
+      } has ${v} today ${date}`,
+  ],
 };
 
 export default function EntryTypeAdd(): JSX.Element {
@@ -65,7 +95,7 @@ export default function EntryTypeAdd(): JSX.Element {
     return n ? data.map((u: string) => ({ value: u, label: u })) : [];
   });
 
-  setValidation({ validators });
+  setValidation({ validators, messages });
 
   createEffect(() => {
     if (submitForm.state === 'ready') {
