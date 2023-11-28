@@ -67,6 +67,7 @@ const EntryTypes: Component = (): JSX.Element => {
       );
       return;
     }
+    setKillOneEntryType(undefined);
     setFreshEntryType(evt.detail);
   };
 
@@ -78,6 +79,7 @@ const EntryTypes: Component = (): JSX.Element => {
       );
       return;
     }
+    setFreshEntryType(undefined);
     setKillOneEntryType(evt.detail);
   };
 

@@ -6,16 +6,9 @@ import {
   TextField,
   Typography,
 } from '@suid/material';
-import {
-  createEffect,
-  createResource,
-  createMemo,
-  For,
-  untrack,
-} from 'solid-js';
+import { createEffect, createResource, createMemo, For } from 'solid-js';
 import type { JSX } from 'solid-js';
 import type { EntryTypeData } from '@/pages/entry-types/types';
-import { isEntryTypeData } from '@/pages/entry-types/types';
 
 import type { FieldNames, Validators } from '@/lib/form';
 import { required, int, isEmptyObject } from '@/lib/form';
@@ -60,7 +53,6 @@ export default function EntryTypeDetail(): JSX.Element {
       if (!('n' in result && false === isNaN(parseInt(result.n as any)))) {
         throw new Error('data received is not for an entry type deletion');
       }
-      const { code } = result;
       toasting(`entry type "${inputs.code.value}" has been deleted`);
 
       const deleted: EntryTypeData = {
