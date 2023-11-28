@@ -3,44 +3,38 @@ import {
   useTheme,
   Card,
   CardContent,
-  CardActions,
   TextField,
   Typography,
-  Button,
 } from '@suid/material';
-import { createEffect, createResource, createMemo } from 'solid-js';
+import {
+  createEffect,
+  createResource,
+  createMemo,
+  For,
+  untrack,
+} from 'solid-js';
 import type { JSX } from 'solid-js';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 import { isEntryTypeData } from '@/pages/entry-types/types';
 
 import type { FieldNames, Validators } from '@/lib/form';
-import { required, int } from '@/lib/form';
+import { required, int, isEmptyObject } from '@/lib/form';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { dispatch } from '@/lib/customevent';
 import { apiEntryType } from '@/api';
 
 const theme = useTheme();
-const names = ['id', 'code', 'description', 'unit'];
+const names = ['id', 'dontCheckChanged'];
 type Names = FieldNames<typeof names>;
-
-// sample custom validators
-/*const  alphabetic = () => {
-  const fn = (v: any) => (/^[a-z]+$/i).test(v);
-  fn.tpl = 'made of letters only';
-  return fn;
-}*/
-// dummy custom validator
-const numeric = (v: any) => /^[0-9]+$/i.test(v);
-//numeric.tpl = 'made of numbers only';
-numeric.tpl = (f: string, v: string) => `${f}[${v}] not made of numbers only`;
 
 // set up validation
 const validators: Validators<Names> = {
   id: [required(), int],
+  dontCheckChanged: [() => true],
 };
 
-export default function EntryTypeEdit(): JSX.Element {
+export default function EntryTypeDetail(): JSX.Element {
   const { inputs, setValidation, submitForm } =
     useDialog() as DialogProviderValue<EntryTypeData>;
 
@@ -52,7 +46,7 @@ export default function EntryTypeEdit(): JSX.Element {
       return {};
     }
 
-    const info = statsResource(); // <- this gives us string[]
+    const info = statsResource();
 
     const { data, n } = info as any;
     return n ? data : {};
@@ -63,35 +57,51 @@ export default function EntryTypeEdit(): JSX.Element {
   createEffect(() => {
     if (submitForm.state === 'ready') {
       const result = submitForm() as EntryTypeData;
-      if (!isEntryTypeData(result)) {
-        throw new Error('data received is not an entry type');
+      if (!('n' in result && false === isNaN(parseInt(result.n as any)))) {
+        throw new Error('data received is not for an entry type deletion');
       }
       const { code } = result;
-      toasting(`entry type "${code}" has been deleted`);
+      toasting(`entry type "${inputs.code.value}" has been deleted`);
 
-      dispatch('dots:fresh:EntryType', result);
+      const deleted: EntryTypeData = {
+        id: inputs.id.value,
+        code: inputs.code.value,
+        description: inputs.description.value,
+        unit: inputs.unit.value,
+      };
+      dispatch('dots:killone:EntryType', deleted);
     }
   });
+
+  const id = inputs.id.value;
 
   return (
     <Container
       sx={{
         padding: theme.spacing(3),
         display: 'flex',
-        alignItems: 'center',
-        flexDirection: 'column',
+        alignItems: 'stretch',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
         rowGap: theme.spacing(2),
+        columnGap: theme.spacing(2),
       }}
     >
       <TextField
         name="id"
-        label="Id"
         type="hidden"
         id="id"
-        defaultValue={inputs.id}
+        defaultValue={id}
         sx={{ display: 'none' }}
       />
-      <Card sx={{ minWidth: '15rem', alignSelf: 'flex-start' }}>
+      <TextField
+        name="dontCheckChanged"
+        type="hidden"
+        id="dontCheckChanged"
+        defaultValue={true}
+        sx={{ display: 'none' }}
+      />
+      <Card sx={{ minWidth: '100%' }}>
         <CardContent style={{}}>
           <Typography>Code</Typography>
           <Typography sx={{ mb: 1 }} variant="h5">
@@ -104,11 +114,29 @@ export default function EntryTypeEdit(): JSX.Element {
           <Typography>unit</Typography>
           <Typography variant="body2">{inputs.unit.value}</Typography>
         </CardContent>
-        <CardActions>
-          <Button size="small">Learn More</Button>
-        </CardActions>
       </Card>
-      {JSON.stringify(stats())}
+      <Card sx={{ minWidth: '100%' }}>
+        <CardContent style={{}}>
+          <Typography>Status</Typography>
+          <Typography sx={{ mb: 1 }} variant="h4">
+            {isEmptyObject(stats()) ? 'deletable' : 'not deletable'}
+          </Typography>
+          <For each={Object.keys(stats())}>
+            {(k: string) => {
+              return (
+                <>
+                  <Typography component={'h5'}>{k}</Typography>
+                  <Typography sx={{ mb: 1 }} color="text.secondary">
+                    {`there are ${stats()[k]} entries that depend on ${
+                      inputs.code.value
+                    }`}
+                  </Typography>
+                </>
+              );
+            }}
+          </For>
+        </CardContent>
+      </Card>
     </Container>
   );
 }

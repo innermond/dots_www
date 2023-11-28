@@ -1,3 +1,5 @@
+import { isEmptyObject } from './validators';
+
 type Validation<T> = {
   value: T;
   error: boolean;
@@ -103,16 +105,6 @@ function validate<T extends string>(
   }
   return hint;
 }
-
-const isEmptyObject = (value: unknown): value is Record<string, any> => {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.getPrototypeOf(value) === Object.prototype &&
-    Object.keys(value).length === 0
-  );
-};
 
 type ExcludeEmptyObject<T> = T extends {} ? never : T;
 // this function never returns {}

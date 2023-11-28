@@ -57,6 +57,7 @@ const EntryTypes: Component = (): JSX.Element => {
   };
 
   const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
+  const [killOneEntryType, setKillOneEntryType] = createSignal<EntryTypeData>();
 
   const handleFreshEntryType = (evt: CustomEvent) => {
     if (!isEntryTypeData(evt.detail)) {
@@ -69,8 +70,20 @@ const EntryTypes: Component = (): JSX.Element => {
     setFreshEntryType(evt.detail);
   };
 
+  const handleKillOneEntryType = (evt: CustomEvent) => {
+    if (!isEntryTypeData(evt.detail)) {
+      toasting(
+        'Deleting from screen of entry types table did not happen. Cannot understand what to delete',
+        'warning',
+      );
+      return;
+    }
+    setKillOneEntryType(evt.detail);
+  };
+
   const rows = (): EntryTypeData[] => {
     const changed = freshEntryType() as EntryTypeData;
+    const killed = killOneEntryType() as EntryTypeData;
     const data = entryTypes();
 
     if (data === undefined || data === null) {
@@ -85,6 +98,11 @@ const EntryTypes: Component = (): JSX.Element => {
       } else {
         data[inx] = changed;
       }
+    } else if (!!killed) {
+      inx = data.findIndex((et: EntryTypeData) => et.id == killed.id);
+      if (inx !== -1) {
+        data.splice(inx, 1);
+      }
     }
     return data;
   };
@@ -92,9 +110,11 @@ const EntryTypes: Component = (): JSX.Element => {
   onMount(() => {
     setState('currentPageTitle', "Entry types's list");
     listen('dots:fresh:EntryType', handleFreshEntryType as EventListener);
+    listen('dots:killone:EntryType', handleKillOneEntryType as EventListener);
   });
   onCleanup(() => {
     unlisten('dots:fresh:EntryType', handleFreshEntryType as EventListener);
+    unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
   });
 
   const dialogSignal = createSignal(false);
@@ -141,7 +161,7 @@ const EntryTypes: Component = (): JSX.Element => {
     if ((cmpname() as string) === 'detailEntry') {
       return detailEntryType;
     }
-    return undefined;
+    throw new Error(`no component defined for ${cmpname()}`);
   };
   const title = () => {
     if ((cmpname() as string) === 'editEntry') {
@@ -153,7 +173,7 @@ const EntryTypes: Component = (): JSX.Element => {
     if ((cmpname() as string) === 'detailEntry') {
       return 'Details of entry type';
     }
-    return undefined;
+    throw new Error(`no title defined for ${cmpname()}`);
   };
   const textSave = () => {
     if ((cmpname() as string) === 'editEntry') {
@@ -165,17 +185,31 @@ const EntryTypes: Component = (): JSX.Element => {
     if ((cmpname() as string) === 'detailEntry') {
       return 'Delete';
     }
-    return undefined;
+    throw new Error(`no text button defined for ${cmpname()}`);
   };
   const fields = () => {
-    return (cmpname() as string) === 'editEntry'
-      ? ['id', 'code', 'description', 'unit']
-      : ['code', 'description', 'unit'];
+    if ((cmpname() as string) === 'editEntry') {
+      return ['id', 'code', 'description', 'unit'];
+    }
+    if ((cmpname() as string) === 'addEntry') {
+      return ['code', 'description', 'unit'];
+    }
+    if ((cmpname() as string) === 'detailEntry') {
+      return ['id', 'dontCheckChanged'];
+    }
+    throw new Error(`no fields defined for ${cmpname()}`);
   };
   const sendRequestFn = () => {
-    return (cmpname() as string) === 'editEntry'
-      ? apiEntryType.edit
-      : apiEntryType.add;
+    if ((cmpname() as string) === 'editEntry') {
+      return apiEntryType.edit;
+    }
+    if ((cmpname() as string) === 'addEntry') {
+      return apiEntryType.add;
+    }
+    if ((cmpname() as string) === 'detailEntry') {
+      return apiEntryType.del;
+    }
+    throw new Error(`no api call defined for ${cmpname()}`);
   };
 
   createComputed(() => {

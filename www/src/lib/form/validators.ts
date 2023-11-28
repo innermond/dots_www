@@ -103,4 +103,23 @@ function checkPasswordStrength(password: string): [number, string[]] {
   return [strength, tips];
 }
 
-export { optional, required, int, minlen, maxlen, likeemail, checkpass };
+const isEmptyObject = (value: unknown): value is Record<string, any> => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype &&
+    Object.keys(value).length === 0
+  );
+};
+
+export {
+  optional,
+  required,
+  int,
+  minlen,
+  maxlen,
+  likeemail,
+  checkpass,
+  isEmptyObject,
+};

@@ -248,14 +248,19 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
       names,
     );
     let changed = false;
-    for (const n of names) {
-      // != ensure strings like numbers are equal with numbers
-      if (
-        props.initialInputs()[n as keyof typeof props.initialInputs] !=
-        (requestData as any)[n]
-      ) {
-        changed = true;
-        break;
+    let dontCheckChanged = true === names.includes('dontCheckChanged');
+    if (dontCheckChanged) {
+      changed = true;
+    } else {
+      for (const n of names) {
+        // != ensure strings like numbers are equal with numbers
+        if (
+          props.initialInputs()[n as keyof typeof props.initialInputs] !=
+          (requestData as any)[n]
+        ) {
+          changed = true;
+          break;
+        }
       }
     }
 
@@ -344,7 +349,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
         'An error occured';
       if (data.name === 'AbortError') {
         severity = 'info' as AlertColor;
-        message = 'Adding a new entry type has been canceled by user';
+        message = 'Action has been canceled by user';
       }
       toasting(message, severity);
     }

@@ -63,7 +63,7 @@ async function send<T>(
     if ((window as any)?.devjson) {
       json = (window as any).devjson;
     }
-    if (!response.ok) {
+    if (response.status >= 400) {
       const message = json?.error ?? 'we got error';
       const data = json?.data;
       const httperr = new ApiError(`${hint}: ${message}`, response, data);

@@ -48,5 +48,13 @@ const customEvent = (el: HTMLElement, accessor: CustomEventAccessor): void => {
   onCleanup(() => unlisten(name, handler, doc ? document.body : el));
 };
 
+declare module 'solid-js' {
+  namespace JSX {
+    interface CustomEvents {
+      refetchItem: CustomEvent;
+    }
+  }
+}
+
 export type { CustomEventAccessor };
 export { dispatch, listen, unlisten, customEvent };

@@ -37,14 +37,6 @@ import { setLoading } from '@/components/Loading';
 import toasting from '@/lib/toast';
 import { apiCompany } from '@/api';
 
-declare module 'solid-js' {
-  namespace JSX {
-    interface CustomEvents {
-      refetchItem: CustomEvent;
-    }
-  }
-}
-
 type ErrorResource = ApiError | Error;
 
 const [state, setState] = appstate;

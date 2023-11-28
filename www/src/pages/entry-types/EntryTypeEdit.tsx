@@ -28,16 +28,16 @@ type Names = FieldNames<typeof names>;
   return fn;
 }*/
 // dummy custom validator
-const numeric = (v: any) => /^[0-9]+$/i.test(v);
+//const numeric = (v: any) => /^[0-9]+$/i.test(v);
 //numeric.tpl = 'made of numbers only';
-numeric.tpl = (f: string, v: string) => `${f}[${v}] not made of numbers only`;
+//numeric.tpl = (f: string, v: string) => `${f}[${v}] not made of numbers only`;
 
 // set up validation
 const validators: Validators<Names> = {
   id: [required(), int],
   code: [required(), minlen(7), maxlen(50)],
   description: [optional, minlen(7), maxlen(100)],
-  unit: [required(), numeric, minlen(3), maxlen(20)],
+  unit: [required(), minlen(3), maxlen(20)],
 };
 
 // functions that prepare error messages
