@@ -35,7 +35,7 @@ type Names = FieldNames<typeof names>;
 // set up validation
 const validators: Validators<Names> = {
   id: [required(), int],
-  code: [required(), minlen(7), maxlen(50)],
+  code: [required(), minlen(3), maxlen(50)],
   description: [optional, minlen(7), maxlen(100)],
   unit: [required(), minlen(3), maxlen(20)],
 };
