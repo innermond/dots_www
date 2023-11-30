@@ -23,6 +23,7 @@ import {
   useContext,
   Show,
   Suspense,
+  onCleanup,
 } from 'solid-js';
 import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
 import type { Accessor, Component, Resource, Setter } from 'solid-js';
@@ -79,6 +80,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const handleCloseClick = () => {
     setOpen(false);
   };
+
+  onCleanup(() => {
+    setLoading(false);
+  });
 
   const closing = (): boolean => {
     const v = open();

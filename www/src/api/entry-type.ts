@@ -71,6 +71,18 @@ class APIEntryType {
   del(data: EntryTypeData): ReturnType<typeof apix<typeof data>> {
     const { id } = data;
     const args = {
+      hint: 'soft deleting entry type',
+      method: 'PATCH',
+      url: `/entry-types/${id}?del`,
+      isFn: (v: any) => 'n' in v && !isNaN(parseInt(v.n)),
+    } as ApiArgs<never>;
+
+    return apix<never>(args);
+  }
+
+  delete(data: EntryTypeData): ReturnType<typeof apix<typeof data>> {
+    const { id } = data;
+    const args = {
       hint: 'deleting entry type',
       method: 'DELETE',
       url: `/entry-types/${id}`,

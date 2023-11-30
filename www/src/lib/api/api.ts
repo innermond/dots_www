@@ -21,6 +21,7 @@ async function send<T>(
   signal?: AbortSignal,
 ): Promise<JSON | Error> {
   const headers: HeadersInit = {
+    'X-Request-Id': crypto.randomUUID(),
     'Content-type': 'application/json',
     ...extraHeaders,
   };
