@@ -18,8 +18,9 @@ import { apiEntryType } from '@/api';
 import { dispatch } from '@/lib/customevent';
 
 const theme = useTheme();
-const names = ['id', 'code', 'description', 'unit'];
-type Names = FieldNames<typeof names>;
+const names = ['id', 'code', 'description', 'unit'] as const;
+//type Names = FieldNames<typeof names>;
+type Names = (typeof names)[number];
 
 // sample custom validators
 /*const  alphabetic = () => {

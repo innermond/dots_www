@@ -28,7 +28,6 @@ import {
   checkpass,
   validate,
 } from '@/lib/form';
-import HelperTextMultiline from '@/components/HelperTextMultiline';
 import { useNavigate } from '@solidjs/router';
 
 async function fetchLoginData(e: Event) {
@@ -43,36 +42,32 @@ async function fetchLoginData(e: Event) {
   return login(requestData);
 }
 
-const defaultInputs: Validable<'email' | 'password'> = {
+const initialValues = {
   email: {
+    value: '',
     error: false,
-    message: [],
+    message: '',
   },
   password: {
+    value: '',
     error: false,
-    message: [],
+    message: '',
   },
 };
+const defaultInputs: Validable<{ email: string; password: string }> =
+  initialValues;
 
 const validators: Validators<'email' | 'password'> = {
-  email: [required, likeemail, minlen(7), maxlen(100)],
+  email: [required(), likeemail(), minlen(7), maxlen(100)],
   //password: [required, minlen(8), maxlen(15), checkpass([""])],
-  password: [checkpass([''])],
+  password: [checkpass('')],
 };
 const messages: MessagesMap<'email' | 'password'> = {
-  email: [
-    (f: string) => `${f} is required`,
-    (f: string) => `${f} expects a valid email address`,
-    (f: string, v: string, { len }: { len: number }) =>
-      `${f} must be more than ${len} - has ${v.length}`,
-    (f: string, v: string, { len }: { len: number }) =>
-      `${f} must be less than ${len} - has ${v.length}`,
-  ],
   password: [
     //(f:string) => `${f} is required`,
     //(f:string, v:string, {len}:{len:number}) => `${f} must be more than ${len} - has ${v.length}`,
     //(f:string, v:string, {len}:{len:number}) => `${f} must be less than ${len} - has ${v.length}`,
-    (f: string, v: string, { tips }: { tips: string[] }) => tips,
+    (__: string, _: string, { tips }: { tips: string }) => tips,
   ],
 };
 
@@ -100,7 +95,7 @@ const LoginForm: Component = (): JSX.Element => {
     const { name, value } = e.target as HTMLInputElement;
     if (!['email', 'password'].includes(name)) return;
 
-    const multierrors: string[] = validate<'email' | 'password'>(
+    const multierrors: string = validate<'email' | 'password'>(
       name,
       value,
       validators,
@@ -146,8 +141,9 @@ const LoginForm: Component = (): JSX.Element => {
       setLoading(false);
 
       const zero = {
+        value: '',
         error: false,
-        message: [],
+        message: '',
       };
       setInputs({ email: zero, password: zero });
       formRef?.reset();
@@ -198,7 +194,7 @@ const LoginForm: Component = (): JSX.Element => {
             autoFocus
             disabled={isDisabled()}
             error={inputs.email.error}
-            helperText={<HelperTextMultiline lines={inputs.email.message} />}
+            helperText={inputs.email.message}
           />
           <TextField
             margin="normal"
@@ -211,7 +207,7 @@ const LoginForm: Component = (): JSX.Element => {
             autoComplete="off"
             disabled={isDisabled()}
             error={inputs.password.error}
-            helperText={<HelperTextMultiline lines={inputs.password.message} />}
+            helperText={inputs.password.message}
           />
           <FormControlLabel
             control={
