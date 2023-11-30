@@ -69,6 +69,7 @@ export type DialogSaveProps<T extends {}> = {
   sendRequestFn: Function;
   initialInputs: Accessor<T>;
   setInitialInputs: Setter<T>;
+  allowStopRequest?: boolean;
 } & ParentProps;
 
 const DialogContext = createContext();
@@ -78,6 +79,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const [open, setOpen] = props!.open;
 
   const handleCloseClick = () => {
+    if (submitForm.loading) {
+      toasting('wait for operation to complete', 'warning');
+      return;
+    }
     setOpen(false);
   };
 
@@ -384,7 +389,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
         >
           {props.title}
         </Typography>
-        <Show when={submitForm.loading}>
+        <Show when={submitForm.loading && props.allowStopRequest}>
           <ActionButton
             text="stop"
             only="text"
