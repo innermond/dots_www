@@ -286,7 +286,7 @@ const EntryTypes: Component = (): JSX.Element => {
             <TableHead>
               <TableRow hover>
                 <TableCell component="th">
-                  <Checkbox />
+                  <Checkbox id="entries-all" />
                 </TableCell>
                 <TableCell component="th">Code</TableCell>
                 <TableCell component="th" align="right">
@@ -306,7 +306,7 @@ const EntryTypes: Component = (): JSX.Element => {
                   return (
                     <TableRow>
                       <TableCell>
-                        <Checkbox />
+                        <Checkbox name="entries" value={et.id} />
                       </TableCell>
                       <TableCell>{et.code}</TableCell>
                       <TableCell align="right">{et.description}</TableCell>

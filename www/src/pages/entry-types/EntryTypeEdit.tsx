@@ -129,7 +129,6 @@ export default function EntryTypeEdit(): JSX.Element {
     >
       <TextFieldEllipsis
         name="id"
-        label="Id"
         type="hidden"
         id="id"
         defaultValue={id}

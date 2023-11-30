@@ -87,7 +87,7 @@ const InputOrSelect = <T extends {}>(props: InputOrSelectProps) => {
           error={props.unit.error}
           disabled={props.disabled}
         >
-          <InputLabel shrink={!!props.unit.value} id="unit-label">
+          <InputLabel shrink={!!props.unit.value} for="unit" id="unit-label">
             Unit
           </InputLabel>
           <Select
