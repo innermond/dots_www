@@ -24,6 +24,7 @@ import {
   useTheme,
   IconButton,
   Box,
+  Badge,
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
@@ -35,7 +36,12 @@ import Skeleton from '@suid/material/Skeleton';
 import type { Slice } from '@/lib/api';
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
-import { EntryTypeData, entryTypeZero, isEntryTypeData } from './types';
+import {
+  DataEntryTypes,
+  EntryTypeData,
+  entryTypeZero,
+  isEntryTypeData,
+} from './types';
 import ActionButton from '@/components/ActionButton';
 import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
@@ -56,41 +62,44 @@ const EntryTypes: Component = (): JSX.Element => {
   const [result] = createResource(() => {
     return { ...slice };
   }, apiEntryType.all);
-  const positionOverflowRight = (): boolean => {
+
+  const dataTable = createMemo((): DataEntryTypes => {
     const info = result();
     if (info instanceof Error || !info) {
+      return { data: [], n: 0 };
+    }
+    return info;
+  });
+
+  const totalRows = createMemo(() => {
+    const { n } = dataTable();
+    return n;
+  });
+
+  const [lastDirection, setLastDirection] = createSignal(1);
+
+  const positionOverflowRight = (): boolean => {
+    const peak = totalRows();
+    if (peak === -1) {
       return false;
     }
-
-    const { n: peak } = info as any;
-
     return peak <= slice.limit + slice.offset;
   };
 
   const positionOverflowLeft = (): boolean => {
-    return slice.offset - slice.limit <= 0;
-  };
-
-  const entryTypes = (): EntryTypeData[] => {
-    const info = result();
-    if (info instanceof Error || !info) {
-      return [];
-    }
-
-    const { data, n } = info as any;
-    return n ? data : [];
+    return slice.offset <= 0;
   };
 
   const goSlice = (dir: number) => {
-    const info = result();
-    if (info instanceof Error || !info) {
+    const peak = totalRows();
+    if (peak === -1) {
       return;
     }
 
-    const { n: peak } = info as any;
     dir = dir > 0 ? 1 : -1;
+    setLastDirection(dir);
     const position = dir * slice.limit + slice.offset;
-    if (position <= 0 || position >= peak) {
+    if (position < 0 || position > peak) {
       return;
     }
 
@@ -127,7 +136,7 @@ const EntryTypes: Component = (): JSX.Element => {
   const rows = (): EntryTypeData[] => {
     const changed = freshEntryType() as EntryTypeData;
     const killed = killOneEntryType() as EntryTypeData;
-    const data = entryTypes();
+    const { data } = dataTable();
 
     if (data === undefined || data === null) {
       return [];
@@ -135,19 +144,26 @@ const EntryTypes: Component = (): JSX.Element => {
 
     let inx = -1;
     if (!!changed) {
-      inx = data.findIndex((et: EntryTypeData) => et.id == changed.id);
+      inx = data.findIndex(
+        (et: EntryTypeData | Error) =>
+          isEntryTypeData(et) && et.id == changed.id,
+      );
       if (inx === -1) {
         data.unshift(changed);
       } else {
         data[inx] = changed;
       }
     } else if (!!killed) {
-      inx = data.findIndex((et: EntryTypeData) => et.id == killed.id);
+      inx = data.findIndex(
+        (et: EntryTypeData | Error) =>
+          isEntryTypeData(et) && et.id == killed.id,
+      );
       if (inx !== -1) {
         data.splice(inx, 1);
       }
     }
-    return data;
+    // data shape is filtered above such here is only EntryTypeData[]
+    return data as EntryTypeData[];
   };
 
   onMount(() => {
@@ -395,13 +411,37 @@ const EntryTypes: Component = (): JSX.Element => {
             disabled={positionOverflowLeft()}
             onClick={() => goSlice(-1)}
           >
-            <ChevronLeftIcon />
+            <Show
+              when={
+                (lastDirection() === -1 && !positionOverflowLeft()) ||
+                positionOverflowRight()
+              }
+              fallback=<ChevronLeftIcon />
+            >
+              <Badge max={1000} badgeContent={slice.offset} color="primary">
+                <ChevronLeftIcon />
+              </Badge>
+            </Show>
           </IconButton>
           <IconButton
             disabled={positionOverflowRight()}
             onClick={() => goSlice(1)}
           >
-            <ChevronRightIcon />
+            <Show
+              when={
+                (lastDirection() === 1 && !positionOverflowRight()) ||
+                positionOverflowLeft()
+              }
+              fallback=<ChevronRightIcon />
+            >
+              <Badge
+                max={1000}
+                badgeContent={totalRows() - (slice.offset + slice.limit)}
+                color="primary"
+              >
+                <ChevronRightIcon />
+              </Badge>
+            </Show>
           </IconButton>
         </Box>
       </Show>
