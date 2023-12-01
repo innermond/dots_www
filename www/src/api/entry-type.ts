@@ -1,5 +1,5 @@
-import { api, apix } from '@/lib/api';
-import type { ApiArgs } from '@/lib/api';
+import { api, apix, query } from '@/lib/api';
+import type { ApiArgs, Slice } from '@/lib/api';
 import {
   DataEntryTypes,
   DataEntryTypeUnits,
@@ -10,11 +10,19 @@ import {
 } from '@/pages/entry-types/types';
 
 class APIEntryType {
-  async all(): Promise<DataEntryTypes | Error> {
+  async all(slice?: Slice): Promise<DataEntryTypes | Error> {
+    const pp = {} as any;
+    if (!isNaN(Number(slice?.offset))) {
+      pp.offset = slice!.offset;
+    }
+    if (!isNaN(Number(slice?.limit))) {
+      pp.limit = slice!.limit;
+    }
+    const url = query('/entry-types', pp);
     const args = {
       hint: 'loading entry types',
       method: 'GET',
-      url: '/entry-types',
+      url,
       isFn: isDataEntryTypes,
     } as ApiArgs<DataEntryTypes>;
 

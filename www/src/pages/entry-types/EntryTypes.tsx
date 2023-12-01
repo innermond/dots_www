@@ -23,6 +23,7 @@ import {
   Stack,
   useTheme,
   IconButton,
+  Box,
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
@@ -31,6 +32,7 @@ import EditIcon from '@suid/icons-material/Edit';
 import { Grid } from '@suid/material';
 import Skeleton from '@suid/material/Skeleton';
 
+import type { Slice } from '@/lib/api';
 import { apiEntryType } from '@/api';
 import appstate from '@/lib/app';
 import { EntryTypeData, entryTypeZero, isEntryTypeData } from './types';
@@ -39,13 +41,36 @@ import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
 import toasting from '@/lib/toast';
 import { listen, unlisten } from '@/lib/customevent';
+import { createStore } from 'solid-js/store';
+import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
+import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
 
   const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
 
-  const [result] = createResource(apiEntryType.all);
+  const peakRow = 20;
+
+  const [slice, setSlice] = createStore<Slice>({ offset: 0, limit: peakRow });
+  const [result] = createResource(() => {
+    return { ...slice };
+  }, apiEntryType.all);
+  const positionOverflowRight = (): boolean => {
+    const info = result();
+    if (info instanceof Error || !info) {
+      return false;
+    }
+
+    const { n: peak } = info as any;
+
+    return peak <= slice.limit + slice.offset;
+  };
+
+  const positionOverflowLeft = (): boolean => {
+    return slice.offset - slice.limit <= 0;
+  };
+
   const entryTypes = (): EntryTypeData[] => {
     const info = result();
     if (info instanceof Error || !info) {
@@ -54,6 +79,22 @@ const EntryTypes: Component = (): JSX.Element => {
 
     const { data, n } = info as any;
     return n ? data : [];
+  };
+
+  const goSlice = (dir: number) => {
+    const info = result();
+    if (info instanceof Error || !info) {
+      return;
+    }
+
+    const { n: peak } = info as any;
+    dir = dir > 0 ? 1 : -1;
+    const position = dir * slice.limit + slice.offset;
+    if (position <= 0 || position >= peak) {
+      return;
+    }
+
+    setSlice((s: Slice) => ({ ...s, offset: position }));
   };
 
   const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
@@ -244,7 +285,7 @@ const EntryTypes: Component = (): JSX.Element => {
   const dummy = (num: number, height: string = '1rem') => (
     <Grid container rowSpacing={4.5}>
       <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'end' }}>
-        <Skeleton width="10rem" height="5rem" variant="text" />
+        <Skeleton width="10rem" height="3rem" variant="text" />
       </Grid>
       <For each={new Array(num)}>
         {_ => {
@@ -261,7 +302,7 @@ const EntryTypes: Component = (): JSX.Element => {
   return (
     <>
       {dialogSave}
-      <Show when={result.state === 'ready'} fallback={dummy(20, '2rem')}>
+      <Show when={result.state === 'ready'} fallback={dummy(peakRow, '1rem')}>
         <TableContainer component={Paper}>
           <Stack
             direction="row"
@@ -349,6 +390,20 @@ const EntryTypes: Component = (): JSX.Element => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Box>
+          <IconButton
+            disabled={positionOverflowLeft()}
+            onClick={() => goSlice(-1)}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+          <IconButton
+            disabled={positionOverflowRight()}
+            onClick={() => goSlice(1)}
+          >
+            <ChevronRightIcon />
+          </IconButton>
+        </Box>
       </Show>
     </>
   );

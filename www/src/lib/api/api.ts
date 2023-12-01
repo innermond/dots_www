@@ -111,13 +111,15 @@ const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
   return convertKeysToCamelCase(verifiedOrError) as T;
 };
 
+type Slice = { offset: number; limit: number };
+
 const query = (path: string, pairs: Record<string, string>) => {
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(pairs)) {
     q.append(k, v);
   }
   const qstr = q.toString();
-  const url = `${path}?${qstr}`;
+  const url = path + (qstr ? '?' + qstr : '');
 
   return url;
 };
@@ -207,5 +209,5 @@ const zero = (undef: boolean = false) => ({
   message: [],
 });
 
-export type { ApiArgs };
+export type { ApiArgs, Slice };
 export { ApiError, api, apix, query, send, payload, zero };
