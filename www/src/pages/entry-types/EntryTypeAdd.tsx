@@ -72,7 +72,7 @@ const messages = {
 
 export default function EntryTypeAdd(): JSX.Element {
   const {
-    setChildrenLoaded,
+    setUI,
     inputs,
     setInitialInputs,
     isDisabled,
@@ -101,8 +101,8 @@ export default function EntryTypeAdd(): JSX.Element {
 
   setValidation({ validators, messages });
 
-  onMount(() => setChildrenLoaded(true));
-  onCleanup(() => setChildrenLoaded(true));
+  onMount(() => setUI('ready', true));
+  onCleanup(() => setUI('ready', false));
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

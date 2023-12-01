@@ -61,7 +61,7 @@ const messages: MessagesMap<Names> = {
 
 export default function EntryTypeEdit(): JSX.Element {
   const {
-    setChildrenLoaded,
+    setUI,
     inputs,
     isDisabled,
     setValidation,
@@ -85,8 +85,8 @@ export default function EntryTypeEdit(): JSX.Element {
 
   setValidation({ validators, messages });
 
-  onMount(() => setChildrenLoaded(true));
-  onCleanup(() => setChildrenLoaded(true));
+  onMount(() => setUI('ready', true));
+  onCleanup(() => setUI('ready', false));
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

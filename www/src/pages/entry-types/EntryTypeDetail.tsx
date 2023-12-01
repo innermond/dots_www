@@ -11,7 +11,6 @@ import {
   createResource,
   createMemo,
   For,
-  onMount,
   onCleanup,
   Show,
 } from 'solid-js';
@@ -36,7 +35,7 @@ const validators: Validators<Names> = {
 };
 
 export default function EntryTypeDetail(): JSX.Element {
-  const { setChildrenLoaded, inputs, setValidation, submitForm } =
+  const { setUI, inputs, setValidation, submitForm } =
     useDialog() as DialogProviderValue<EntryTypeData>;
 
   // get stats
@@ -48,7 +47,7 @@ export default function EntryTypeDetail(): JSX.Element {
     }
 
     const info = statsResource();
-    setChildrenLoaded(true);
+    setUI('ready', true);
 
     const { data, n } = info as any;
     return n ? data : {};
@@ -56,7 +55,8 @@ export default function EntryTypeDetail(): JSX.Element {
 
   setValidation({ validators });
 
-  onCleanup(() => setChildrenLoaded(true));
+  setUI('show', 'reset', false);
+  onCleanup(() => setUI('ready', true));
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

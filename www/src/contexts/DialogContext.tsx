@@ -51,7 +51,7 @@ const defaultTransition = function (
 };
 
 export type DialogProviderValue<T extends {}> = {
-  setChildrenLoaded: Setter<boolean>;
+  setUI: SetStoreFunction<DialogState>;
   inputs: Store<Validable<T>>;
   setInputs: SetStoreFunction<Validable<T>>;
   setInitialInputs: Setter<T>;
@@ -74,10 +74,24 @@ export type DialogSaveProps<T extends {}> = {
   allowStopRequest?: boolean;
 } & ParentProps;
 
+type DialogState = {
+  show: {
+    reset: boolean;
+    stop: boolean;
+    action: boolean;
+  };
+  ready: boolean;
+};
+
 const DialogContext = createContext();
 // T is typeof data to be sent
 const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
-  const [childrenLoaded, setChildrenLoaded] = createSignal(false);
+  const initialUi = {
+    show: { reset: true, stop: !!props.allowStopRequest, action: true },
+    ready: false,
+  };
+  const initialState: DialogState = initialUi;
+  const [ui, setUI] = createStore(initialState);
 
   // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
@@ -174,7 +188,27 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
   const handleReset = (evt: Event): void => {
     evt.preventDefault();
-    zeroingInputs();
+    let changed = false;
+    let dontCheckChanged = true === names.includes('dontCheckChanged');
+    if (dontCheckChanged) {
+      changed = true;
+    } else {
+      for (const n of names) {
+        // != ensure strings like numbers are equal with numbers
+        if (
+          props.initialInputs()[n as keyof typeof props.initialInputs] !=
+          inputs[n as keyof typeof inputs].value
+        ) {
+          changed = true;
+          break;
+        }
+      }
+    }
+    if (changed) {
+      zeroingInputs();
+    } else {
+      toasting('nothing to reset', 'info' as AlertColor);
+    }
   };
 
   const handleStop = (evt: Event): void => {
@@ -279,7 +313,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     }
 
     if (!changed) {
-      toasting('no change', 'info' as AlertColor);
+      toasting(
+        'unchanged data no not needed to be saved',
+        'info' as AlertColor,
+      );
       return;
     }
 
@@ -287,7 +324,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   };
 
   const isDisabled = createMemo(() => {
-    const v = submitForm.loading || !childrenLoaded() || inputsHasErrors();
+    const v = submitForm.loading || !ui.ready;
     return v;
   });
 
@@ -404,21 +441,21 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
             color="error"
             size="small"
             onClick={handleStop}
-            disabled={isDisabled()}
+            disabled={isDisabled() || inputsHasErrors()}
           />
         </Show>
-        <Show when={!submitForm.loading}>
+        <Show when={!submitForm.loading && ui.show.reset}>
           <ActionButton
             kind="reset"
             only="text"
             type="reset"
             color="error"
             size="small"
-            disabled={isDisabled()}
+            disabled={isDisabled() || inputsHasErrors()}
           />
         </Show>
         <ActionButton
-          disabled={isDisabled()}
+          disabled={isDisabled() || inputsHasErrors()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
         />
       </Toolbar>
@@ -427,7 +464,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   );
 
   const form: DialogProviderValue<any> = {
-    setChildrenLoaded,
+    setUI,
     inputs,
     setInputs,
     isDisabled,
