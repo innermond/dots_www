@@ -24,6 +24,7 @@ import {
   Show,
   Suspense,
   onCleanup,
+  createMemo,
 } from 'solid-js';
 import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
 import type { Accessor, Component, Resource, Setter } from 'solid-js';
@@ -50,6 +51,7 @@ const defaultTransition = function (
 };
 
 export type DialogProviderValue<T extends {}> = {
+  setChildrenLoaded: Setter<boolean>;
   inputs: Store<Validable<T>>;
   setInputs: SetStoreFunction<Validable<T>>;
   setInitialInputs: Setter<T>;
@@ -75,6 +77,8 @@ export type DialogSaveProps<T extends {}> = {
 const DialogContext = createContext();
 // T is typeof data to be sent
 const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
+  const [childrenLoaded, setChildrenLoaded] = createSignal(false);
+
   // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
 
@@ -282,7 +286,10 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     setStartSubmit((prev: T | undefined) => requestData);
   };
 
-  const isDisabled = () => submitForm.loading;
+  const isDisabled = createMemo(() => {
+    const v = submitForm.loading || !childrenLoaded() || inputsHasErrors();
+    return v;
+  });
 
   // utility to help form's inputs be controlled components
   const handleChange = (evtOrname: object | string, value: any) => {
@@ -397,6 +404,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
             color="error"
             size="small"
             onClick={handleStop}
+            disabled={isDisabled()}
           />
         </Show>
         <Show when={!submitForm.loading}>
@@ -406,10 +414,11 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
             type="reset"
             color="error"
             size="small"
+            disabled={isDisabled()}
           />
         </Show>
         <ActionButton
-          disabled={inputsHasErrors() || isDisabled()}
+          disabled={isDisabled()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
         />
       </Toolbar>
@@ -417,7 +426,8 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     </AppBar>
   );
 
-  const form = {
+  const form: DialogProviderValue<any> = {
+    setChildrenLoaded,
     inputs,
     setInputs,
     isDisabled,

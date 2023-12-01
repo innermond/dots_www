@@ -1,5 +1,12 @@
 import { Container, useTheme, FormGroup } from '@suid/material';
-import { createEffect, createResource, untrack, createMemo } from 'solid-js';
+import {
+  createEffect,
+  createResource,
+  untrack,
+  createMemo,
+  onMount,
+  onCleanup,
+} from 'solid-js';
 import type { JSX } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import type {
@@ -9,7 +16,7 @@ import type {
 import { isEntryTypeData } from '@/pages/entry-types/types';
 
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
-import type { FieldNames, MessagesMap, Validators } from '@/lib/form';
+import type { MessagesMap, Validators } from '@/lib/form';
 import { required, minlen, maxlen, optional, int } from '@/lib/form';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
@@ -19,7 +26,7 @@ import { dispatch } from '@/lib/customevent';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'] as const;
-//type Names = FieldNames<typeof names>;
+
 type Names = (typeof names)[number];
 
 // sample custom validators
@@ -54,6 +61,7 @@ const messages: MessagesMap<Names> = {
 
 export default function EntryTypeEdit(): JSX.Element {
   const {
+    setChildrenLoaded,
     inputs,
     isDisabled,
     setValidation,
@@ -76,6 +84,9 @@ export default function EntryTypeEdit(): JSX.Element {
   });
 
   setValidation({ validators, messages });
+
+  onMount(() => setChildrenLoaded(true));
+  onCleanup(() => setChildrenLoaded(true));
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

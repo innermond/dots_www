@@ -5,6 +5,8 @@ import {
   createResource,
   createMemo,
   untrack,
+  onMount,
+  onCleanup,
 } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import {
@@ -37,7 +39,7 @@ const alphaPosibleUppercase = (uppercase?: boolean) => {
     rx = /^[A-Z]+$/;
   }
   const fn = (v: any) => rx.test(v);
-  fn.tpl = 'made of letters only';
+  fn.tpl = uppercase ? 'made of upcased letters only' : 'made of letters only';
   fn.args = {
     *[Symbol.iterator]() {
       yield uppercase;
@@ -70,6 +72,7 @@ const messages = {
 
 export default function EntryTypeAdd(): JSX.Element {
   const {
+    setChildrenLoaded,
     inputs,
     setInitialInputs,
     isDisabled,
@@ -97,6 +100,9 @@ export default function EntryTypeAdd(): JSX.Element {
   });
 
   setValidation({ validators, messages });
+
+  onMount(() => setChildrenLoaded(true));
+  onCleanup(() => setChildrenLoaded(true));
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

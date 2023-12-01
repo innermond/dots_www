@@ -6,7 +6,15 @@ import {
   TextField,
   Typography,
 } from '@suid/material';
-import { createEffect, createResource, createMemo, For } from 'solid-js';
+import {
+  createEffect,
+  createResource,
+  createMemo,
+  For,
+  onMount,
+  onCleanup,
+  Show,
+} from 'solid-js';
 import type { JSX } from 'solid-js';
 import type { EntryTypeData } from '@/pages/entry-types/types';
 
@@ -28,24 +36,27 @@ const validators: Validators<Names> = {
 };
 
 export default function EntryTypeDetail(): JSX.Element {
-  const { inputs, setValidation, submitForm } =
+  const { setChildrenLoaded, inputs, setValidation, submitForm } =
     useDialog() as DialogProviderValue<EntryTypeData>;
 
   // get stats
   const apicall = () => apiEntryType.stats(inputs.id.value);
   const [statsResource] = createResource(apicall);
-  const stats = createMemo((): Record<string, string> => {
+  const stats = createMemo((): Record<string, string> | undefined => {
     if (statsResource.state !== 'ready') {
-      return {};
+      return undefined;
     }
 
     const info = statsResource();
+    setChildrenLoaded(true);
 
     const { data, n } = info as any;
     return n ? data : {};
   });
 
   setValidation({ validators });
+
+  onCleanup(() => setChildrenLoaded(true));
 
   createEffect(() => {
     if (submitForm.state === 'ready') {
@@ -111,22 +122,28 @@ export default function EntryTypeDetail(): JSX.Element {
         <CardContent style={{}}>
           <Typography>Status</Typography>
           <Typography sx={{ mb: 1 }} variant="h4">
-            {isEmptyObject(stats()) ? 'deletable' : 'not deletable'}
+            {stats() === undefined
+              ? 'checking....'
+              : isEmptyObject(stats())
+              ? 'deletable'
+              : 'not deletable'}
           </Typography>
-          <For each={Object.keys(stats())}>
-            {(k: string) => {
-              return (
-                <>
-                  <Typography component={'h5'}>{k}</Typography>
-                  <Typography sx={{ mb: 1 }} color="text.secondary">
-                    {`there are ${stats()[k]} entries that depend on ${
-                      inputs.code.value
-                    }`}
-                  </Typography>
-                </>
-              );
-            }}
-          </For>
+          <Show when={!!stats() && !isEmptyObject(stats())}>
+            <For each={Object.keys(stats() as Record<string, string>)}>
+              {(k: string) => {
+                return (
+                  <>
+                    <Typography component={'h5'}>{k}</Typography>
+                    <Typography sx={{ mb: 1 }} color="text.secondary">
+                      {`there are ${stats()![k]} entries that depend on ${
+                        inputs.code.value
+                      }`}
+                    </Typography>
+                  </>
+                );
+              }}
+            </For>
+          </Show>
         </CardContent>
       </Card>
     </Container>

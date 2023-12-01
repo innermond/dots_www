@@ -31,7 +31,13 @@ const ActionButton = (props: ActionButtonProps): JSX.Element => {
 
   if (my.only === 'text') {
     return (
-      <Button variant="text" color="primary" type="submit" {...buttonProps}>
+      <Button
+        disabled={props.disabled}
+        variant="text"
+        color="primary"
+        type="submit"
+        {...buttonProps}
+      >
         {txt}
       </Button>
     );
@@ -45,6 +51,7 @@ const ActionButton = (props: ActionButtonProps): JSX.Element => {
         startIcon={icon}
         color="primary"
         type="submit"
+        disabled={props.disabled}
         {...buttonProps}
       />
     );
