@@ -6,6 +6,8 @@ import {
   createMemo,
   onMount,
   onCleanup,
+  createSignal,
+  createComputed,
 } from 'solid-js';
 import type { JSX } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
@@ -22,7 +24,7 @@ import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { InputOrSelectOption } from './InputOrSelect';
 import { apiEntryType } from '@/api';
-import { dispatch } from '@/lib/customevent';
+import { dispatch, listen } from '@/lib/customevent';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'] as const;
@@ -87,6 +89,36 @@ export default function EntryTypeEdit(): JSX.Element {
 
   onMount(() => setUI('ready', true));
   onCleanup(() => setUI('ready', false));
+
+  const [editedStop, setEditedStop] = createSignal<EntryTypeData>();
+  const [edited] = createResource(editedStop, apiEntryType.editx);
+  // TODO signaling ready and comp do not work!!!
+  createEffect(() => {
+    if (editedStop()) {
+      toasting('trying to cancel changes...');
+      return;
+    }
+    if (edited.loading) {
+      toasting('trying to stop changes...');
+    } else if (edited.state === 'ready') {
+      toasting('stopping changes was done', 'success');
+    } else if (edited.error) {
+      toasting('we cannot guarantee that changes has been stopped', 'error');
+    }
+    //setEditedStop(undefined);
+  });
+
+  const onStop = (evt: Event) => {
+    const data = (evt as CustomEvent).detail;
+    if (!isEntryTypeData(data)) {
+      toasting('we cannot guarantee that changes has been stopped');
+      return;
+    }
+    //if (edited.latest, data)
+    setEditedStop(data);
+  };
+
+  listen('dots:cancelRequest', onStop);
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

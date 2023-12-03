@@ -15,7 +15,7 @@ function isEntryTypeData(d: unknown): d is EntryTypeData {
     (!!d &&
       typeof d === 'object' &&
       'id' in d &&
-      typeof d.id === 'number' &&
+      (typeof d.id === 'number' || !isNaN(parseInt('' + d.id))) &&
       'code' in d &&
       typeof d.code === 'string' &&
       // description may miss - optional

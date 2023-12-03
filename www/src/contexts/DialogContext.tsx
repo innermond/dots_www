@@ -39,6 +39,7 @@ import toasting from '@/lib/toast';
 import ActionButton from '@/components/ActionButton';
 import type { ActionButtonProps } from '@/components/ActionButton';
 import { createContext } from 'solid-js';
+import { dispatch } from '@/lib/customevent';
 
 const theme = useTheme();
 
@@ -214,8 +215,21 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const handleStop = (evt: Event): void => {
     evt.preventDefault();
     setCut(true);
+    dispatch('dots:cancelRequest', snapshotInputs());
     setTimeout(() => setCut(false), 0);
   };
+
+  function snapshotInputs(): Record<(typeof names)[number], any> {
+    const ss = {} as Record<(typeof names)[number], any>;
+    const ii = structuredClone(unwrap(props.initialInputs()));
+    for (const k of Object.keys(ii)) {
+      if (!names.includes(k)) {
+        continue;
+      }
+      ss[k] = ii[k as keyof typeof props.initialInputs];
+    }
+    return ss;
+  }
 
   // collect data from event
   function collectFormData<T>(
