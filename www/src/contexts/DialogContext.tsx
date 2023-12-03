@@ -441,7 +441,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
             color="error"
             size="small"
             onClick={handleStop}
-            disabled={isDisabled() || inputsHasErrors()}
+            disabled={inputsHasErrors()}
           />
         </Show>
         <Show when={!submitForm.loading && ui.show.reset}>

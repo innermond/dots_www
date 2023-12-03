@@ -291,6 +291,7 @@ const EntryTypes: Component = (): JSX.Element => {
           sendRequestFn={sendRequestFn()}
           initialInputs={initialInputs}
           setInitialInputs={setInitialInputs}
+          allowStopRequest={true}
         >
           <Dynamic component={cmp()} />
         </DialogProvider>
