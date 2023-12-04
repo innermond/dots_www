@@ -231,7 +231,7 @@ export default function EntryTypeAdd(): JSX.Element {
           defaultValue={code}
           error={inputs.code.error}
           helperText={inputs.code.message}
-          disabled={isDisabled()}
+          disabled={waiting()}
         />
         <TextFieldEllipsis
           InputLabelProps={{ shrink: !!inputs.description.value }}
@@ -246,13 +246,13 @@ export default function EntryTypeAdd(): JSX.Element {
           value={inputs.description.value}
           error={inputs.description.error}
           helperText={inputs.description.message}
-          disabled={isDisabled()}
+          disabled={waiting()}
         />
       </FormGroup>
       <InputOrSelect
         unit={inputs.unit}
         units={units()}
-        disabled={isDisabled()}
+        disabled={waiting()}
         setUnit={setUnit}
       />
     </Container>
