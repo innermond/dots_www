@@ -81,7 +81,7 @@ function validate<T extends string>(
           return validator.tpl;
         }
         if ((validator.tpl as any) instanceof Function) {
-          return (validator.tpl as any)(...arguments);
+          return (validator.tpl as any)(name, value, args);
         }
         return 'is invalid';
       };

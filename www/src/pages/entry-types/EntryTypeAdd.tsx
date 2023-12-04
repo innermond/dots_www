@@ -7,11 +7,14 @@ import {
   untrack,
   onMount,
   onCleanup,
+  batch,
+  createSignal,
 } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import {
   isEntryTypeData,
   isDataEntryTypeUnits,
+  asEntryTypeData,
 } from '@/pages/entry-types/types';
 import type {
   DataEntryTypeUnits,
@@ -20,13 +23,13 @@ import type {
 
 import { entryTypeZero } from '@/pages/entry-types/types';
 import type { FieldNames, Validators } from '@/lib/form';
-import { required, minlen, maxlen } from '@/lib/form';
+import { required, minlen, maxlen, isSimilar } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import toasting from '@/lib/toast';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { InputOrSelectOption } from './InputOrSelect';
 import { apiEntryType } from '@/api';
-import { dispatch } from '@/lib/customevent';
+import { dispatch, listen, unlisten } from '@/lib/customevent';
 
 const theme = useTheme();
 const names = ['code', 'description', 'unit'];
@@ -101,8 +104,61 @@ export default function EntryTypeAdd(): JSX.Element {
 
   setValidation({ validators, messages });
 
-  onMount(() => setUI('ready', true));
-  onCleanup(() => setUI('ready', false));
+  onMount(() =>
+    batch(() => {
+      setUI('ready', true);
+      setUI('show', 'stop', true);
+    }),
+  );
+  onCleanup(() => {
+    setUI('ready', false);
+    unlisten('dots:cancelRequest', onStop);
+  });
+
+  const [addedStop, setAddedStop] = createSignal<EntryTypeData>();
+  const [added] = createResource(addedStop, apiEntryType.add);
+
+  const waiting = createMemo(
+    () => isDisabled() || ['pending', 'refreshing'].includes(added.state),
+  );
+
+  createEffect(() => {
+    if (added.loading) {
+      toasting('trying to stop changes...', 'warning');
+    } else if (added.state === 'ready') {
+      toasting('stopping changes was done', 'success');
+    } else if (added.error) {
+      toasting('we cannot guarantee that changes has been stopped', 'error');
+    }
+  });
+
+  const onStop = (evt: Event) => {
+    const [, current] = (evt as CustomEvent).detail;
+    console.log(current);
+    return;
+    if (!isEntryTypeData(reverted)) {
+      toasting('we cannot guarantee that changes has been stopped');
+      return;
+    }
+    let tobeSaved = {} as any;
+    for (const k of Object.keys(inputs)) {
+      tobeSaved[k] = inputs[k as keyof typeof inputs].value;
+    }
+    try {
+      tobeSaved = asEntryTypeData(tobeSaved);
+    } catch (e) {
+      console.log('not an entry type', tobeSaved);
+    }
+    // use whatever tobeSaved may be
+    // TODO this check may be miss as well (it seems to never be true)
+    if (isSimilar(reverted, tobeSaved)) {
+      toasting('latest data is the same - nothing need to be stopped');
+      return;
+    }
+    setAddedStop(reverted);
+  };
+
+  listen('dots:cancelRequest', onStop);
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

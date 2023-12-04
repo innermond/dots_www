@@ -215,18 +215,26 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const handleStop = (evt: Event): void => {
     evt.preventDefault();
     setCut(true);
-    dispatch('dots:cancelRequest', snapshotInputs());
+    const prev = snapshotInputs();
+
+    let curr = snapshotInputs(unwrap(inputs), v => v?.value);
+    dispatch('dots:cancelRequest', [prev, curr]);
     setTimeout(() => setCut(false), 0);
   };
 
-  function snapshotInputs(): Record<(typeof names)[number], any> {
+  function snapshotInputs(
+    ground: any = props.initialInputs(),
+    mapfn?: (v: any) => any,
+  ): Record<(typeof names)[number], any> {
     const ss = {} as Record<(typeof names)[number], any>;
-    const ii = structuredClone(unwrap(props.initialInputs()));
+    // TODO: structuredClone may throw
+    const ii = structuredClone(ground);
     for (const k of Object.keys(ii)) {
       if (!names.includes(k)) {
         continue;
       }
-      ss[k] = ii[k as keyof typeof props.initialInputs];
+      const v = ii[k as keyof typeof ground];
+      ss[k] = mapfn ? mapfn(v) : v;
     }
     return ss;
   }
@@ -447,7 +455,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
         >
           {props.title}
         </Typography>
-        <Show when={submitForm.loading && props.allowStopRequest}>
+        <Show when={submitForm.loading && ui.show.stop}>
           <ActionButton
             text="stop"
             only="text"

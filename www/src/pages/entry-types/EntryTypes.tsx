@@ -260,10 +260,10 @@ const EntryTypes: Component = (): JSX.Element => {
   };
   const sendRequestFn = () => {
     if ((cmpname() as string) === 'editEntry') {
-      return apiEntryType.edit;
+      return apiEntryType.editx;
     }
     if ((cmpname() as string) === 'addEntry') {
-      return apiEntryType.add;
+      return apiEntryType.addx;
     }
     if ((cmpname() as string) === 'detailEntry') {
       return apiEntryType.del;
@@ -291,7 +291,6 @@ const EntryTypes: Component = (): JSX.Element => {
           sendRequestFn={sendRequestFn()}
           initialInputs={initialInputs}
           setInitialInputs={setInitialInputs}
-          allowStopRequest={true}
         >
           <Dynamic component={cmp()} />
         </DialogProvider>

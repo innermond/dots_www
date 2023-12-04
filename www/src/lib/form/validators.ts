@@ -113,6 +113,30 @@ const isEmptyObject = (value: unknown): value is Record<string, any> => {
   );
 };
 
+const isSimilar = (origin: { [key: string]: any }, compared: any): boolean => {
+  const originKeys = Object.keys(origin);
+  const comparedKeys = Object.keys(compared);
+
+  if (originKeys.length > comparedKeys.length) {
+    return false;
+  }
+
+  for (const key of originKeys) {
+    if (typeof origin[key] === 'object' && typeof compared[key] === 'object') {
+      if (!isSimilar(origin[key], compared[key])) {
+        return false;
+      }
+    } else {
+      if (origin[key] !== compared[key]) {
+        return false;
+      }
+    }
+  }
+
+  // all key-value pairs are the same
+  return true;
+};
+
 export {
   optional,
   required,
@@ -122,4 +146,5 @@ export {
   likeemail,
   checkpass,
   isEmptyObject,
+  isSimilar,
 };

@@ -51,7 +51,19 @@ class APIEntryType {
     return api(args);
   }
 
-  add(data: Omit<EntryTypeData, 'id'>): ReturnType<typeof apix<typeof data>> {
+  add(data: Omit<EntryTypeData, 'id'>): ReturnType<typeof api<typeof data>> {
+    const args = {
+      hint: 'adding entry type',
+      method: 'POST',
+      url: '/entry-types',
+      isFn: isEntryTypeData,
+      data,
+    } as ApiArgs<typeof data>;
+
+    return api<typeof data>(args);
+  }
+
+  addx(data: Omit<EntryTypeData, 'id'>): ReturnType<typeof apix<typeof data>> {
     const args = {
       hint: 'adding entry type',
       method: 'POST',
@@ -63,7 +75,7 @@ class APIEntryType {
     return apix<typeof data>(args);
   }
 
-  edit(data: EntryTypeData): ReturnType<typeof apix<typeof data>> {
+  editx(data: EntryTypeData): ReturnType<typeof apix<typeof data>> {
     const { id, ...idless } = data;
     const args = {
       hint: 'editing entry type',
@@ -76,7 +88,7 @@ class APIEntryType {
     return apix<typeof data>(args);
   }
 
-  editx(data: EntryTypeData): ReturnType<typeof api<typeof data>> {
+  edit(data: EntryTypeData): ReturnType<typeof api<typeof data>> {
     const { id, ...idless } = data;
     const args = {
       hint: 'editing entry type',

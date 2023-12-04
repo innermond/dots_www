@@ -25,6 +25,15 @@ function isEntryTypeData(d: unknown): d is EntryTypeData {
   );
 }
 
+function asEntryTypeData(d: unknown): EntryTypeData | never {
+  if (!isEntryTypeData(d)) {
+    throw new Error('data is not an EntryType');
+  }
+
+  d.id = parseInt('' + d.id);
+  return d;
+}
+
 type DataEntryTypeUnits = { data: (string | Error)[]; n: number };
 
 function isKeyofEntryTypeData(k: string): k is keyof EntryTypeData {
@@ -96,6 +105,7 @@ const entryTypesZero: DataEntryTypes = {
 export type { EntryTypeData, DataEntryTypes, DataEntryTypeUnits };
 export {
   isEntryTypeData,
+  asEntryTypeData,
   isKeyofEntryTypeData,
   isDataEntryTypes,
   isDataEntryTypeUnits,
