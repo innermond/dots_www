@@ -25,6 +25,8 @@ import {
   Suspense,
   onCleanup,
   createMemo,
+  batch,
+  untrack,
 } from 'solid-js';
 import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
 import type { Accessor, Component, Resource, Setter } from 'solid-js';
@@ -40,6 +42,7 @@ import ActionButton from '@/components/ActionButton';
 import type { ActionButtonProps } from '@/components/ActionButton';
 import { createContext } from 'solid-js';
 import { dispatch } from '@/lib/customevent';
+import AlertDialog, { AlertDialogState } from '@/components/AlertDialog';
 
 const theme = useTheme();
 
@@ -297,10 +300,40 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     return v;
   });
 
-  // vaidate and submit
-  const handleSubmit = (event: SubmitEvent) => {
-    event.preventDefault();
+  const onCloseAlertDialog = createEffect(() => {
+    if (continueActionState.open) {
+      return;
+    }
+    if (continueActionState.event?.type !== 'submit') {
+      return;
+    }
 
+    if (continueActionState.choosing) {
+      // submit
+      handlngSubmit(continueActionState.event);
+      untrack(() => {
+        setContinueActionState('event', undefined);
+      });
+    }
+
+    return continueActionState.event ?? undefined;
+  });
+  const handleSubmit = (evt: SubmitEvent) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+    if (!continueActionState.open) {
+      batch(() => {
+        setContinueActionState('open', true);
+        if (evt.type === 'submit') {
+          setContinueActionState('event', evt);
+        }
+      });
+    }
+  };
+
+  // vaidate and submit
+  const handlngSubmit = (event: SubmitEvent) => {
+    event.preventDefault();
     if (!event.target) return;
     if (event.target instanceof HTMLFormElement) {
       Array.from(event.target.elements)
@@ -344,6 +377,12 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
     setStartSubmit((prev: T | undefined) => requestData);
   };
+
+  const [continueActionState, setContinueActionState] = createStore({
+    open: false,
+    choosing: false,
+    event: undefined,
+  } as AlertDialogState);
 
   const isDisabled = createMemo(() => {
     const v = submitForm.loading || !ui.ready;
@@ -498,36 +537,42 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   };
 
   return (
-    <DialogContext.Provider value={form}>
-      <Dialog
-        fullWidth
-        sx={{ alignItems: 'center' }}
-        open={open() ?? false}
-        onClose={handleCloseClick}
-        TransitionComponent={props.transition ?? defaultTransition}
-      >
-        <Container
-          novalidate
-          autocomplete="off"
-          spellcheck={false}
-          component="form"
-          onSubmit={handleSubmit}
-          onReset={handleReset}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
+    <>
+      <DialogContext.Provider value={form}>
+        <Dialog
+          fullWidth
+          sx={{ alignItems: 'center' }}
+          open={open() ?? false}
+          onClose={handleCloseClick}
+          TransitionComponent={props.transition ?? defaultTransition}
         >
-          {appBar}
-          <Suspense
-            fallback={<CircularProgress size="3rem" sx={{ m: '5rem' }} />}
+          <Container
+            novalidate
+            autocomplete="off"
+            spellcheck={false}
+            component="form"
+            onSubmit={handleSubmit}
+            onReset={handleReset}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
           >
-            {props.children}
-          </Suspense>
-        </Container>
-      </Dialog>
-    </DialogContext.Provider>
+            {appBar}
+            <Suspense
+              fallback={<CircularProgress size="3rem" sx={{ m: '5rem' }} />}
+            >
+              {props.children}
+            </Suspense>
+            <AlertDialog
+              state={continueActionState}
+              setState={setContinueActionState}
+            />
+          </Container>
+        </Dialog>
+      </DialogContext.Provider>
+    </>
   );
 };
 
