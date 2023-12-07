@@ -6,12 +6,14 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@suid/material';
-import { SetStoreFunction, Store } from 'solid-js/store';
+import { SetStoreFunction, Store, produce } from 'solid-js/store';
 
 export type AlertDialogState = {
   open: boolean;
   choosing: boolean;
   event?: SubmitEvent;
+  title?: string;
+  text?: string;
 };
 
 export type AlertDialogProps = {
@@ -22,8 +24,12 @@ export type AlertDialogProps = {
 export default function AlertDialog(props: AlertDialogProps) {
   const handleClose = (choosing: boolean) => {
     return () => {
-      props.setState('choosing', choosing);
-      props.setState('open', false);
+      props.setState(
+        produce((s: AlertDialogState) => {
+          s.choosing = choosing;
+          s.open = false;
+        }),
+      );
     };
   };
 
@@ -35,17 +41,17 @@ export default function AlertDialog(props: AlertDialogProps) {
       aria-describedby="alert-dialog-description"
     >
       <DialogTitle id="alert-dialog-title">
-        {"Use Google's location service?"}
+        {props.state?.title ?? 'Choose what to do next'}
       </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
-          Let Google help apps determine location. This means sending anonymous
-          location data to Google, even when no apps are running.
+          {props.state?.text ??
+            'Be wise, evaluate the consequences !. The immediate action you are about to start it to start can be stopped right now or be carried out. You decide!'}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose(false)}>Disagree</Button>
-        <Button onClick={handleClose(true)}>Agree</Button>
+        <Button onClick={handleClose(false)}>Cancel</Button>
+        <Button onClick={handleClose(true)}>OK</Button>
       </DialogActions>
     </Dialog>
   );

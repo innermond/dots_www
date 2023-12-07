@@ -26,6 +26,7 @@ import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { dispatch } from '@/lib/customevent';
 import { apiEntryType } from '@/api';
 import { produce } from 'solid-js/store';
+import { AlertDialogState } from '@/components/AlertDialog';
 
 const theme = useTheme();
 const names = ['id', 'dontCheckChanged'];
@@ -38,7 +39,7 @@ const validators: Validators<Names> = {
 };
 
 export default function EntryTypeDetail(): JSX.Element {
-  const { setUI, inputs, setValidation, submitForm } =
+  const { setUI, setActionAlert, inputs, setValidation, submitForm } =
     useDialog() as DialogProviderValue<EntryTypeData>;
 
   // get stats
@@ -64,6 +65,13 @@ export default function EntryTypeDetail(): JSX.Element {
       produce((ui: DialogState) => {
         ui.show.reset = false;
         ui.askMeBeforeAction = true;
+      }),
+    );
+    setActionAlert(
+      produce((ui: AlertDialogState) => {
+        ui.title = `You are about to delete the entry type "${inputs.code.value}"`;
+        ui.text =
+          'This entry type is in such state that it can be deleted. Also, it may be restored in the future if you will choose this';
       }),
     );
   });

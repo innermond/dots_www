@@ -56,6 +56,7 @@ const defaultTransition = function (
 
 export type DialogProviderValue<T extends {}> = {
   setUI: SetStoreFunction<DialogState>;
+  setActionAlert: SetStoreFunction<AlertDialogState>;
   inputs: Store<Validable<T>>;
   setInputs: SetStoreFunction<Validable<T>>;
   setInitialInputs: Setter<T>;
@@ -304,22 +305,22 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   });
 
   const onCloseAlertDialog = createEffect(() => {
-    if (continueActionState.open) {
+    if (actionAlert.open) {
       return;
     }
-    if (continueActionState.event?.type !== 'submit') {
+    if (actionAlert.event?.type !== 'submit') {
       return;
     }
 
-    if (continueActionState.choosing) {
+    if (actionAlert.choosing) {
       // submit
-      handlngSubmit(continueActionState.event);
+      handlngSubmit(actionAlert.event);
       untrack(() => {
-        setContinueActionState('event', undefined);
+        setActionAlert('event', undefined);
       });
     }
 
-    return continueActionState.event ?? undefined;
+    return actionAlert.event ?? undefined;
   });
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
@@ -330,11 +331,11 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
       return;
     }
 
-    if (!continueActionState.open) {
+    if (!actionAlert.open) {
       batch(() => {
-        setContinueActionState('open', true);
+        setActionAlert('open', true);
         if (evt.type === 'submit') {
-          setContinueActionState('event', evt);
+          setActionAlert('event', evt);
         }
       });
     }
@@ -387,7 +388,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     setStartSubmit((prev: T | undefined) => requestData);
   };
 
-  const [continueActionState, setContinueActionState] = createStore({
+  const [actionAlert, setActionAlert] = createStore({
     open: false,
     choosing: false,
     event: undefined,
@@ -536,6 +537,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
   const form: DialogProviderValue<any> = {
     setUI,
+    setActionAlert,
     inputs,
     setInputs,
     isDisabled,
@@ -575,10 +577,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
             >
               {props.children}
             </Suspense>
-            <AlertDialog
-              state={continueActionState}
-              setState={setContinueActionState}
-            />
+            <AlertDialog state={actionAlert} setState={setActionAlert} />
           </Container>
         </Dialog>
       </DialogContext.Provider>
