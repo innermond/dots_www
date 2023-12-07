@@ -76,6 +76,7 @@ export type DialogSaveProps<T extends {}> = {
   initialInputs: Accessor<T>;
   setInitialInputs: Setter<T>;
   allowStopRequest?: boolean;
+  askMeBeforeAction?: boolean;
 } & ParentProps;
 
 type DialogState = {
@@ -84,6 +85,7 @@ type DialogState = {
     stop: boolean;
     action: boolean;
   };
+  askMeBeforeAction: boolean;
   ready: boolean;
 };
 
@@ -92,6 +94,7 @@ const DialogContext = createContext();
 const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const initialUi = {
     show: { reset: true, stop: !!props.allowStopRequest, action: true },
+    askMeBeforeAction: !!props?.askMeBeforeAction,
     ready: false,
   };
   const initialState: DialogState = initialUi;
@@ -321,6 +324,12 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
     evt.stopPropagation();
+
+    if (ui.askMeBeforeAction === false) {
+      handlngSubmit(evt);
+      return;
+    }
+
     if (!continueActionState.open) {
       batch(() => {
         setContinueActionState('open', true);
@@ -516,6 +525,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
           />
         </Show>
         <ActionButton
+          color={ui.askMeBeforeAction ? 'error' : undefined}
           disabled={isDisabled() || inputsHasErrors()}
           kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
         />
@@ -580,4 +590,5 @@ export function useDialog() {
   return useContext(DialogContext);
 }
 
+export type { DialogState };
 export default DialogProvider;

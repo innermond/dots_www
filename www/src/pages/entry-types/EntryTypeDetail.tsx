@@ -13,6 +13,7 @@ import {
   For,
   onCleanup,
   Show,
+  onMount,
 } from 'solid-js';
 import type { JSX } from 'solid-js';
 import type { EntryTypeData } from '@/pages/entry-types/types';
@@ -20,9 +21,11 @@ import type { EntryTypeData } from '@/pages/entry-types/types';
 import type { FieldNames, Validators } from '@/lib/form';
 import { required, int, isEmptyObject } from '@/lib/form';
 import toasting from '@/lib/toast';
+import type { DialogState } from '@/contexts/DialogContext';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { dispatch } from '@/lib/customevent';
 import { apiEntryType } from '@/api';
+import { produce } from 'solid-js/store';
 
 const theme = useTheme();
 const names = ['id', 'dontCheckChanged'];
@@ -47,6 +50,7 @@ export default function EntryTypeDetail(): JSX.Element {
     }
 
     const info = statsResource();
+
     setUI('ready', true);
 
     const { data, n } = info as any;
@@ -55,7 +59,14 @@ export default function EntryTypeDetail(): JSX.Element {
 
   setValidation({ validators });
 
-  setUI('show', 'reset', false);
+  onMount(() => {
+    setUI(
+      produce((ui: DialogState) => {
+        ui.show.reset = false;
+        ui.askMeBeforeAction = true;
+      }),
+    );
+  });
   onCleanup(() => setUI('ready', true));
 
   createEffect(() => {
