@@ -66,7 +66,8 @@ export default function EntryTypeDetail(): JSX.Element {
     setUI(
       produce((ui: DialogState) => {
         ui.show.reset = false;
-        ui.askMeBeforeAction = true;
+        ui.show.stop = true;
+        //ui.askMeBeforeAction = true;
       }),
     );
     setActionAlert(
@@ -76,12 +77,39 @@ export default function EntryTypeDetail(): JSX.Element {
           'This entry type is in such state that it can be deleted. Also, it may be restored in the future if you will choose this';
       }),
     );
+
     listen('dots:killone:EntryType', handleKillOneEntryType as EventListener);
+    listen('dots:cancelRequest', onStop);
   });
   onCleanup(() => {
     setUI('ready', true);
     unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
+    unlisten('dots:cancelRequest', onStop);
   });
+
+  const onStop = (evt: Event) => {
+    evt.stopPropagation();
+    evt.preventDefault();
+    console.log(evt);
+    /* const [reverted, current] = (evt as CustomEvent).detail;
+    if (!isEntryTypeData(reverted)) {
+      toasting('we cannot guarantee that changes has been stopped');
+      return;
+    }
+    let tobeSaved = current;
+    try {
+      tobeSaved = asEntryTypeData(current);
+    } catch (e) {
+      console.log('not an entry type', tobeSaved);
+    }
+    // use whatever tobeSaved may be
+    // TODO this check may be miss as well (it seems to never be true)
+    if (isSimilar(reverted, tobeSaved)) {
+      toasting('latest data is the same - nothing need to be stopped');
+      return;
+    }
+    setEditedStop(reverted);*/
+  };
 
   type Status = 'checking' | 'deletable' | 'not deletable' | 'deleted';
   const [status, setStatus] = createSignal<Status>();
@@ -100,6 +128,7 @@ export default function EntryTypeDetail(): JSX.Element {
       return;
     }
     setStatus('deleted');
+    setUI('ready', false);
   };
 
   createEffect(() => {
