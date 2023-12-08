@@ -46,7 +46,7 @@ export default function AlertDialog(props: AlertDialogProps) {
       <DialogContent>
         <DialogContentText id="alert-dialog-description">
           {props.state?.text ??
-            'Be wise, evaluate the consequences !. The immediate action you are about to start it to start can be stopped right now or be carried out. You decide!'}
+            'Be wise, evaluate the consequences!. The immediate action you are about to start, it can be stopped right now or be carried it out. You decide!'}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

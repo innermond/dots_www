@@ -88,17 +88,18 @@ type DialogState = {
   };
   askMeBeforeAction: boolean;
   ready: boolean;
+  sendRequestFn: Function;
 };
 
 const DialogContext = createContext();
 // T is typeof data to be sent
 const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
-  const initialUi = {
+  const initialState = {
     show: { reset: true, stop: !!props.allowStopRequest, action: true },
     askMeBeforeAction: !!props?.askMeBeforeAction,
     ready: false,
-  };
-  const initialState: DialogState = initialUi;
+    sendRequestFn: props.sendRequestFn,
+  } as DialogState;
   const [ui, setUI] = createStore(initialState);
 
   // open starts as undefined - means it has never been open
@@ -196,34 +197,39 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
   const handleReset = (evt: Event): void => {
     evt.preventDefault();
+
     let changed = false;
     let dontCheckChanged = true === names.includes('dontCheckChanged');
+
     if (dontCheckChanged) {
-      changed = true;
-    } else {
-      for (const n of names) {
-        // != ensure strings like numbers are equal with numbers
-        if (
-          props.initialInputs()[n as keyof typeof props.initialInputs] !=
-          inputs[n as keyof typeof inputs].value
-        ) {
-          changed = true;
-          break;
-        }
+      zeroingInputs();
+      return;
+    }
+
+    for (const n of names) {
+      // != ensure strings like numbers are equal with numbers
+      if (
+        props.initialInputs()[n as keyof typeof props.initialInputs] !=
+        inputs[n as keyof typeof inputs].value
+      ) {
+        changed = true;
+        break;
       }
     }
-    if (changed) {
-      zeroingInputs();
-    } else {
+
+    if (!changed) {
       toasting('nothing to reset', 'info' as AlertColor);
+      return;
     }
+
+    zeroingInputs();
   };
 
   const handleStop = (evt: Event): void => {
     evt.preventDefault();
     setCut(true);
-    const prev = snapshotInputs();
 
+    const prev = snapshotInputs();
     let curr = snapshotInputs(unwrap(inputs), v => v?.value);
     dispatch('dots:cancelRequest', [prev, curr]);
     setTimeout(() => setCut(false), 0);
@@ -276,7 +282,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     }
 
     // fire request
-    const [remote, abort] = props.sendRequestFn(requestData);
+    const [remote, abort] = ui.sendRequestFn(requestData);
 
     // closing while loading trigger request abortion
     const cancelRequest = () => {

@@ -87,12 +87,13 @@ export default function EntryTypeEdit(): JSX.Element {
 
   setValidation({ validators, messages });
 
-  onMount(() =>
+  onMount(() => {
     batch(() => {
       setUI('ready', true);
       setUI('show', 'stop', true);
     }),
-  );
+      listen('dots:cancelRequest', onStop);
+  });
   onCleanup(() => {
     setUI('ready', false);
     unlisten('dots:cancelRequest', onStop);
@@ -135,8 +136,6 @@ export default function EntryTypeEdit(): JSX.Element {
     }
     setEditedStop(reverted);
   };
-
-  listen('dots:cancelRequest', onStop);
 
   createEffect(() => {
     if (submitForm.state === 'ready') {

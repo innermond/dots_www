@@ -16,14 +16,14 @@ import {
   onMount,
 } from 'solid-js';
 import type { JSX } from 'solid-js';
-import type { EntryTypeData } from '@/pages/entry-types/types';
+import { isEntryTypeData, type EntryTypeData } from '@/pages/entry-types/types';
 
 import type { FieldNames, Validators } from '@/lib/form';
 import { required, int, isEmptyObject } from '@/lib/form';
 import toasting from '@/lib/toast';
 import type { DialogState } from '@/contexts/DialogContext';
 import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
-import { dispatch } from '@/lib/customevent';
+import { dispatch, listen, unlisten } from '@/lib/customevent';
 import { apiEntryType } from '@/api';
 import { produce } from 'solid-js/store';
 import { AlertDialogState } from '@/components/AlertDialog';
@@ -74,8 +74,18 @@ export default function EntryTypeDetail(): JSX.Element {
           'This entry type is in such state that it can be deleted. Also, it may be restored in the future if you will choose this';
       }),
     );
+    listen('dots:killone:EntryType', handleKillOneEntryType as EventListener);
   });
-  onCleanup(() => setUI('ready', true));
+  onCleanup(() => {
+    setUI('ready', true);
+    unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
+  });
+
+  const handleKillOneEntryType = (evt: CustomEvent) => {
+    if (!isEntryTypeData(evt.detail)) {
+      return;
+    }
+  };
 
   createEffect(() => {
     if (submitForm.state === 'ready') {
