@@ -8,6 +8,8 @@ import {
 } from '@suid/material';
 import {
   createEffect,
+  createSignal,
+  createComputed,
   createResource,
   createMemo,
   For,
@@ -81,10 +83,23 @@ export default function EntryTypeDetail(): JSX.Element {
     unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
   });
 
+  type Status = 'checking' | 'deletable' | 'not deletable' | 'deleted';
+  const [status, setStatus] = createSignal<Status>();
+  createComputed(() => {
+    if (stats() === undefined) {
+      setStatus('checking');
+    } else if (isEmptyObject(stats())) {
+      setStatus('deletable');
+    } else {
+      setStatus('not deletable');
+    }
+  });
+
   const handleKillOneEntryType = (evt: CustomEvent) => {
     if (!isEntryTypeData(evt.detail)) {
       return;
     }
+    setStatus('deleted');
   };
 
   createEffect(() => {
@@ -151,11 +166,7 @@ export default function EntryTypeDetail(): JSX.Element {
         <CardContent style={{}}>
           <Typography>Status</Typography>
           <Typography sx={{ mb: 1 }} variant="h4">
-            {stats() === undefined
-              ? 'checking....'
-              : isEmptyObject(stats())
-              ? 'deletable'
-              : 'not deletable'}
+            {status()}
           </Typography>
           <Show when={!!stats() && !isEmptyObject(stats())}>
             <For each={Object.keys(stats() as Record<string, string>)}>
