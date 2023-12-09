@@ -28,7 +28,13 @@ import {
   batch,
   untrack,
 } from 'solid-js';
-import { SetStoreFunction, Store, createStore, unwrap } from 'solid-js/store';
+import {
+  SetStoreFunction,
+  Store,
+  createStore,
+  produce,
+  unwrap,
+} from 'solid-js/store';
 import type { Accessor, Component, Resource, Setter } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
@@ -43,6 +49,8 @@ import type { ActionButtonProps } from '@/components/ActionButton';
 import { createContext } from 'solid-js';
 import { dispatch } from '@/lib/customevent';
 import AlertDialog, { AlertDialogState } from '@/components/AlertDialog';
+import { ActionBarProps } from '@/components/ActionBar';
+import ActionBar from '@/components/ActionBar';
 
 const theme = useTheme();
 
@@ -105,7 +113,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
 
-  const handleCloseClick = () => {
+  const handleClose = () => {
     if (submitForm.loading) {
       toasting('wait for operation to complete', 'warning');
       return;
@@ -351,21 +359,25 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const handlngSubmit = (event: SubmitEvent) => {
     event.preventDefault();
     if (!event.target) return;
+    let form: HTMLFormElement;
     if (event.target instanceof HTMLFormElement) {
+      form = event.target;
       Array.from(event.target.elements)
         .filter((t: Element) => 'id' in t && names.includes(t.id))
         .map((t: unknown) => validateInputUpdateStore(t));
     } else {
       validateInputUpdateStore(event.target);
+      if (!('form' in event.target)) {
+        toasting('cannot find a form to send', 'error');
+        return;
+      }
+      form = event.target.form as HTMLFormElement;
     }
     if (inputsHasErrors()) {
       return;
     }
 
-    const requestData: T = collectFormData(
-      event.target as HTMLFormElement,
-      names,
-    );
+    const requestData: T = collectFormData(form, names);
     let changed = false;
     let dontCheckChanged = true === names.includes('dontCheckChanged');
     if (dontCheckChanged) {
@@ -486,7 +498,98 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     }
   });
 
+  type Bar = Pick<ActionBarProps, 'close' | 'reset' | 'stop' | 'act'>;
+  const barInitial: Bar = {
+    close: { show: true, disabled: false, color: 'inherit' },
+    reset: {
+      show: true,
+      disabled: false,
+      text: 'reset',
+      color: 'error',
+      kind: 'reset',
+    },
+    stop: {
+      show: false,
+      disabled: false,
+      text: 'stop',
+      color: 'error',
+      kind: 'action',
+    },
+    act: {
+      show: true,
+      disabled: false,
+      text: 'Do',
+      color: 'inherit',
+      kind: 'action',
+    },
+  };
+  const [bar, setBar] = createStore(barInitial);
+
+  createComputed(() => {
+    if (submitForm.loading && ui.show.stop) {
+      setBar('stop', 'show', true);
+    } else {
+      setBar('stop', 'show', false);
+    }
+
+    if (!submitForm.loading && ui.show.reset) {
+      setBar('reset', 'show', true);
+    } else {
+      setBar('reset', 'show', false);
+    }
+  });
+  createComputed(() => {
+    if (inputsHasErrors()) {
+      setBar('stop', 'disabled', true);
+    } else {
+      setBar('stop', 'disabled', false);
+    }
+
+    if (isDisabled() || inputsHasErrors()) {
+      setBar(
+        produce((b: Bar) => {
+          b.reset.disabled = true;
+          b.act.disabled = true;
+        }),
+      );
+    } else {
+      setBar(
+        produce((b: Bar) => {
+          b.reset.disabled = false;
+          b.act.disabled = false;
+        }),
+      );
+    }
+  });
+  createComputed(() => {
+    if (ui.askMeBeforeAction) {
+      setBar('act', 'color', 'error');
+    } else {
+      setBar('act', 'color', undefined);
+    }
+
+    if (props.textSave?.toLowerCase()) {
+      setBar(
+        'act',
+        'kind',
+        props.textSave.toLowerCase() as ActionButtonProps['kind'],
+      );
+    }
+  });
+
   const appBar = (
+    <ActionBar
+      title={props.title}
+      onStop={handleStop}
+      onClose={handleClose}
+      close={bar.close}
+      reset={bar.reset}
+      stop={bar.stop}
+      act={bar.act}
+    />
+  );
+
+  const appBarold = (
     <AppBar
       color="transparent"
       sx={{ position: 'relative', mt: theme.spacing(1) }}
@@ -495,7 +598,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
         <IconButton
           edge="start"
           color="inherit"
-          onClick={handleCloseClick}
+          onClick={handleClose}
           aria-label="close"
         >
           <CloseIcon />
@@ -561,7 +664,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
           fullWidth
           sx={{ alignItems: 'center' }}
           open={open() ?? false}
-          onClose={handleCloseClick}
+          onClose={handleClose}
           TransitionComponent={props.transition ?? defaultTransition}
         >
           <Container

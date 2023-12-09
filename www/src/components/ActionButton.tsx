@@ -8,7 +8,7 @@ import { splitProps } from 'solid-js';
 import type { JSX } from 'solid-js';
 
 type ActionButtonProps = ButtonProps & {
-  kind?: 'edit' | 'add' | 'delete' | 'reset';
+  kind?: 'edit' | 'add' | 'delete' | 'action' | 'reset';
   text?: string;
   only?: 'text' | 'icon';
 };
