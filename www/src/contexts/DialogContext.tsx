@@ -1,16 +1,4 @@
-import CloseIcon from '@suid/icons-material/Close';
-import {
-  Dialog,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Slide,
-  Divider,
-  Container,
-  useTheme,
-  CircularProgress,
-} from '@suid/material';
+import { Dialog, Slide, Container, CircularProgress } from '@suid/material';
 import { TransitionProps } from '@suid/material/transitions';
 import {
   JSX,
@@ -21,7 +9,6 @@ import {
   createComputed,
   createEffect,
   useContext,
-  Show,
   Suspense,
   onCleanup,
   createMemo,
@@ -44,15 +31,12 @@ import { makeValidable } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
-import ActionButton from '@/components/ActionButton';
 import type { ActionButtonProps } from '@/components/ActionButton';
 import { createContext } from 'solid-js';
 import { dispatch } from '@/lib/customevent';
 import AlertDialog, { AlertDialogState } from '@/components/AlertDialog';
 import { ActionBarProps } from '@/components/ActionBar';
 import ActionBar from '@/components/ActionBar';
-
-const theme = useTheme();
 
 const defaultTransition = function (
   props: TransitionProps & {
@@ -102,6 +86,10 @@ type DialogState = {
 const DialogContext = createContext();
 // T is typeof data to be sent
 const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
+  onCleanup(() => {
+    setLoading(false);
+  });
+
   const initialState = {
     show: { reset: true, stop: !!props.allowStopRequest, action: true },
     askMeBeforeAction: !!props?.askMeBeforeAction,
@@ -113,22 +101,18 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   // open starts as undefined - means it has never been open
   const [open, setOpen] = props!.open;
 
-  const handleClose = () => {
-    if (submitForm.loading) {
-      toasting('wait for operation to complete', 'warning');
-      return;
-    }
-    setOpen(false);
-  };
-
-  onCleanup(() => {
-    setLoading(false);
-  });
-
   const closing = (): boolean => {
     const v = open();
     return !v;
   };
+
+  createComputed(() => {
+    const v = closing();
+    if (v) {
+      zeroingInputs();
+    }
+    return v;
+  });
 
   // abort request
   const [cut, setCut] = createSignal(false);
@@ -202,47 +186,6 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
     };
     setInputs((prev: Validable<T>) => ({ ...prev, [name]: v }));
   };
-
-  const handleReset = (evt: Event): void => {
-    evt.preventDefault();
-
-    let changed = false;
-    let dontCheckChanged = true === names.includes('dontCheckChanged');
-
-    if (dontCheckChanged) {
-      zeroingInputs();
-      return;
-    }
-
-    for (const n of names) {
-      // != ensure strings like numbers are equal with numbers
-      if (
-        props.initialInputs()[n as keyof typeof props.initialInputs] !=
-        inputs[n as keyof typeof inputs].value
-      ) {
-        changed = true;
-        break;
-      }
-    }
-
-    if (!changed) {
-      toasting('nothing to reset', 'info' as AlertColor);
-      return;
-    }
-
-    zeroingInputs();
-  };
-
-  const handleStop = (evt: Event): void => {
-    evt.preventDefault();
-    setCut(true);
-
-    const prev = snapshotInputs();
-    let curr = snapshotInputs(unwrap(inputs), v => v?.value);
-    dispatch('dots:cancelRequest', [prev, curr]);
-    setTimeout(() => setCut(false), 0);
-  };
-
   function snapshotInputs(
     ground: any = props.initialInputs(),
     mapfn?: (v: any) => any,
@@ -310,15 +253,7 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
   const [startSubmit, setStartSubmit] = createSignal<T>();
   const [submitForm] = createResource(startSubmit, sendRequest);
 
-  createComputed(() => {
-    const v = closing();
-    if (v) {
-      zeroingInputs();
-    }
-    return v;
-  });
-
-  const onCloseAlertDialog = createEffect(() => {
+  createEffect(() => {
     if (actionAlert.open) {
       return;
     }
@@ -336,6 +271,55 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
     return actionAlert.event ?? undefined;
   });
+
+  const handleClose = () => {
+    if (submitForm.loading) {
+      toasting('wait for operation to complete', 'warning');
+      return;
+    }
+    setOpen(false);
+  };
+
+  const handleReset = (evt: Event): void => {
+    evt.preventDefault();
+
+    let changed = false;
+    let dontCheckChanged = true === names.includes('dontCheckChanged');
+
+    if (dontCheckChanged) {
+      zeroingInputs();
+      return;
+    }
+
+    for (const n of names) {
+      // != ensure strings like numbers are equal with numbers
+      if (
+        props.initialInputs()[n as keyof typeof props.initialInputs] !=
+        inputs[n as keyof typeof inputs].value
+      ) {
+        changed = true;
+        break;
+      }
+    }
+
+    if (!changed) {
+      toasting('nothing to reset', 'info' as AlertColor);
+      return;
+    }
+
+    zeroingInputs();
+  };
+
+  const handleStop = (evt: Event): void => {
+    evt.preventDefault();
+    setCut(true);
+
+    const prev = snapshotInputs();
+    let curr = snapshotInputs(unwrap(inputs), v => v?.value);
+    dispatch('dots:cancelRequest', [prev, curr]);
+    setTimeout(() => setCut(false), 0);
+  };
+
   const handleSubmit = (evt: SubmitEvent) => {
     evt.preventDefault();
     evt.stopPropagation();
@@ -587,61 +571,6 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
       stop={bar.stop}
       act={bar.act}
     />
-  );
-
-  const appBarold = (
-    <AppBar
-      color="transparent"
-      sx={{ position: 'relative', mt: theme.spacing(1) }}
-    >
-      <Toolbar sx={{ pr: 0 }}>
-        <IconButton
-          edge="start"
-          color="inherit"
-          onClick={handleClose}
-          aria-label="close"
-        >
-          <CloseIcon />
-        </IconButton>
-        <Typography
-          sx={{
-            ml: 2,
-            flex: 1,
-          }}
-          variant="h5"
-          component="div"
-        >
-          {props.title}
-        </Typography>
-        <Show when={submitForm.loading && ui.show.stop}>
-          <ActionButton
-            text="stop"
-            only="text"
-            type="button"
-            color="error"
-            size="small"
-            onClick={handleStop}
-            disabled={inputsHasErrors()}
-          />
-        </Show>
-        <Show when={!submitForm.loading && ui.show.reset}>
-          <ActionButton
-            kind="reset"
-            only="text"
-            type="reset"
-            color="error"
-            size="small"
-            disabled={isDisabled() || inputsHasErrors()}
-          />
-        </Show>
-        <ActionButton
-          color={ui.askMeBeforeAction ? 'error' : undefined}
-          disabled={isDisabled() || inputsHasErrors()}
-          kind={props.textSave?.toLowerCase() as ActionButtonProps['kind']}
-        />
-      </Toolbar>
-      <Divider />
-    </AppBar>
   );
 
   const form: DialogProviderValue<any> = {
