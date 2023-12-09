@@ -18,13 +18,13 @@ import { dispatch } from '@/lib/customevent';
 
 const theme = useTheme();
 
-const EVENT_ACTIONBAR__CLOSE = 'dots:actionbar:close',
-  EVENT_ACTIONBAR__STOP = 'dots:actionbar:stop',
+const EVENT_ACTIONBAR_CLOSE = 'dots:actionbar:close',
+  EVENT_ACTIONBAR_STOP = 'dots:actionbar:stop',
   EVENT_ACTIONBAR_ACT = 'dots:actionbar:act';
 
 //output specific events that are intented to be handled by client code
-const handleClose = () => dispatch(EVENT_ACTIONBAR__CLOSE),
-  handleStop = () => dispatch(EVENT_ACTIONBAR__STOP),
+const handleClose = () => dispatch(EVENT_ACTIONBAR_CLOSE),
+  handleStop = () => dispatch(EVENT_ACTIONBAR_STOP),
   handleAct = () => dispatch(EVENT_ACTIONBAR_ACT);
 
 type ActionProp = {
