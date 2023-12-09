@@ -4,7 +4,7 @@ type CustomEventName = `dots:${string}`;
 
 const dispatch = (
   name: CustomEventName,
-  detail: any,
+  detail: any = null,
   source: HTMLElement | Document = document.body,
   opts?: CustomEventInit,
 ): void => {
