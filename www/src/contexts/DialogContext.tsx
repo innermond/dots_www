@@ -554,9 +554,14 @@ const DialogProvider = <T extends {}>(props: DialogSaveProps<T>) => {
 
     if (props.textSave?.toLowerCase()) {
       setBar(
-        'act',
-        'kind',
-        props.textSave.toLowerCase() as ActionButtonProps['kind'],
+        produce((b: Bar) => {
+          if (!props?.textSave) {
+            return;
+          }
+          b.act.kind =
+            props.textSave.toLowerCase() as ActionButtonProps['kind'];
+          b.act.text = props.textSave;
+        }),
       );
     }
   });
