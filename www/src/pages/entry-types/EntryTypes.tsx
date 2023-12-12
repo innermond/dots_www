@@ -50,6 +50,7 @@ import { listen, unlisten } from '@/lib/customevent';
 import { createStore } from 'solid-js/store';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
+import ActionFormProvider from '@/contexts/ActionFormContext';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -169,21 +170,28 @@ const EntryTypes: Component = (): JSX.Element => {
   onMount(() => {
     setState('currentPageTitle', "Entry types's list");
     listen('dots:fresh:EntryType', handleFreshEntryType as EventListener);
+    listen('dots:close:ActionForm', handleCloseActionForm);
     listen('dots:killone:EntryType', handleKillOneEntryType as EventListener);
   });
   onCleanup(() => {
     unlisten('dots:fresh:EntryType', handleFreshEntryType as EventListener);
+    listen('dots:close:ActionForm', handleCloseActionForm);
     unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
   });
 
   const dialogSignal = createSignal(false);
-  const [openDialog, setOpenDialog] = dialogSignal;
 
-  type LazyWhat = 'editEntry' | 'addEntry' | 'detailEntry' | undefined;
+  type LazyWhat =
+    | 'editEntry'
+    | 'addEntry'
+    | 'updateEntry'
+    | 'detailEntry'
+    | undefined;
 
   const [dyn, setDyn] = createSignal<LazyWhat>();
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
+  const updateEntryType = lazy(() => import('./EntryTypeUpdate'));
   const detailEntryType = lazy(() => import('./EntryTypeDetail'));
 
   const handleDialogWith = (
@@ -192,7 +200,6 @@ const EntryTypes: Component = (): JSX.Element => {
   ) => {
     const { whatToLoad, data } = args;
     batch(() => {
-      setOpenDialog(true);
       setDyn(whatToLoad);
       setInitialInputs(data as EntryTypeData);
     });
@@ -200,79 +207,24 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const theme = useTheme();
 
-  /*
-  const dialogTransition = (
-    props: TransitionProps & { children: JSX.Element },
-  ) => <Slide {...props} direction="up" />;
-*/
+  const handleCloseActionForm = () => setDyn(undefined);
 
-  const cmpname = createMemo(() => {
-    const cmp = dyn();
-    return cmp;
-  });
-  const cmp = () => {
-    if ((cmpname() as string) === 'editEntry') {
+  const cmp = createMemo(() => {
+    if ((dyn() as string) === 'editEntry') {
       return editEntryType;
     }
-    if ((cmpname() as string) === 'addEntry') {
+    if ((dyn() as string) === 'updateEntry') {
+      return updateEntryType;
+    }
+    if ((dyn() as string) === 'addEntry') {
       return addEntryType;
     }
-    if ((cmpname() as string) === 'detailEntry') {
+    if ((dyn() as string) === 'detailEntry') {
       return detailEntryType;
     }
-    throw new Error(`no component defined for ${cmpname()}`);
-  };
-  const title = () => {
-    if ((cmpname() as string) === 'editEntry') {
-      return 'Edit entry types';
-    }
-    if ((cmpname() as string) === 'addEntry') {
-      return 'Add entry types';
-    }
-    if ((cmpname() as string) === 'detailEntry') {
-      return 'Details of entry type';
-    }
-    throw new Error(`no title defined for ${cmpname()}`);
-  };
-  const textSave = () => {
-    if ((cmpname() as string) === 'editEntry') {
-      return 'Edit';
-    }
-    if ((cmpname() as string) === 'addEntry') {
-      return 'Add';
-    }
-    if ((cmpname() as string) === 'detailEntry') {
-      return 'Delete';
-    }
-    throw new Error(`no text button defined for ${cmpname()}`);
-  };
-  const fields = () => {
-    if ((cmpname() as string) === 'editEntry') {
-      return ['id', 'code', 'description', 'unit'];
-    }
-    if ((cmpname() as string) === 'addEntry') {
-      return ['code', 'description', 'unit'];
-    }
-    if ((cmpname() as string) === 'detailEntry') {
-      return ['id', 'dontCheckChanged'];
-    }
-    throw new Error(`no fields defined for ${cmpname()}`);
-  };
-  const sendRequestFn = () => {
-    if ((cmpname() as string) === 'editEntry') {
-      return apiEntryType.editx;
-    }
-    if ((cmpname() as string) === 'addEntry') {
-      return apiEntryType.addx;
-    }
-    if ((cmpname() as string) === 'detailEntry') {
-      return apiEntryType.del;
-    }
-    throw new Error(`no api call defined for ${cmpname()}`);
-  };
-
+  });
   createComputed(() => {
-    if (!openDialog()) {
+    if (!cmp()) {
       // reset
       setDyn(undefined);
       setInitialInputs(entryTypeZero);
@@ -281,19 +233,10 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const dialogSave = () => {
     return (
-      <Show when={openDialog()}>
-        <DialogProvider<EntryTypeData>
-          //transition={dialogTransition}
-          title={title()}
-          textSave={textSave()}
-          open={dialogSignal}
-          names={fields()}
-          sendRequestFn={sendRequestFn()}
-          initialInputs={initialInputs}
-          setInitialInputs={setInitialInputs}
-        >
+      <Show when={!!cmp()}>
+        <ActionFormProvider initialInputs={initialInputs()}>
           <Dynamic component={cmp()} />
-        </DialogProvider>
+        </ActionFormProvider>
       </Show>
     );
   };
@@ -392,7 +335,10 @@ const EntryTypes: Component = (): JSX.Element => {
                             aria-label="edit entry type"
                             onClick={[
                               handleDialogWith,
-                              { whatToLoad: 'editEntry' as LazyWhat, data: et },
+                              {
+                                whatToLoad: 'updateEntry' as LazyWhat,
+                                data: et,
+                              },
                             ]}
                           >
                             <EditIcon fontSize="small" />

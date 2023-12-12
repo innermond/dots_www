@@ -19,11 +19,11 @@ type Validator = ((...params: any) => boolean) & {
   tpl?: string | Function;
 };
 
-type Validators<T extends string> = {
+type Validators<T> = {
   [key in T as string]: Validator[];
 };
 
-type MessagesMap<T extends string> = {
+type MessagesMap<T> = {
   [key in T as string]: Messages;
 };
 type Messages = Array<((...params: any) => string) | string | null>;
@@ -33,7 +33,7 @@ type InnerValidation<T extends string> = {
   messages?: MessagesMap<T>;
 };
 
-function validate<T extends string>(
+function validate<T>(
   name: string,
   value: any,
   validators: Validators<T>,
