@@ -67,7 +67,7 @@ const messages: MessagesMap<Names> = {
   unit: textmessages,
 };
 
-export default function EntryTypeUpdate(props: any): JSX.Element {
+export default function EntryTypeUpdate(): JSX.Element {
   const {
     actionFormState: state,
     setActionFormContextState: setState,
@@ -121,15 +121,13 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
     if (edited.state === 'pending') {
       // post pone execution as in actionform component are other setState calls regarding "ready"
       // and they ar eexecuted AFTER a regular setState issued from here
-      // TODO: create meta data like !important in CSS
-      //setTimeout(() => setState('ready', false), 0);
-      setState('ready', false);
+      setTimeout(() => setState('ready', false), 0);
+      //setState('ready', false);
     } else if (edited.state === 'ready') {
       setState('ready', true);
     } else if (edited.error) {
       setState('ready', true);
     }
-    console.log('etu', state.ready);
   });
 
   createEffect(() => {
@@ -143,8 +141,8 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
   });
 
   const onStop = (evt: Event) => {
-    const [reverted, current] = (evt as CustomEvent).detail;
-    if (!isEntryTypeData(reverted)) {
+    const [prev, current] = (evt as CustomEvent).detail;
+    if (!isEntryTypeData(prev)) {
       toasting('we cannot guarantee that changes has been stopped');
       return;
     }
@@ -156,11 +154,13 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
     }
     // use whatever tobeSaved may be
     // TODO this check may be miss as well (it seems to never be true)
-    if (isSimilar(reverted, tobeSaved)) {
+    if (isSimilar(prev, tobeSaved)) {
       toasting('latest data is the same - nothing need to be stopped');
       return;
     }
-    setEditedStop(reverted);
+    // fire up a request to revert the very posible (read already) changed entry type
+    setEditedStop(prev);
+    setState('ready', false);
   };
 
   // after submiting and receiving a response

@@ -181,15 +181,6 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     return actionAlert.event ?? undefined;
   });
 
-  const handleClose = (evt: Event) => {
-    if (!state.ready) {
-      toasting('wait for operation to complete', 'warning');
-      return;
-    }
-    setState('open', false);
-    dispatch('dots:close:ActionForm');
-  };
-
   const handleReset = (evt: Event): void => {
     evt.preventDefault();
 
@@ -220,6 +211,15 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     zeroingInputs();
   };
 
+  const handleClose = () => {
+    if (!state.ready) {
+      toasting('wait for operation to complete', 'warning');
+      return;
+    }
+    setState('open', false);
+    dispatch('dots:close:ActionForm');
+  };
+
   const handleStop = (evt: Event): void => {
     evt.preventDefault();
     batch(() => {
@@ -230,21 +230,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     const prev = snapshotInputs(unwrap(state.initials));
     const inputs = unwrap(state.inputs) as Validable<EntryTypeData>;
 
-    const obj = {} as any;
-    for (let k of Object.keys(inputs)) {
-      if (!isKeyofEntryTypeData(k)) {
-        continue;
-      }
-      if (!('value' in inputs[k])) {
-        continue;
-      }
-      obj[k] = inputs[k].value;
-    }
-    if (!isEntryTypeData(obj)) {
-      return;
-    }
-
-    let curr = snapshotInputs<EntryTypeData>(obj, v => v?.value);
+    let curr = snapshotInputs<Validable<EntryTypeData>>(inputs, v => v?.value);
     dispatch('dots:cancelRequest', [prev, curr]);
     setTimeout(() => setState('cut', false), 0);
   };
@@ -316,7 +302,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
       return;
     }
 
-    setStartSubmit((prev: T | undefined) => requestData);
+    setStartSubmit(() => requestData);
   };
 
   const [actionAlert, setActionAlert] = createStore({
@@ -333,6 +319,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     setState(
       produce((s: ActionFormContextState<T>) => {
         const result = submitForm();
+
         // abort error is fine
         if (result instanceof Error && result.name === 'AbortError') {
           s.ready = true;
@@ -340,7 +327,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
         }
 
         // before submit or after successfully submit
-        s.ready = true;
+        s.ready = ['unresolved', 'ready'].includes(submitForm.state);
         s.result = result;
       }),
     );

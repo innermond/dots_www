@@ -7,8 +7,8 @@ import {
   untrack,
   onMount,
   onCleanup,
-  batch,
   createSignal,
+  createComputed,
 } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import {
@@ -23,13 +23,19 @@ import type {
 
 import { entryTypeZero } from '@/pages/entry-types/types';
 import type { FieldNames, Validators } from '@/lib/form';
-import { required, minlen, maxlen, isSimilar } from '@/lib/form';
+import { required, minlen, maxlen } from '@/lib/form';
 import TextFieldEllipsis from '@/components/TextFieldEllipsis';
 import toasting from '@/lib/toast';
-import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { InputOrSelectOption } from './InputOrSelect';
 import { apiEntryType } from '@/api';
 import { dispatch, listen, unlisten } from '@/lib/customevent';
+import ActionForm from '@/components/ActionForm';
+import {
+  ActionFormContextState,
+  ActionFormContextValue,
+  useActionForm,
+} from '@/contexts/ActionFormContext';
+import { produce } from 'solid-js/store';
 
 const theme = useTheme();
 const names = ['code', 'description', 'unit'];
@@ -75,19 +81,18 @@ const messages = {
 
 export default function EntryTypeAdd(): JSX.Element {
   const {
-    setUI,
-    inputs,
-    setInitialInputs,
-    isDisabled,
-    setValidation,
-    submitForm,
+    actionFormState: state,
+    setActionFormContextState: setState,
     validateInputUpdateStore,
-    handleChange,
-  } = useDialog() as DialogProviderValue<EntryTypeData>;
+    makeHandleChange,
+  } = useActionForm() as ActionFormContextValue<EntryTypeData>;
+
+  const handleChange = makeHandleChange(validators, messages);
 
   // list of units
   const [unitsResource, { mutate }] = createResource(apiEntryType.units);
   const units = createMemo((): InputOrSelectOption[] => {
+    console.log('units');
     if (unitsResource.state !== 'ready') {
       return [];
     }
@@ -102,67 +107,80 @@ export default function EntryTypeAdd(): JSX.Element {
     return n ? data.map((u: string) => ({ value: u, label: u })) : [];
   });
 
-  setValidation({ validators, messages });
-
-  onMount(() =>
-    batch(() => {
-      setUI('ready', true);
-      setUI('show', 'stop', true);
-    }),
-  );
+  onMount(() => {
+    setState(
+      produce((s: ActionFormContextState<EntryTypeData>) => {
+        s.ready = true;
+        s.open = true;
+        s.show.stop = false;
+      }),
+    );
+    listen('dots:cancelRequest', onStop);
+  });
   onCleanup(() => {
-    setUI('ready', false);
+    setState(
+      produce((s: ActionFormContextState<EntryTypeData>) => {
+        s.ready = false;
+        s.open = false;
+        s.result = undefined;
+      }),
+    );
     unlisten('dots:cancelRequest', onStop);
   });
 
-  const [addedStop, setAddedStop] = createSignal<EntryTypeData>();
-  const [added] = createResource(addedStop, apiEntryType.add);
+  const [delStop, setDelStop] = createSignal<EntryTypeData>();
+  const [del] = createResource(delStop, apiEntryType.del);
 
   const waiting = createMemo(
-    () => isDisabled() || ['pending', 'refreshing'].includes(added.state),
+    () => !state.ready || ['pending', 'refreshing'].includes(del.state),
   );
-
-  createEffect(() => {
-    if (added.loading) {
-      toasting('trying to stop changes...', 'warning');
-    } else if (added.state === 'ready') {
-      toasting('stopping changes was done', 'success');
-    } else if (added.error) {
-      toasting('we cannot guarantee that changes has been stopped', 'error');
+  /*
+  createComputed(() => {
+    if (del.state === 'pending') {
+      // post pone execution as in actionform component are other setState calls regarding "ready"
+      // and they ar eexecuted AFTER a regular setState issued from here
+      setTimeout(() => setState('ready', false), 0);
+      //setState('ready', false);
+    } else if (del.state === 'ready') {
+      setState('ready', true);
+    } else if (del.error) {
+      setState('ready', true);
     }
   });
 
-  const onStop = (evt: Event) => {
-    const [, current] = (evt as CustomEvent).detail;
-    console.log(current);
-    return;
-    if (!isEntryTypeData(reverted)) {
-      toasting('we cannot guarantee that changes has been stopped');
+  createEffect(() => {
+    if (del.state === 'pending') {
+      toasting('trying to stop changes...', 'warning');
+    } else if (del.state === 'ready') {
+      toasting('stopping changes was done', 'success');
+    } else if (del.error) {
+      toasting('we cannot guarantee that changes has been stopped', 'error');
+    }
+  });
+*/
+  // TODO flawed, state.result is deeceiving
+  // once we abort the request we cannot get back a result!
+  const onStop = () => {
+    if (!isEntryTypeData(state.result)) {
+      toasting('We cannot undo it just now. Try again!');
       return;
     }
     let tobeSaved = {} as any;
-    for (const k of Object.keys(inputs)) {
-      tobeSaved[k] = inputs[k as keyof typeof inputs].value;
-    }
     try {
-      tobeSaved = asEntryTypeData(tobeSaved);
+      tobeSaved = asEntryTypeData(state.result);
     } catch (e) {
       console.log('not an entry type', tobeSaved);
     }
-    // use whatever tobeSaved may be
-    // TODO this check may be miss as well (it seems to never be true)
-    if (isSimilar(reverted, tobeSaved)) {
-      toasting('latest data is the same - nothing need to be stopped');
-      return;
-    }
-    setAddedStop(reverted);
+
+    setDelStop(state.result);
+    setState('ready', false);
   };
 
   listen('dots:cancelRequest', onStop);
 
   createEffect(() => {
-    if (submitForm.state === 'ready') {
-      const result = submitForm() as EntryTypeData;
+    if (state.ready && !!state.result) {
+      const result = state.result as EntryTypeData;
       if (!isEntryTypeData(result)) {
         throw new Error('data received is not an entry type');
       }
@@ -170,7 +188,10 @@ export default function EntryTypeAdd(): JSX.Element {
       toasting(`entry type "${code}" has been added`);
 
       untrack(() => {
-        if (result.unit !== inputs.unit.value) {
+        if (
+          result.unit !== undefined &&
+          result.unit !== state.inputs.unit.value
+        ) {
           mutate((prev: DataEntryTypeUnits | Error | undefined) => {
             if (prev === undefined) {
               return prev;
@@ -189,72 +210,88 @@ export default function EntryTypeAdd(): JSX.Element {
         }
       });
 
-      setInitialInputs(entryTypeZero);
+      setState('initials', entryTypeZero);
       dispatch('dots:fresh:EntryType', result);
     }
   });
 
-  const code = inputs.code.value;
-  const description = inputs.description.value;
+  const code = state.inputs.code.value;
+  const description = state.inputs.description.value;
 
   const setUnit = (u: string | null) =>
-    validateInputUpdateStore({ name: 'unit', value: u });
+    validateInputUpdateStore(
+      { name: 'unit', value: u },
+      false,
+      validators,
+      messages,
+      ['unit'],
+    );
 
   return (
-    <Container
-      sx={{
-        padding: theme.spacing(3),
-        display: 'flex',
-        alignItems: 'center',
-        flexDirection: 'column',
-        rowGap: theme.spacing(2),
-      }}
+    <ActionForm
+      title="Add entry type"
+      textSave="Add"
+      names={names}
+      initialInputs={state.initials}
+      actionFn={apiEntryType.addx}
+      validators={validators}
+      messages={messages}
     >
-      <FormGroup
+      <Container
         sx={{
-          width: '100%',
+          padding: theme.spacing(3),
           display: 'flex',
-          flexDirection: 'row',
-          columnGap: theme.spacing(1),
+          alignItems: 'center',
+          flexDirection: 'column',
+          rowGap: theme.spacing(2),
         }}
       >
-        <TextFieldEllipsis
-          InputLabelProps={{ shrink: !!inputs.code.value }}
-          name="code"
-          label="Code"
-          type="text"
-          id="code"
-          autoComplete="off"
-          sx={{ width: '10rem' }}
-          onChange={handleChange}
-          value={inputs.code.value}
-          defaultValue={code}
-          error={inputs.code.error}
-          helperText={inputs.code.message}
+        <FormGroup
+          sx={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'row',
+            columnGap: theme.spacing(1),
+          }}
+        >
+          <TextFieldEllipsis
+            InputLabelProps={{ shrink: !!state.inputs.code.value }}
+            name="code"
+            label="Code"
+            type="text"
+            id="code"
+            autoComplete="off"
+            sx={{ width: '10rem' }}
+            onChange={handleChange}
+            value={state.inputs.code.value}
+            defaultValue={code}
+            error={state.inputs.code.error}
+            helperText={state.inputs.code.message}
+            disabled={waiting()}
+          />
+          <TextFieldEllipsis
+            InputLabelProps={{ shrink: !!state.inputs.description.value }}
+            name="description"
+            label="Description"
+            type="text"
+            id="description"
+            autoComplete="off"
+            sx={{ flex: 1 }}
+            onChange={handleChange}
+            defaultValue={description}
+            value={state.inputs.description.value}
+            error={state.inputs.description.error}
+            helperText={state.inputs.description.message}
+            disabled={waiting()}
+          />
+        </FormGroup>
+        <InputOrSelect
+          unit={state.inputs.unit}
+          units={units()}
+          setUnit={setUnit}
           disabled={waiting()}
         />
-        <TextFieldEllipsis
-          InputLabelProps={{ shrink: !!inputs.description.value }}
-          name="description"
-          label="Description"
-          type="text"
-          id="description"
-          autoComplete="off"
-          sx={{ flex: 1 }}
-          onChange={handleChange}
-          defaultValue={description}
-          value={inputs.description.value}
-          error={inputs.description.error}
-          helperText={inputs.description.message}
-          disabled={waiting()}
-        />
-      </FormGroup>
-      <InputOrSelect
-        unit={inputs.unit}
-        units={units()}
-        disabled={waiting()}
-        setUnit={setUnit}
-      />
-    </Container>
+      </Container>
+    </ActionForm>
   );
 }
