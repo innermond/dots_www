@@ -16,7 +16,7 @@ import { createStore, produce, unwrap } from 'solid-js/store';
 import type { Component } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
-import type { MessagesMap, Validators } from '@/lib/form';
+import type { MessagesMap, Validable, Validators } from '@/lib/form';
 import { makeValidable } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
@@ -31,7 +31,11 @@ import {
   ActionFormContextValue,
   useActionForm,
 } from '@/contexts/ActionFormContext';
-import { EntryTypeData } from '@/pages/entry-types/types';
+import {
+  EntryTypeData,
+  isEntryTypeData,
+  isKeyofEntryTypeData,
+} from '@/pages/entry-types/types';
 
 export type ActionFormProps<T> = {
   title: string;
@@ -65,7 +69,12 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
   };
 
   const names = props.names;
-  type Names = (typeof names)[number];
+
+  const zeroingInputs = () => {
+    const initial = props.initialInputs;
+    const init = makeValidable(initial, ...names);
+    setState('inputs', init);
+  };
 
   // it reset inputs when closing
   createComputed(() => {
@@ -86,12 +95,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     }
     return false;
   };
-  const zeroingInputs = () => {
-    const initial = props.initialInputs;
-    const init = makeValidable(initial, ...names);
-    setState('inputs', init);
-  };
-  function snapshotInputs(
+  function snapshotInputs<T extends {}>(
     ground: T,
     mapfn?: (v: any) => any,
   ): Record<(typeof names)[number], any> {
@@ -178,12 +182,12 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
   });
 
   const handleClose = (evt: Event) => {
-    if (submitForm.loading) {
+    if (!state.ready) {
       toasting('wait for operation to complete', 'warning');
       return;
     }
-    dispatch('dots:close:ActionForm');
     setState('open', false);
+    dispatch('dots:close:ActionForm');
   };
 
   const handleReset = (evt: Event): void => {
@@ -218,10 +222,29 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
 
   const handleStop = (evt: Event): void => {
     evt.preventDefault();
-    setState('cut', true);
+    batch(() => {
+      setState('cut', true);
+      setState('ready', false);
+    });
 
     const prev = snapshotInputs(unwrap(state.initials));
-    let curr = snapshotInputs(unwrap(state.inputs), v => v?.value);
+    const inputs = unwrap(state.inputs) as Validable<EntryTypeData>;
+
+    const obj = {} as any;
+    for (let k of Object.keys(inputs)) {
+      if (!isKeyofEntryTypeData(k)) {
+        continue;
+      }
+      if (!('value' in inputs[k])) {
+        continue;
+      }
+      obj[k] = inputs[k].value;
+    }
+    if (!isEntryTypeData(obj)) {
+      return;
+    }
+
+    let curr = snapshotInputs<EntryTypeData>(obj, v => v?.value);
     dispatch('dots:cancelRequest', [prev, curr]);
     setTimeout(() => setState('cut', false), 0);
   };
@@ -303,7 +326,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
   } as AlertDialogState);
 
   createComputed(() => {
-    if (!state.ready) {
+    if (!['ready'].includes(submitForm.state)) {
       return;
     }
     // overwrite
@@ -317,7 +340,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
         }
 
         // before submit or after successfully submit
-        s.ready = ['unresolved', 'ready'].includes(submitForm.state);
+        s.ready = true;
         s.result = result;
       }),
     );

@@ -7,7 +7,6 @@ import {
   onMount,
   onCleanup,
   createSignal,
-  batch,
   createComputed,
 } from 'solid-js';
 import type { JSX } from 'solid-js';
@@ -27,9 +26,11 @@ import { apiEntryType } from '@/api';
 import { dispatch, listen, unlisten } from '@/lib/customevent';
 import ActionForm from '@/components/ActionForm';
 import {
+  ActionFormContextState,
   ActionFormContextValue,
   useActionForm,
 } from '@/contexts/ActionFormContext';
+import { produce } from 'solid-js/store';
 
 const theme = useTheme();
 const names = ['id', 'code', 'description', 'unit'];
@@ -76,7 +77,6 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
 
   const handleChange = makeHandleChange(validators, messages);
 
-  console.log('etu');
   // list of units
   const [unitsResource, { mutate }] = createResource(apiEntryType.units);
   const units = createMemo((): InputOrSelectOption[] => {
@@ -90,19 +90,23 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
   });
 
   onMount(() => {
-    batch(() => {
-      setState('ready', true);
-      setState('open', true);
-      setState('show', 'stop', true);
-    });
+    setState(
+      produce((s: ActionFormContextState<EntryTypeData>) => {
+        s.ready = true;
+        s.open = true;
+        s.show.stop = true;
+      }),
+    );
     listen('dots:cancelRequest', onStop);
   });
   onCleanup(() => {
-    batch(() => {
-      setState('ready', false);
-      setState('result', undefined);
-      setState('open', false);
-    });
+    setState(
+      produce((s: ActionFormContextState<EntryTypeData>) => {
+        s.ready = false;
+        s.open = false;
+        s.result = undefined;
+      }),
+    );
     unlisten('dots:cancelRequest', onStop);
   });
 
@@ -114,17 +118,22 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
   );
 
   createComputed(() => {
-    if (edited.loading) {
+    if (edited.state === 'pending') {
+      // post pone execution as in actionform component are other setState calls regarding "ready"
+      // and they ar eexecuted AFTER a regular setState issued from here
+      // TODO: create meta data like !important in CSS
+      //setTimeout(() => setState('ready', false), 0);
       setState('ready', false);
     } else if (edited.state === 'ready') {
       setState('ready', true);
     } else if (edited.error) {
       setState('ready', true);
     }
+    console.log('etu', state.ready);
   });
 
   createEffect(() => {
-    if (edited.loading) {
+    if (edited.state === 'pending') {
       toasting('trying to stop changes...', 'warning');
     } else if (edited.state === 'ready') {
       toasting('stopping changes was done', 'success');
