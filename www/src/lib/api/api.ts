@@ -74,7 +74,8 @@ async function send<T>(
   } catch (err: any) {
     // TODO find a proper way to deal with AbortError
     if (err?.name === 'AbortError') {
-      throw err;
+      console.log(err.message);
+      return err;
     }
     throw err;
   }

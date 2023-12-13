@@ -31,6 +31,7 @@ import {
   ActionFormContextValue,
   useActionForm,
 } from '@/contexts/ActionFormContext';
+import { EntryTypeData } from '@/pages/entry-types/types';
 
 export type ActionFormProps<T> = {
   title: string;
@@ -91,7 +92,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     setState('inputs', init);
   };
   function snapshotInputs(
-    ground: any = props.initialInputs,
+    ground: T,
     mapfn?: (v: any) => any,
   ): Record<(typeof names)[number], any> {
     const ss = {} as Record<(typeof names)[number], any>;
@@ -219,7 +220,7 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     evt.preventDefault();
     setState('cut', true);
 
-    const prev = snapshotInputs();
+    const prev = snapshotInputs(unwrap(state.initials));
     let curr = snapshotInputs(unwrap(state.inputs), v => v?.value);
     dispatch('dots:cancelRequest', [prev, curr]);
     setTimeout(() => setState('cut', false), 0);
@@ -308,15 +309,22 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
     // overwrite
     setState(
       produce((s: ActionFormContextState<T>) => {
+        const result = submitForm();
+        // abort error is fine
+        if (result instanceof Error && result.name === 'AbortError') {
+          s.ready = true;
+          return;
+        }
+
         // before submit or after successfully submit
         s.ready = ['unresolved', 'ready'].includes(submitForm.state);
-        s.result = submitForm();
+        s.result = result;
       }),
     );
   });
 
   createComputed(() => {
-    const initial = props.initialInputs;
+    const initial = state.initials;
     if (initial === undefined) {
       return;
     }

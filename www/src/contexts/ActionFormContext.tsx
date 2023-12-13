@@ -7,7 +7,7 @@ import { createContext } from 'solid-js';
 
 export type ActionFormContextProps<T> = {
   initialInputs: T;
-} & ParentProps<T>;
+};
 
 export type ActionFormContextState<T> = {
   // action form
@@ -39,10 +39,12 @@ export type ActionFormContextValue<T> = {
   ) => (evtOrname: object | string, value: any) => void;
 };
 
-const ActionFormContext = createContext<ActionFormContextValue<any>>();
+const ActionFormContext = createContext();
 
 // T is typeof data to be sent
-const ActionFormProvider = <T extends {}>(props: ActionFormContextProps<T>) => {
+const ActionFormProvider = <T extends {}>(
+  props: ParentProps<ActionFormContextProps<T>>,
+) => {
   const names = Object.keys(props.initialInputs);
 
   let defaultInputs: Validable<typeof props.initialInputs>;

@@ -8,7 +8,7 @@ import {
   onCleanup,
   createSignal,
   batch,
-  Show,
+  createComputed,
 } from 'solid-js';
 import type { JSX } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
@@ -76,6 +76,7 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
 
   const handleChange = makeHandleChange(validators, messages);
 
+  console.log('etu');
   // list of units
   const [unitsResource, { mutate }] = createResource(apiEntryType.units);
   const units = createMemo((): InputOrSelectOption[] => {
@@ -111,6 +112,16 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
   const waiting = createMemo(
     () => !state.ready || ['pending', 'refreshing'].includes(edited.state),
   );
+
+  createComputed(() => {
+    if (edited.loading) {
+      setState('ready', false);
+    } else if (edited.state === 'ready') {
+      setState('ready', true);
+    } else if (edited.error) {
+      setState('ready', true);
+    }
+  });
 
   createEffect(() => {
     if (edited.loading) {
@@ -171,9 +182,11 @@ export default function EntryTypeUpdate(props: any): JSX.Element {
             return { data, n };
           });
         }
-      });
 
-      setState('initials', result);
+        if (!(result instanceof Error)) {
+          setState('initials', result);
+        }
+      });
       dispatch('dots:fresh:EntryType', result);
     }
   });

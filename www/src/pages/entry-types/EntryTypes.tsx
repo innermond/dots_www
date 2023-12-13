@@ -10,7 +10,7 @@ import {
   createComputed,
   onCleanup,
 } from 'solid-js';
-import type { Component, JSX } from 'solid-js';
+import type { Component, JSX, ParentProps } from 'solid-js';
 import {
   Paper,
   Table,
@@ -43,7 +43,6 @@ import {
   isEntryTypeData,
 } from './types';
 import ActionButton from '@/components/ActionButton';
-import DialogProvider from '@/contexts/DialogContext';
 import { Dynamic } from 'solid-js/web';
 import toasting from '@/lib/toast';
 import { listen, unlisten } from '@/lib/customevent';
@@ -231,16 +230,6 @@ const EntryTypes: Component = (): JSX.Element => {
     }
   });
 
-  const dialogSave = () => {
-    return (
-      <Show when={!!cmp()}>
-        <ActionFormProvider initialInputs={initialInputs()}>
-          <Dynamic component={cmp()} />
-        </ActionFormProvider>
-      </Show>
-    );
-  };
-
   const dummy = (num: number, height: string = '1rem') => (
     <Grid container rowSpacing={4.5}>
       <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'end' }}>
@@ -258,9 +247,17 @@ const EntryTypes: Component = (): JSX.Element => {
     </Grid>
   );
 
+  const actionForm = (
+    <Show when={!!cmp() && !!initialInputs()}>
+      <ActionFormProvider<EntryTypeData> initialInputs={initialInputs()}>
+        <Dynamic component={cmp()} />
+      </ActionFormProvider>
+    </Show>
+  );
+
   return (
     <>
-      {dialogSave}
+      {actionForm}
       <Show when={result.state === 'ready'} fallback={dummy(peakRow, '1rem')}>
         <TableContainer component={Paper}>
           <Stack
