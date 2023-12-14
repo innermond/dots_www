@@ -10,7 +10,7 @@ import {
   createComputed,
   onCleanup,
 } from 'solid-js';
-import type { Component, JSX, ParentProps } from 'solid-js';
+import type { Component, JSX } from 'solid-js';
 import {
   Paper,
   Table,
@@ -57,10 +57,18 @@ const EntryTypes: Component = (): JSX.Element => {
   const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
 
   const peakRow = 20;
+  const defaultFilter = {
+    code: 'order-asc',
+    unit: 'eq-piese',
+  };
 
-  const [slice, setSlice] = createStore<Slice>({ offset: 0, limit: peakRow });
+  const [slice, setSlice] = createStore<Slice<EntryTypeData>>({
+    offset: 0,
+    limit: peakRow,
+    ...defaultFilter,
+  });
   const [result] = createResource(() => {
-    return { ...slice };
+    return slice;
   }, apiEntryType.all);
 
   const dataTable = createMemo((): DataEntryTypes => {
@@ -359,7 +367,7 @@ const EntryTypes: Component = (): JSX.Element => {
                 (lastDirection() === -1 && !positionOverflowLeft()) ||
                 positionOverflowRight()
               }
-              fallback=<ChevronLeftIcon />
+              fallback={<ChevronLeftIcon />}
             >
               <Badge max={1000} badgeContent={slice.offset} color="primary">
                 <ChevronLeftIcon />
@@ -375,7 +383,7 @@ const EntryTypes: Component = (): JSX.Element => {
                 (lastDirection() === 1 && !positionOverflowRight()) ||
                 positionOverflowLeft()
               }
-              fallback=<ChevronRightIcon />
+              fallback={<ChevronRightIcon />}
             >
               <Badge
                 max={1000}

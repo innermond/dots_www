@@ -112,7 +112,9 @@ const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
   return convertKeysToCamelCase(verifiedOrError) as T;
 };
 
-type Slice = { offset: number; limit: number };
+type Slice<T> = { offset: number; limit: number } & Partial<{
+  [K in keyof T]: Function | string;
+}>;
 
 const query = (path: string, pairs: Record<string, string>) => {
   const q = new URLSearchParams();
@@ -210,5 +212,5 @@ const zero = (undef: boolean = false) => ({
   message: [],
 });
 
-export type { ApiArgs, Slice };
+export type { ApiArgs, Slice, QueryFilter };
 export { ApiError, api, apix, query, send, payload, zero };

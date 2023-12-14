@@ -1,3 +1,4 @@
+import { splitProps } from 'solid-js';
 import { api, apix, query } from '@/lib/api';
 import type { ApiArgs, Slice } from '@/lib/api';
 import {
@@ -7,10 +8,12 @@ import {
   isDataEntryTypes,
   isDataEntryTypeUnits,
   isEntryTypeData,
+  isKeyofEntryTypeData,
+  entryTypeZero,
 } from '@/pages/entry-types/types';
 
 class APIEntryType {
-  async all(slice?: Slice): Promise<DataEntryTypes | Error> {
+  async all(slice: Slice<EntryTypeData>): Promise<DataEntryTypes | Error> {
     const pp = {} as any;
     if (!isNaN(Number(slice?.offset))) {
       pp.offset = slice!.offset;
@@ -18,7 +21,28 @@ class APIEntryType {
     if (!isNaN(Number(slice?.limit))) {
       pp.limit = slice!.limit;
     }
-    const url = query('/entry-types', pp);
+
+    let params = { ...pp };
+    const filterKeys = Object.keys(entryTypeZero) as Array<keyof EntryTypeData>;
+    const [filters] = splitProps(slice, filterKeys);
+    if (!!filters) {
+      const fpp = {} as Partial<{
+        [K in keyof EntryTypeData]: Function | string;
+      }>;
+      for (let k of Object.keys(filters)) {
+        if (!isKeyofEntryTypeData(k)) {
+          continue;
+        }
+        const fn = filters[k as keyof typeof filters] as Function | string;
+        if (typeof fn === 'function') {
+          fpp[k] = fn();
+        } else {
+          fpp[k] = fn;
+        }
+      }
+      params = { ...params, ...fpp };
+    }
+    const url = query('/entry-types', params);
     const args = {
       hint: 'loading entry types',
       method: 'GET',
