@@ -8,7 +8,6 @@ import {
   onMount,
   onCleanup,
   createSignal,
-  createComputed,
 } from 'solid-js';
 import InputOrSelect from './InputOrSelect';
 import {

@@ -18,13 +18,19 @@ import {
   onMount,
 } from 'solid-js';
 import type { JSX } from 'solid-js';
-import { isEntryTypeData, type EntryTypeData } from '@/pages/entry-types/types';
+import { setActionAlert } from '@/components/AlertDialog';
+import type { EntryTypeData } from '@/pages/entry-types/types';
+import { isEntryTypeData } from '@/pages/entry-types/types';
+import ActionForm from '@/components/ActionForm';
+import {
+  ActionFormContextState,
+  ActionFormContextValue,
+  useActionForm,
+} from '@/contexts/ActionFormContext';
 
-import type { FieldNames, Validators } from '@/lib/form';
+import type { FieldNames, MessagesMap, Validators } from '@/lib/form';
 import { required, int, isEmptyObject } from '@/lib/form';
 import toasting from '@/lib/toast';
-import type { DialogState } from '@/contexts/DialogContext';
-import { DialogProviderValue, useDialog } from '@/contexts/DialogContext';
 import { dispatch, listen, unlisten } from '@/lib/customevent';
 import { apiEntryType } from '@/api';
 import { produce } from 'solid-js/store';
@@ -40,12 +46,17 @@ const validators: Validators<Names> = {
   dontCheckChanged: [() => true],
 };
 
+const messages: MessagesMap<Names> = {
+  id: [null, null],
+  dontCheckChanged: [null],
+};
+
 export default function EntryTypeDetail(): JSX.Element {
-  const { setUI, setActionAlert, inputs, setValidation, submitForm } =
-    useDialog() as DialogProviderValue<EntryTypeData>;
+  const { actionFormState: state, setActionFormContextState: setState } =
+    useActionForm() as ActionFormContextValue<EntryTypeData>;
 
   // get stats
-  const apicall = () => apiEntryType.stats(inputs.id.value);
+  const apicall = () => apiEntryType.stats(state.inputs.id.value);
   const [statsResource] = createResource(apicall);
   const stats = createMemo((): Record<string, string> | undefined => {
     if (statsResource.state !== 'ready') {
@@ -54,26 +65,26 @@ export default function EntryTypeDetail(): JSX.Element {
 
     const info = statsResource();
 
-    setUI('ready', true);
+    setState('ready', true);
 
     const { data, n } = info as any;
     return n ? data : {};
   });
 
-  setValidation({ validators });
-
   onMount(() => {
-    setUI(
-      produce((ui: DialogState) => {
-        ui.show.reset = false;
-        ui.show.stop = true;
-        //ui.askMeBeforeAction = true;
+    setState(
+      produce((s: ActionFormContextState<EntryTypeData>) => {
+        s.askMeBeforeAction = true;
+        s.ready = true;
+        s.open = true;
+        s.show.reset = false;
+        s.show.stop = true;
       }),
     );
     setActionAlert(
-      produce((ui: AlertDialogState) => {
-        ui.title = `You are about to delete the entry type "${inputs.code.value}"`;
-        ui.text =
+      produce((s: AlertDialogState) => {
+        s.title = `You are about to delete the entry type "${state.inputs.code.value}"`;
+        s.text =
           'This entry type is in such state that it can be deleted. Also, it may be restored in the future if you will choose this';
       }),
     );
@@ -82,7 +93,12 @@ export default function EntryTypeDetail(): JSX.Element {
     listen('dots:cancelRequest', onStop);
   });
   onCleanup(() => {
-    setUI('ready', true);
+    setState(
+      produce((s: ActionFormContextState<EntryTypeData>) => {
+        s.ready = true;
+        s.result = undefined;
+      }),
+    );
     unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
     unlisten('dots:cancelRequest', onStop);
   });
@@ -128,93 +144,106 @@ export default function EntryTypeDetail(): JSX.Element {
       return;
     }
     setStatus('deleted');
-    setUI('ready', false);
+    setState('ready', true);
   };
 
   createEffect(() => {
-    if (submitForm.state === 'ready') {
-      const result = submitForm() as EntryTypeData;
+    if (state.ready && !!state.result) {
+      const result = state.result;
+      if (result instanceof Error) {
+        return;
+      }
       if (!('n' in result && false === isNaN(parseInt(result.n as any)))) {
         throw new Error('data received is not for an entry type deletion');
       }
-      toasting(`entry type "${inputs.code.value}" has been deleted`);
+      toasting(`entry type "${state.inputs.code.value}" has been deleted`);
 
       const deleted: EntryTypeData = {
-        id: inputs.id.value,
-        code: inputs.code.value,
-        description: inputs.description.value,
-        unit: inputs.unit.value,
+        id: state.inputs.id.value,
+        code: state.inputs.code.value,
+        description: state.inputs.description.value,
+        unit: state.inputs.unit.value,
       };
       dispatch('dots:killone:EntryType', deleted);
     }
   });
 
-  const id = inputs.id.value;
+  const id = state.inputs.id.value;
 
   return (
-    <Container
-      sx={{
-        padding: theme.spacing(3),
-        display: 'flex',
-        alignItems: 'stretch',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        rowGap: theme.spacing(2),
-        columnGap: theme.spacing(2),
-      }}
+    <ActionForm
+      title="Detail entry type"
+      textSave="Deactivate"
+      names={names}
+      initialInputs={state.initials}
+      actionFn={apiEntryType.del}
+      validators={validators}
+      messages={messages}
     >
-      <TextField
-        name="id"
-        type="hidden"
-        id="id"
-        defaultValue={id}
-        sx={{ display: 'none' }}
-      />
-      <TextField
-        name="dontCheckChanged"
-        type="hidden"
-        id="dontCheckChanged"
-        defaultValue={true}
-        sx={{ display: 'none' }}
-      />
-      <Card sx={{ minWidth: '100%' }}>
-        <CardContent style={{}}>
-          <Typography>Code</Typography>
-          <Typography sx={{ mb: 1 }} variant="h5">
-            {inputs.code.value}
-          </Typography>
-          <Typography>Description</Typography>
-          <Typography sx={{ mb: 1 }} color="text.secondary">
-            {inputs.description.value}
-          </Typography>
-          <Typography>unit</Typography>
-          <Typography variant="body2">{inputs.unit.value}</Typography>
-        </CardContent>
-      </Card>
-      <Card sx={{ minWidth: '100%' }}>
-        <CardContent style={{}}>
-          <Typography>Status</Typography>
-          <Typography sx={{ mb: 1 }} variant="h4">
-            {status()}
-          </Typography>
-          <Show when={!!stats() && !isEmptyObject(stats())}>
-            <For each={Object.keys(stats() as Record<string, string>)}>
-              {(k: string) => {
-                return (
-                  <>
-                    <Typography component={'h5'}>{k}</Typography>
-                    <Typography sx={{ mb: 1 }} color="text.secondary">
-                      {`there are ${stats()![k]} entries that depend on ${
-                        inputs.code.value
-                      }`}
-                    </Typography>
-                  </>
-                );
-              }}
-            </For>
-          </Show>
-        </CardContent>
-      </Card>
-    </Container>
+      <Container
+        sx={{
+          padding: theme.spacing(3),
+          display: 'flex',
+          alignItems: 'stretch',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          rowGap: theme.spacing(2),
+          columnGap: theme.spacing(2),
+        }}
+      >
+        <TextField
+          name="id"
+          type="hidden"
+          id="id"
+          defaultValue={id}
+          sx={{ display: 'none' }}
+        />
+        <TextField
+          name="dontCheckChanged"
+          type="hidden"
+          id="dontCheckChanged"
+          defaultValue={true}
+          sx={{ display: 'none' }}
+        />
+        <Card sx={{ minWidth: '100%' }}>
+          <CardContent style={{}}>
+            <Typography>Code</Typography>
+            <Typography sx={{ mb: 1 }} variant="h5">
+              {state.inputs.code.value}
+            </Typography>
+            <Typography>Description</Typography>
+            <Typography sx={{ mb: 1 }} color="text.secondary">
+              {state.inputs.description.value}
+            </Typography>
+            <Typography>unit</Typography>
+            <Typography variant="body2">{state.inputs.unit.value}</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ minWidth: '100%' }}>
+          <CardContent style={{}}>
+            <Typography>Status</Typography>
+            <Typography sx={{ mb: 1 }} variant="h4">
+              {status()}
+            </Typography>
+            <Show when={!!stats() && !isEmptyObject(stats())}>
+              <For each={Object.keys(stats() as Record<string, string>)}>
+                {(k: string) => {
+                  return (
+                    <>
+                      <Typography component={'h5'}>{k}</Typography>
+                      <Typography sx={{ mb: 1 }} color="text.secondary">
+                        {`there are ${stats()![k]} entries that depend on ${
+                          state.inputs.code.value
+                        }`}
+                      </Typography>
+                    </>
+                  );
+                }}
+              </For>
+            </Show>
+          </CardContent>
+        </Card>
+      </Container>
+    </ActionForm>
   );
 }

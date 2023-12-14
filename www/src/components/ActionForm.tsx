@@ -23,7 +23,10 @@ import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
 import type { ActionButtonProps } from '@/components/ActionButton';
 import { dispatch } from '@/lib/customevent';
-import AlertDialog, { AlertDialogState } from '@/components/AlertDialog';
+import AlertDialog, {
+  actionAlert,
+  setActionAlert,
+} from '@/components/AlertDialog';
 import { ActionBarProps } from '@/components/ActionBar';
 import ActionBar from '@/components/ActionBar';
 import {
@@ -31,11 +34,7 @@ import {
   ActionFormContextValue,
   useActionForm,
 } from '@/contexts/ActionFormContext';
-import {
-  EntryTypeData,
-  isEntryTypeData,
-  isKeyofEntryTypeData,
-} from '@/pages/entry-types/types';
+import { EntryTypeData } from '@/pages/entry-types/types';
 
 export type ActionFormProps<T> = {
   title: string;
@@ -263,9 +262,23 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
       form = event.target;
       Array.from(event.target.elements)
         .filter((t: Element) => 'id' in t && names.includes(t.id))
-        .map((t: unknown) => validateInputUpdateStore(t));
+        .map((t: unknown) =>
+          validateInputUpdateStore(
+            t,
+            false,
+            props.validators,
+            props.messages,
+            props.names,
+          ),
+        );
     } else {
-      validateInputUpdateStore(event.target);
+      validateInputUpdateStore(
+        event.target,
+        false,
+        props.validators,
+        props.messages,
+        props.names,
+      );
       if (!('form' in event.target)) {
         toasting('cannot find a form to send', 'error');
         return;
@@ -304,12 +317,6 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
 
     setStartSubmit(() => requestData);
   };
-
-  const [actionAlert, setActionAlert] = createStore({
-    open: false,
-    choosing: false,
-    event: undefined,
-  } as AlertDialogState);
 
   createComputed(() => {
     if (!['ready'].includes(submitForm.state)) {

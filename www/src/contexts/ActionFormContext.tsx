@@ -87,6 +87,9 @@ const ActionFormProvider = <T extends {}>(
     type KeyValfromT = { name: keyof T; value: T[typeof name] };
     const { name, value } = data as KeyValfromT;
 
+    if (names.length === 0) {
+      names = Object.keys(validators);
+    }
     if (!!names && !names?.includes(name as string)) return;
 
     const errorstr: string = skipValidation

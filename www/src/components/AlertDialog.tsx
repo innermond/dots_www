@@ -6,7 +6,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@suid/material';
-import { SetStoreFunction, Store, produce } from 'solid-js/store';
+import { SetStoreFunction, Store, createStore, produce } from 'solid-js/store';
 
 export type AlertDialogState = {
   open: boolean;
@@ -20,6 +20,12 @@ export type AlertDialogProps = {
   state: Store<AlertDialogState>;
   setState: SetStoreFunction<AlertDialogState>;
 };
+
+export const [actionAlert, setActionAlert] = createStore({
+  open: false,
+  choosing: false,
+  event: undefined,
+} as AlertDialogState);
 
 export default function AlertDialog(props: AlertDialogProps) {
   const handleClose = (choosing: boolean) => {
