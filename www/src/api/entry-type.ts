@@ -40,7 +40,13 @@ class APIEntryType {
           fpp[k] = fn;
         }
       }
-      params = { ...params, ...fpp };
+      params = [
+        params,
+        fpp,
+        { code: 'piese' },
+        { code: 'start' },
+        { _mask_code: 'ovk' },
+      ];
     }
     const url = query('/entry-types', params);
     const args = {

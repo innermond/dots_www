@@ -116,10 +116,20 @@ type Slice<T> = { offset: number; limit: number } & Partial<{
   [K in keyof T]: Function | string;
 }>;
 
-const query = (path: string, pairs: Record<string, string>) => {
+type URLParams = Record<string, string>;
+
+const query = (path: string, pairs: URLParams | URLParams[]) => {
   const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(pairs)) {
-    q.append(k, v);
+  let mpairs: URLParams[] = [];
+  if (!Array.isArray(pairs)) {
+    mpairs = [pairs];
+  } else {
+    mpairs = pairs;
+  }
+  for (const pairs of mpairs) {
+    for (const [k, v] of Object.entries(pairs)) {
+      q.append(k, v);
+    }
   }
   const qstr = q.toString();
   const url = path + (qstr ? '?' + qstr : '');

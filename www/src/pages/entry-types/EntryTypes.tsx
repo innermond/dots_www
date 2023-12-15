@@ -58,8 +58,7 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const peakRow = 20;
   const defaultFilter = {
-    code: 'order-asc',
-    unit: 'eq-piese',
+    code: 'asc',
   };
 
   const [slice, setSlice] = createStore<Slice<EntryTypeData>>({
@@ -111,7 +110,7 @@ const EntryTypes: Component = (): JSX.Element => {
       return;
     }
 
-    setSlice((s: Slice) => ({ ...s, offset: position }));
+    setSlice((s: Slice<EntryTypeData>) => ({ ...s, offset: position }));
   };
 
   const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
@@ -185,8 +184,6 @@ const EntryTypes: Component = (): JSX.Element => {
     listen('dots:close:ActionForm', handleCloseActionForm);
     unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
   });
-
-  const dialogSignal = createSignal(false);
 
   type LazyWhat =
     | 'editEntry'
