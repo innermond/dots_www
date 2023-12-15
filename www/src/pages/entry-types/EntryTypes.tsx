@@ -9,6 +9,7 @@ import {
   createMemo,
   createComputed,
   onCleanup,
+  untrack,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -46,7 +47,7 @@ import ActionButton from '@/components/ActionButton';
 import { Dynamic } from 'solid-js/web';
 import toasting from '@/lib/toast';
 import { listen, unlisten } from '@/lib/customevent';
-import { createStore } from 'solid-js/store';
+import { createStore, unwrap } from 'solid-js/store';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 import ActionFormProvider from '@/contexts/ActionFormContext';
@@ -58,7 +59,7 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const peakRow = 20;
   const defaultFilter = {
-    code: 'asc',
+    id: 'desc',
   };
 
   const [slice, setSlice] = createStore<Slice<EntryTypeData>>({
@@ -66,8 +67,11 @@ const EntryTypes: Component = (): JSX.Element => {
     limit: peakRow,
     ...defaultFilter,
   });
+
+  const sliceChanged = () => slice.offset;
   const [result] = createResource(() => {
-    return slice;
+    sliceChanged();
+    return { ...unwrap(slice) };
   }, apiEntryType.all);
 
   const dataTable = createMemo((): DataEntryTypes => {
@@ -98,19 +102,20 @@ const EntryTypes: Component = (): JSX.Element => {
   };
 
   const goSlice = (dir: number) => {
-    const peak = totalRows();
+    const peak = untrack(() => totalRows());
     if (peak === -1) {
       return;
     }
 
     dir = dir > 0 ? 1 : -1;
     setLastDirection(dir);
-    const position = dir * slice.limit + slice.offset;
+    const position = untrack(() => dir * slice.limit + slice.offset);
     if (position < 0 || position > peak) {
       return;
     }
 
     setSlice((s: Slice<EntryTypeData>) => ({ ...s, offset: position }));
+    console.log('go', slice);
   };
 
   const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
@@ -384,7 +389,11 @@ const EntryTypes: Component = (): JSX.Element => {
             >
               <Badge
                 max={1000}
-                badgeContent={totalRows() - (slice.offset + slice.limit)}
+                badgeContent={
+                  totalRows() < slice.limit
+                    ? totalRows()
+                    : totalRows() - (slice.offset + slice.limit)
+                }
                 color="primary"
               >
                 <ChevronRightIcon />
