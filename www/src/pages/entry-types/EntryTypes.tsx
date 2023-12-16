@@ -36,18 +36,19 @@ import Skeleton from '@suid/material/Skeleton';
 
 import type { Slice } from '@/lib/api';
 import { apiEntryType } from '@/api';
-import appstate from '@/lib/app';
+import appstate, { isDeepEqual } from '@/lib/app';
 import {
   DataEntryTypes,
   EntryTypeData,
   entryTypeZero,
   isEntryTypeData,
+  isKeyofEntryTypeData,
 } from './types';
 import ActionButton from '@/components/ActionButton';
 import { Dynamic } from 'solid-js/web';
 import toasting from '@/lib/toast';
 import { listen, unlisten } from '@/lib/customevent';
-import { createStore, unwrap } from 'solid-js/store';
+import { SetStoreFunction, createStore, unwrap } from 'solid-js/store';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 import ActionFormProvider from '@/contexts/ActionFormContext';
@@ -62,16 +63,57 @@ const EntryTypes: Component = (): JSX.Element => {
     id: 'desc',
   };
 
-  const [slice, setSlice] = createStore<Slice<EntryTypeData>>({
+  const [slice, setSliceOrigin] = createStore<Slice<EntryTypeData>>({
     offset: 0,
     limit: peakRow,
     ...defaultFilter,
   });
 
-  const sliceChanged = () => slice.offset;
+  const isSliceKey = (k: unknown): k is keyof Slice<EntryTypeData> => {
+    if (typeof k !== 'string') {
+      return false;
+    }
+    if (['offset', 'limit'].includes(k) && isKeyofEntryTypeData(k)) {
+      return true;
+    }
+    return false;
+  };
+
+  type ParametersSetSliceOrigin = Parameters<
+    SetStoreFunction<Slice<EntryTypeData>>
+  >;
+
+  const [sliceChanged, setSliceChanged] = createSignal<number>(1);
+  // wrap origin setStore
+  // so every call will trigger the signal used to drive associated request
+  const setSlice = (...args: ParametersSetSliceOrigin) => {
+    if (!Array.isArray(args)) {
+      return;
+    }
+
+    try {
+      // before
+      const before = structuredClone(unwrap(slice));
+      // change
+      setSliceOrigin.apply(null, args);
+      // after
+      const after = structuredClone(unwrap(slice));
+      // have really changed?
+      if (isDeepEqual(before, after)) {
+        return;
+      }
+      // notify slice has changed
+      setSliceChanged((v: number) => v + 1);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const [result] = createResource(() => {
-    sliceChanged();
-    return { ...unwrap(slice) };
+    if (sliceChanged()) {
+      const slicesrc = unwrap(slice);
+      return { ...slicesrc };
+    }
   }, apiEntryType.all);
 
   const dataTable = createMemo((): DataEntryTypes => {
@@ -87,35 +129,42 @@ const EntryTypes: Component = (): JSX.Element => {
     return n;
   });
 
-  const [lastDirection, setLastDirection] = createSignal(1);
-
-  const positionOverflowRight = (): boolean => {
+  const positionOverflowRight = createMemo((): boolean => {
     const peak = totalRows();
     if (peak === -1) {
       return false;
     }
-    return peak <= slice.limit + slice.offset;
-  };
+    const curr = slice.offset + slice.limit;
+    const overflow = curr >= peak;
+    return overflow;
+  });
 
-  const positionOverflowLeft = (): boolean => {
-    return slice.offset <= 0;
-  };
+  const positionOverflowLeft = createMemo((): boolean => {
+    const overflow = slice.offset <= 0;
+    return overflow;
+  });
 
   const goSlice = (dir: number) => {
     const peak = untrack(() => totalRows());
-    if (peak === -1) {
+    if (isNaN(Number(peak)) || peak < 0) {
       return;
     }
 
     dir = dir > 0 ? 1 : -1;
-    setLastDirection(dir);
-    const position = untrack(() => dir * slice.limit + slice.offset);
+    const position = untrack(() => dir * slice.limit + 1 * slice.offset);
+    if (isNaN(Number(position))) {
+      return;
+    }
+
     if (position < 0 || position > peak) {
       return;
     }
 
-    setSlice((s: Slice<EntryTypeData>) => ({ ...s, offset: position }));
-    console.log('go', slice);
+    // This version, while valid upsets typescript compiler
+    //setSlice('offset', position);
+    // but this makes it happy as we inform compiler that everything is fine ("as ParametersSetSliceOrigin")
+    // TODO gives the power back to the compiler
+    setSlice.apply(null, ['offset', position] as ParametersSetSliceOrigin);
   };
 
   const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
@@ -364,13 +413,7 @@ const EntryTypes: Component = (): JSX.Element => {
             disabled={positionOverflowLeft()}
             onClick={() => goSlice(-1)}
           >
-            <Show
-              when={
-                (lastDirection() === -1 && !positionOverflowLeft()) ||
-                positionOverflowRight()
-              }
-              fallback={<ChevronLeftIcon />}
-            >
+            <Show when={!positionOverflowLeft()} fallback={<ChevronLeftIcon />}>
               <Badge max={1000} badgeContent={slice.offset} color="primary">
                 <ChevronLeftIcon />
               </Badge>
@@ -381,10 +424,7 @@ const EntryTypes: Component = (): JSX.Element => {
             onClick={() => goSlice(1)}
           >
             <Show
-              when={
-                (lastDirection() === 1 && !positionOverflowRight()) ||
-                positionOverflowLeft()
-              }
+              when={!positionOverflowRight()}
               fallback={<ChevronRightIcon />}
             >
               <Badge
