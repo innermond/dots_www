@@ -10,6 +10,7 @@ import {
   createComputed,
   onCleanup,
   untrack,
+  createEffect,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -51,6 +52,8 @@ import { listen, unlisten } from '@/lib/customevent';
 import { SetStoreFunction, createStore, unwrap } from 'solid-js/store';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
+import ViewColumnOutlinedIcon from '@suid/icons-material/ViewColumnOutlined';
+import FilterListIcon from '@suid/icons-material/FilterList';
 import ActionFormProvider from '@/contexts/ActionFormContext';
 
 const EntryTypes: Component = (): JSX.Element => {
@@ -251,6 +254,9 @@ const EntryTypes: Component = (): JSX.Element => {
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
   const updateEntryType = lazy(() => import('./EntryTypeUpdate'));
   const detailEntryType = lazy(() => import('./EntryTypeDetail'));
+  const filterColumnsEntryType = lazy(
+    () => import('../../components/FilterItems'),
+  );
 
   const handleDialogWith = (
     args: { whatToLoad: LazyWhat; data?: EntryTypeData },
@@ -259,8 +265,22 @@ const EntryTypes: Component = (): JSX.Element => {
     const { whatToLoad, data } = args;
     batch(() => {
       setDyn(whatToLoad);
-      setInitialInputs(data as EntryTypeData);
+      if (isEntryTypeData(data)) {
+        setInitialInputs(data as EntryTypeData);
+      }
     });
+  };
+
+  const [openFilterColumns, setOpenFilterColumns] = createSignal(false);
+  let actionButtonColumns: HTMLButtonElement | null;
+  const handleColumns = () => {
+    const isOpen = untrack(() => openFilterColumns());
+    setOpenFilterColumns(!isOpen);
+
+    const anchor = untrack(() => anchorElColumns());
+    if (anchor === null) {
+      setAnchorElColumns(actionButtonColumns);
+    }
   };
 
   const theme = useTheme();
@@ -314,8 +334,55 @@ const EntryTypes: Component = (): JSX.Element => {
     </Show>
   );
 
+  const initialColumns = ['code', 'description', 'unit'];
+  const [columns, setColumns] = createSignal<string[]>(initialColumns);
+  createEffect(() => console.log(columns()));
+
+  const tableCells = (
+    cols: string[],
+    vals?: { [Key in (typeof cols)[number]]: any },
+  ): JSX.Element => {
+    const isHeadCell = vals === undefined;
+
+    return (
+      <For each={cols}>
+        {(col: string, inx: () => number) => {
+          if (inx() === 0) {
+            return isHeadCell ? (
+              <TableCell component="th">{col}</TableCell>
+            ) : (
+              <TableCell component="td">{vals ? vals[col] : ''}</TableCell>
+            );
+          }
+          return isHeadCell ? (
+            <TableCell component="th" align="right">
+              {col}
+            </TableCell>
+          ) : (
+            <TableCell component="td" align="right">
+              {vals ? vals[col] : ''}
+            </TableCell>
+          );
+        }}
+      </For>
+    );
+  };
+
+  const [anchorElColumns, setAnchorElColumns] =
+    createSignal<HTMLButtonElement | null>(null);
+
   return (
     <>
+      <Dynamic
+        anchorEl={anchorElColumns}
+        setAnchorEl={setAnchorElColumns}
+        open={openFilterColumns}
+        setOpen={setOpenFilterColumns}
+        title="Hide columns"
+        items={initialColumns}
+        setItems={setColumns}
+        component={filterColumnsEntryType}
+      />
       {actionForm}
       <Show when={result.state === 'ready'} fallback={dummy(peakRow, '1rem')}>
         <TableContainer component={Paper}>
@@ -326,6 +393,26 @@ const EntryTypes: Component = (): JSX.Element => {
               justifyContent: 'end',
             }}
           >
+            <ActionButton
+              size="large"
+              variant="text"
+              startIcon={<FilterListIcon />}
+              onClick={[
+                handleDialogWith,
+                { whatToLoad: 'addEntry', data: entryTypeZero },
+              ]}
+            >
+              Filters
+            </ActionButton>
+            <ActionButton
+              ref={actionButtonColumns}
+              size="large"
+              variant="text"
+              startIcon={<ViewColumnOutlinedIcon />}
+              onClick={handleColumns}
+            >
+              Columns
+            </ActionButton>
             <ActionButton
               size="large"
               variant="text"
@@ -344,13 +431,7 @@ const EntryTypes: Component = (): JSX.Element => {
                 <TableCell component="th">
                   <Checkbox id="entries-all" />
                 </TableCell>
-                <TableCell component="th">Code</TableCell>
-                <TableCell component="th" align="right">
-                  Description
-                </TableCell>
-                <TableCell component="th" align="right">
-                  Unit
-                </TableCell>
+                {tableCells(columns())}
                 <TableCell component="th" align="right">
                   &nbsp;
                 </TableCell>
@@ -364,9 +445,7 @@ const EntryTypes: Component = (): JSX.Element => {
                       <TableCell>
                         <Checkbox name="entries" value={et.id} />
                       </TableCell>
-                      <TableCell>{et.code}</TableCell>
-                      <TableCell align="right">{et.description}</TableCell>
-                      <TableCell align="right">{et.unit}</TableCell>
+                      {tableCells(columns(), et)}
                       <TableCell align="right">
                         <Stack direction="row" paddingLeft={theme.spacing(2)}>
                           <IconButton
