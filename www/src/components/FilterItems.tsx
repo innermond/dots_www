@@ -7,6 +7,8 @@ import Divider from '@suid/material/Divider';
 import Switch from '@suid/material/Switch';
 import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
+import ToggleOnOutlinedIcon from '@suid/icons-material/ToggleOnOutlined';
+import ToggleOffOutlinedIcon from '@suid/icons-material/ToggleOffOutlined';
 import { Accessor, For, Setter, createSignal } from 'solid-js';
 
 type FilterItemsProps = {
@@ -43,6 +45,11 @@ const FilterItems = (props: FilterItemsProps) => {
   const handleClose = () => {
     props.setAnchorEl(null);
     props.setOpen(false);
+  };
+
+  const handleFilterReset = () => {
+    setChecked([]);
+    props.setItems(props.items);
   };
 
   const handleFilterRevert = () => {
@@ -88,7 +95,7 @@ const FilterItems = (props: FilterItemsProps) => {
       onClose={handleClose}
     >
       <List
-        sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+        sx={{ width: '100%', maxWidth: 360 }}
         subheader=<ListSubheader>
           <SubheaderWithIcon />
         </ListSubheader>
@@ -99,31 +106,43 @@ const FilterItems = (props: FilterItemsProps) => {
           divider={<Divider orientation="vertical" flexItem />}
           sx={{ justifyContent: 'space-evenly' }}
         >
-          <Button variant="text" color="secondary" onClick={handleFilterRevert}>
+          <Button
+            startIcon={<ToggleOnOutlinedIcon />}
+            variant="text"
+            onClick={handleFilterRevert}
+          >
             {checked().length ? 'Revert' : 'All'}
           </Button>
+          <Button
+            color="secondary"
+            startIcon={<ToggleOffOutlinedIcon />}
+            variant="text"
+            onClick={handleFilterReset}
+          >
+            Reset
+          </Button>
         </Stack>
-        <Divider />
         <TextField
           id="filteringColumns"
           label="Search by name"
           variant="filled"
           size="small"
           onChange={handleChangeFilteringColumns}
+          autoComplete="off"
         />
-        <Divider />
         <For each={props.items}>
           {(item: string) => {
             const label = `switch-list-label-${item}`;
             return (
-              <ListItem>
+              <ListItem divider={true} dense>
                 <ListItemText id={label} primary={item} />
                 <Switch
+                  size="small"
                   edge="end"
                   onChange={handleToggle(item)}
                   checked={checked().indexOf(item) !== -1}
                   inputProps={{
-                    'aria-labelledby': 'switch-list-label-wifi',
+                    'aria-labelledby': 'switch-list-filtering-columns',
                   }}
                 />
               </ListItem>
