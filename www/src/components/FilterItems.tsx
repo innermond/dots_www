@@ -1,4 +1,4 @@
-import { Popover, Stack } from '@suid/material';
+import { Button, Popover, Stack, TextField } from '@suid/material';
 import List from '@suid/material/List';
 import ListItem from '@suid/material/ListItem';
 import ListItemText from '@suid/material/ListItemText';
@@ -9,20 +9,20 @@ import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import { Accessor, For, Setter, createSignal } from 'solid-js';
 
-type FilterItemsProps<Items> = {
+type FilterItemsProps = {
   open: Accessor<boolean>;
   setOpen: Setter<boolean>;
 
   title?: string;
 
-  items: Items;
-  setItems: Setter<Items>;
+  items: string[];
+  setItems: Setter<string[]>;
 
   anchorEl: Accessor<HTMLButtonElement | null>;
   setAnchorEl: Setter<HTMLButtonElement | null>;
 };
 
-const FilterItems = <T extends string[]>(props: FilterItemsProps<T>) => {
+const FilterItems = (props: FilterItemsProps) => {
   const [checked, setChecked] = createSignal([] as string[]);
 
   const handleToggle = (value: string) => () => {
@@ -45,8 +45,30 @@ const FilterItems = <T extends string[]>(props: FilterItemsProps<T>) => {
     props.setOpen(false);
   };
 
+  const handleFilterRevert = () => {
+    const reverted = props.items.filter((x: string) => !checked().includes(x));
+    const items = props.items.filter((x: string) => checked().includes(x));
+    setChecked(reverted);
+    props.setItems(items);
+  };
+
+  const handleChangeFilteringColumns = (evt: Event, value: string) => {
+    if (value === '') {
+      setChecked([]);
+      props.setItems(props.items);
+      return;
+    }
+    const found = props.items.filter((x: string) => x.includes(value));
+    const reverted = props.items.filter((x: string) => !found.includes(x));
+    setChecked(found);
+    props.setItems(reverted);
+  };
+
   const SubheaderWithIcon = () => (
-    <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+    <Stack
+      direction="row"
+      sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+    >
       {props.title ?? 'Hide items'}
       <IconButton
         size="small"
@@ -71,6 +93,24 @@ const FilterItems = <T extends string[]>(props: FilterItemsProps<T>) => {
           <SubheaderWithIcon />
         </ListSubheader>
       >
+        <Divider />
+        <Stack
+          direction="row"
+          divider={<Divider orientation="vertical" flexItem />}
+          sx={{ justifyContent: 'space-evenly' }}
+        >
+          <Button variant="text" color="secondary" onClick={handleFilterRevert}>
+            {checked().length ? 'Revert' : 'All'}
+          </Button>
+        </Stack>
+        <Divider />
+        <TextField
+          id="filteringColumns"
+          label="Search by name"
+          variant="filled"
+          size="small"
+          onChange={handleChangeFilteringColumns}
+        />
         <Divider />
         <For each={props.items}>
           {(item: string) => {

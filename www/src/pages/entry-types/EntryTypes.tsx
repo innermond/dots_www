@@ -272,13 +272,13 @@ const EntryTypes: Component = (): JSX.Element => {
   };
 
   const [openFilterColumns, setOpenFilterColumns] = createSignal(false);
-  let actionButtonColumns: HTMLButtonElement | null;
+  let actionButtonColumns: HTMLButtonElement | undefined;
   const handleColumns = () => {
     const isOpen = untrack(() => openFilterColumns());
     setOpenFilterColumns(!isOpen);
 
     const anchor = untrack(() => anchorElColumns());
-    if (anchor === null) {
+    if (anchor === null && !!actionButtonColumns) {
       setAnchorElColumns(actionButtonColumns);
     }
   };
@@ -368,6 +368,8 @@ const EntryTypes: Component = (): JSX.Element => {
     );
   };
 
+  const isColumnsFiltered = () => columns()?.length !== initialColumns.length;
+
   const [anchorElColumns, setAnchorElColumns] =
     createSignal<HTMLButtonElement | null>(null);
 
@@ -408,7 +410,15 @@ const EntryTypes: Component = (): JSX.Element => {
               ref={actionButtonColumns}
               size="large"
               variant="text"
-              startIcon={<ViewColumnOutlinedIcon />}
+              startIcon={
+                isColumnsFiltered() ? (
+                  <Badge overlap="circular" variant="dot" color="error">
+                    <ViewColumnOutlinedIcon />
+                  </Badge>
+                ) : (
+                  <ViewColumnOutlinedIcon />
+                )
+              }
               onClick={handleColumns}
             >
               Columns
