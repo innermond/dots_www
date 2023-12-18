@@ -10,7 +10,8 @@ import {
   createComputed,
   onCleanup,
   untrack,
-  createEffect,
+  Switch,
+  Match,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -55,6 +56,7 @@ import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 import ViewColumnOutlinedIcon from '@suid/icons-material/ViewColumnOutlined';
 import FilterListIcon from '@suid/icons-material/FilterList';
 import ActionFormProvider from '@/contexts/ActionFormContext';
+import type { FilterState } from '@/components/FilterSearch';
 
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
@@ -373,38 +375,56 @@ const EntryTypes: Component = (): JSX.Element => {
     createSignal<HTMLButtonElement | null>(null);
 
   const initialFilterState = {
-    anchor: null,
+    anchor: undefined,
     open: false,
+    title: 'Filter items',
     items: [],
-    component: null,
-  };
-  const [filterState, setFIlterState] =
-    createStore<FilterState>(initialFilterState);
-
-  const filterSearchEntryType = lazy(
-    () => import('../../components/FilterSearch'),
+  } as FilterState;
+  const [filterState, setFIlterState] = createStore<FilterState>(
+    structuredClone(initialFilterState),
   );
 
-  const startFilterComponent = (cmpstr: string) => {
-    const initial = { ...initialFilterState };
-    let cmp: Component | null;
-    switch (cmpstr) {
-      case 'search':
-        cmp = filterSearchEntryType;
-        break;
-      default:
-        cmp = null;
+  const FilterSearchEntryType = lazy(
+    () => import('../../components/FilterSearch'),
+  );
+  let actionFilterRef: HTMLButtonElement | undefined;
+
+  const [filterItemsOrigin, setFilterItems] = createSignal<string>();
+  const filterItems = createMemo(() => filterItemsOrigin());
+  const filterComponent = () => {
+    if (filterItems() === 'search-filter') {
+      return FilterSearchEntryType;
     }
-    initial.component = cmp;
-    setFIlterState(initial);
   };
 
-  const Filter = () => {
-    return <Dynamic state={filterState} setState={setFIlterState} />;
+  const startFilterComponent = (cmpstr: string, evt: Event) => {
+    const initial = structuredClone(initialFilterState);
+    initial.open = true;
+    switch (cmpstr) {
+      case 'search-filter':
+        initial.title = 'Search filter';
+        initial.items = ['code', 'description', 'unit'];
+        initial.anchor = actionFilterRef;
+        setFIlterState(initial);
+        setFilterItems('search-filter');
+        console.log(initial);
+        break;
+    }
   };
 
+  createComputed(() => console.log(filterItems()));
   return (
     <>
+      <Dynamic
+        component={filterComponent()}
+        state={filterState}
+        setState={setFIlterState}
+      />
+      <Dynamic
+        state={filterState}
+        setState={setFIlterState}
+        component={filterItemsOrigin()}
+      />
       <Dynamic
         anchorEl={anchorElColumns}
         setAnchorEl={setAnchorElColumns}
@@ -426,19 +446,19 @@ const EntryTypes: Component = (): JSX.Element => {
             }}
           >
             <ActionButton
-              ref={actionButtonColumns}
+              ref={actionFilterRef}
               size="large"
               variant="text"
               startIcon={
                 isColumnsFiltered() ? (
                   <Badge overlap="circular" variant="dot" color="error">
-                    <ViewColumnOutlinedIcon />
+                    <FilterListIcon />
                   </Badge>
                 ) : (
-                  <ViewColumnOutlinedIcon />
+                  <FilterListIcon />
                 )
               }
-              onClick={startFilterComponent('search')}
+              onClick={[startFilterComponent, 'search-filter']}
             >
               Filters
             </ActionButton>
