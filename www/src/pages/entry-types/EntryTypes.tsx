@@ -336,7 +336,6 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const initialColumns = ['code', 'description', 'unit'];
   const [columns, setColumns] = createSignal<string[]>(initialColumns);
-  createEffect(() => console.log(columns()));
 
   const tableCells = (
     cols: string[],

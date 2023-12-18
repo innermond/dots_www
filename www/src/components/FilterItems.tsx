@@ -9,7 +9,7 @@ import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import ToggleOnOutlinedIcon from '@suid/icons-material/ToggleOnOutlined';
 import ToggleOffOutlinedIcon from '@suid/icons-material/ToggleOffOutlined';
-import { Accessor, For, Setter, createSignal } from 'solid-js';
+import { Accessor, For, Setter, createMemo, createSignal } from 'solid-js';
 
 type FilterItemsProps = {
   open: Accessor<boolean>;
@@ -25,7 +25,8 @@ type FilterItemsProps = {
 };
 
 const FilterItems = (props: FilterItemsProps) => {
-  const [checked, setChecked] = createSignal([] as string[]);
+  const [checkedOrigin, setChecked] = createSignal([] as string[]);
+  const checked = createMemo(() => checkedOrigin());
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked().indexOf(value);
@@ -48,8 +49,7 @@ const FilterItems = (props: FilterItemsProps) => {
   };
 
   const handleFilterReset = () => {
-    setChecked([]);
-    props.setItems(props.items);
+    handleChangeFilteringColumns(null, '');
   };
 
   const handleFilterRevert = () => {
@@ -59,7 +59,9 @@ const FilterItems = (props: FilterItemsProps) => {
     props.setItems(items);
   };
 
-  const handleChangeFilteringColumns = (evt: Event, value: string) => {
+  const [search, setSearch] = createSignal('');
+  const handleChangeFilteringColumns = (evt: Event | null, value: string) => {
+    setSearch(value);
     if (value === '') {
       setChecked([]);
       props.setItems(props.items);
@@ -71,7 +73,7 @@ const FilterItems = (props: FilterItemsProps) => {
     props.setItems(reverted);
   };
 
-  const SubheaderWithIcon = () => (
+  const SubheaderWithCloseIcon = () => (
     <Stack
       direction="row"
       sx={{ justifyContent: 'space-between', alignItems: 'center' }}
@@ -96,9 +98,11 @@ const FilterItems = (props: FilterItemsProps) => {
     >
       <List
         sx={{ width: '100%', maxWidth: 360 }}
-        subheader=<ListSubheader>
-          <SubheaderWithIcon />
-        </ListSubheader>
+        subheader={
+          <ListSubheader>
+            <SubheaderWithCloseIcon />
+          </ListSubheader>
+        }
       >
         <Divider />
         <Stack
@@ -111,10 +115,11 @@ const FilterItems = (props: FilterItemsProps) => {
             variant="text"
             onClick={handleFilterRevert}
           >
-            {checked().length ? 'Revert' : 'All'}
+            Revert
           </Button>
           <Button
-            color="secondary"
+            sx={{ pointerEvents: checked()?.length ? 'all' : 'none' }}
+            color={checked()?.length ? 'primary' : 'secondary'}
             startIcon={<ToggleOffOutlinedIcon />}
             variant="text"
             onClick={handleFilterReset}
@@ -128,27 +133,30 @@ const FilterItems = (props: FilterItemsProps) => {
           variant="filled"
           size="small"
           onChange={handleChangeFilteringColumns}
+          value={search()}
           autoComplete="off"
         />
-        <For each={props.items}>
-          {(item: string) => {
-            const label = `switch-list-label-${item}`;
-            return (
-              <ListItem divider={true} dense>
-                <ListItemText id={label} primary={item} />
-                <Switch
-                  size="small"
-                  edge="end"
-                  onChange={handleToggle(item)}
-                  checked={checked().indexOf(item) !== -1}
-                  inputProps={{
-                    'aria-labelledby': 'switch-list-filtering-columns',
-                  }}
-                />
-              </ListItem>
-            );
-          }}
-        </For>
+        <Stack direction="column" sx={{ maxHeight: 360, overflow: 'auto' }}>
+          <For each={props.items}>
+            {(item: string) => {
+              const label = `switch-list-label-${item}`;
+              return (
+                <ListItem divider={true} dense>
+                  <ListItemText id={label} primary={item} />
+                  <Switch
+                    size="small"
+                    edge="end"
+                    onChange={handleToggle(item)}
+                    checked={checked().indexOf(item) !== -1}
+                    inputProps={{
+                      'aria-labelledby': 'switch-list-filtering-columns',
+                    }}
+                  />
+                </ListItem>
+              );
+            }}
+          </For>
+        </Stack>
       </List>
     </Popover>
   );
