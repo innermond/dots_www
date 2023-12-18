@@ -372,6 +372,37 @@ const EntryTypes: Component = (): JSX.Element => {
   const [anchorElColumns, setAnchorElColumns] =
     createSignal<HTMLButtonElement | null>(null);
 
+  const initialFilterState = {
+    anchor: null,
+    open: false,
+    items: [],
+    component: null,
+  };
+  const [filterState, setFIlterState] =
+    createStore<FilterState>(initialFilterState);
+
+  const filterSearchEntryType = lazy(
+    () => import('../../components/FilterSearch'),
+  );
+
+  const startFilterComponent = (cmpstr: string) => {
+    const initial = { ...initialFilterState };
+    let cmp: Component | null;
+    switch (cmpstr) {
+      case 'search':
+        cmp = filterSearchEntryType;
+        break;
+      default:
+        cmp = null;
+    }
+    initial.component = cmp;
+    setFIlterState(initial);
+  };
+
+  const Filter = () => {
+    return <Dynamic state={filterState} setState={setFIlterState} />;
+  };
+
   return (
     <>
       <Dynamic
@@ -395,13 +426,19 @@ const EntryTypes: Component = (): JSX.Element => {
             }}
           >
             <ActionButton
+              ref={actionButtonColumns}
               size="large"
               variant="text"
-              startIcon={<FilterListIcon />}
-              onClick={[
-                handleDialogWith,
-                { whatToLoad: 'addEntry', data: entryTypeZero },
-              ]}
+              startIcon={
+                isColumnsFiltered() ? (
+                  <Badge overlap="circular" variant="dot" color="error">
+                    <ViewColumnOutlinedIcon />
+                  </Badge>
+                ) : (
+                  <ViewColumnOutlinedIcon />
+                )
+              }
+              onClick={startFilterComponent('search')}
             >
               Filters
             </ActionButton>
