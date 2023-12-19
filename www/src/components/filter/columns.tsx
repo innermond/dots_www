@@ -9,68 +9,70 @@ import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import ToggleOnOutlinedIcon from '@suid/icons-material/ToggleOnOutlined';
 import ToggleOffOutlinedIcon from '@suid/icons-material/ToggleOffOutlined';
-import { Accessor, For, Setter, createMemo, createSignal } from 'solid-js';
+import { For, createMemo, createSignal, untrack } from 'solid-js';
+import type { FilterProps, FilterState } from './types';
+import { produce } from 'solid-js/store';
 
-type FilterItemsProps = {
-  open: Accessor<boolean>;
-  setOpen: Setter<boolean>;
+const FilterColumns = (props: FilterProps) => {
+  const initialColumns = [...props.state.items];
+  const [partColumns, setPartColumns] = createSignal(initialColumns);
 
-  title?: string;
-
-  items: string[];
-  setItems: Setter<string[]>;
-
-  anchorEl: Accessor<HTMLButtonElement | null>;
-  setAnchorEl: Setter<HTMLButtonElement | null>;
-};
-
-const FilterItems = (props: FilterItemsProps) => {
-  const [checkedOrigin, setChecked] = createSignal([] as string[]);
-  const checked = createMemo(() => checkedOrigin());
+  const [hiddenOrigin, setHidden] = createSignal([] as string[]);
+  const hidden = createMemo(() => hiddenOrigin());
 
   const handleToggle = (value: string) => () => {
-    const currentIndex = checked().indexOf(value);
-    const newChecked = [...checked()];
+    const found = hidden().indexOf(value);
+    const newHidden = [...hidden()];
 
-    if (currentIndex === -1) {
-      newChecked.push(value);
+    if (found === -1) {
+      newHidden.push(value);
     } else {
-      newChecked.splice(currentIndex, 1);
+      newHidden.splice(found, 1);
     }
 
-    setChecked(newChecked);
-    const excluded = props.items.filter((x: string) => !newChecked.includes(x));
-    props.setItems(excluded);
+    // hide hidden means
+    setHidden(newHidden);
+    // to show the rest of columns
+    const visible = partColumns().filter((x: string) => !newHidden.includes(x));
+    props.setState('items', visible);
   };
 
   const handleClose = () => {
-    props.setAnchorEl(null);
-    props.setOpen(false);
+    props.setState(
+      produce((s: FilterState) => {
+        s.anchor = undefined;
+        s.open = false;
+      }),
+    );
   };
 
   const handleFilterReset = () => {
-    handleChangeFilteringColumns(null, '');
+    handleFilterChange(null, '');
   };
 
   const handleFilterRevert = () => {
-    const reverted = props.items.filter((x: string) => !checked().includes(x));
-    const items = props.items.filter((x: string) => checked().includes(x));
-    setChecked(reverted);
-    props.setItems(items);
+    const reverted = props.state.items.filter(
+      (x: string) => !hidden().includes(x),
+    );
+    const items = partColumns().filter((x: string) => hidden().includes(x));
+    setHidden(reverted);
+    props.setState('items', items);
   };
 
   const [search, setSearch] = createSignal('');
-  const handleChangeFilteringColumns = (evt: Event | null, value: string) => {
+  const handleFilterChange = (evt: Event | null, value: string) => {
     setSearch(value);
     if (value === '') {
-      setChecked([]);
-      props.setItems(props.items);
+      //setHidden([]);
+      const visible = initialColumns.filter(
+        (x: string) => !hidden().includes(x),
+      );
+      props.setState('items', visible);
+      setPartColumns(initialColumns);
       return;
     }
-    const found = props.items.filter((x: string) => x.includes(value));
-    const reverted = props.items.filter((x: string) => !found.includes(x));
-    setChecked(found);
-    props.setItems(reverted);
+    const found = initialColumns.filter((x: string) => x.includes(value));
+    setPartColumns(found);
   };
 
   const SubheaderWithCloseIcon = () => (
@@ -78,7 +80,7 @@ const FilterItems = (props: FilterItemsProps) => {
       direction="row"
       sx={{ justifyContent: 'space-between', alignItems: 'center' }}
     >
-      {props.title ?? 'Hide items'}
+      {props.state.title ?? 'Hide items'}
       <IconButton
         size="small"
         edge="start"
@@ -92,8 +94,8 @@ const FilterItems = (props: FilterItemsProps) => {
 
   return (
     <Popover
-      open={props.open()}
-      anchorEl={props.anchorEl()}
+      open={props.state.open}
+      anchorEl={props.state.anchor}
       onClose={handleClose}
     >
       <List
@@ -118,8 +120,8 @@ const FilterItems = (props: FilterItemsProps) => {
             Revert
           </Button>
           <Button
-            sx={{ pointerEvents: checked()?.length ? 'all' : 'none' }}
-            color={checked()?.length ? 'primary' : 'secondary'}
+            sx={{ pointerEvents: hidden()?.length ? 'all' : 'none' }}
+            color={hidden()?.length ? 'primary' : 'secondary'}
             startIcon={<ToggleOffOutlinedIcon />}
             variant="text"
             onClick={handleFilterReset}
@@ -132,12 +134,12 @@ const FilterItems = (props: FilterItemsProps) => {
           label="Search by name"
           variant="filled"
           size="small"
-          onChange={handleChangeFilteringColumns}
+          onChange={handleFilterChange}
           value={search()}
           autoComplete="off"
         />
         <Stack direction="column" sx={{ maxHeight: 360, overflow: 'auto' }}>
-          <For each={props.items}>
+          <For each={partColumns()}>
             {(item: string) => {
               const label = `switch-list-label-${item}`;
               return (
@@ -147,7 +149,7 @@ const FilterItems = (props: FilterItemsProps) => {
                     size="small"
                     edge="end"
                     onChange={handleToggle(item)}
-                    checked={checked().indexOf(item) !== -1}
+                    checked={hidden().indexOf(item) !== -1}
                     inputProps={{
                       'aria-labelledby': 'switch-list-filtering-columns',
                     }}
@@ -162,4 +164,4 @@ const FilterItems = (props: FilterItemsProps) => {
   );
 };
 
-export default FilterItems;
+export default FilterColumns;

@@ -6,19 +6,8 @@ import Divider from '@suid/material/Divider';
 import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import { For } from 'solid-js';
-import { SetStoreFunction, Store, produce } from 'solid-js/store';
-
-type FilterState = {
-  anchor: HTMLElement | undefined;
-  open: boolean;
-  title: string;
-  items: string[];
-};
-
-type FilterProps = {
-  state: Store<FilterState>;
-  setState: SetStoreFunction<FilterState>;
-};
+import { produce } from 'solid-js/store';
+import type { FilterProps, FilterState } from './types';
 
 const FilterSearch = (props: FilterProps) => {
   const handleClose = () => {
