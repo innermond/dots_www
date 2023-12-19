@@ -409,17 +409,16 @@ const EntryTypes: Component = (): JSX.Element => {
   const startFilterComponent = (cmpstr: string, evt: Event) => {
     const initial = structuredClone(initialFilterState);
     initial.open = true;
+    initial.items = ['code', 'description', 'unit'];
     switch (cmpstr) {
       case 'search-filter':
         initial.title = 'Search filter';
-        initial.items = ['code', 'description', 'unit'];
         initial.anchor = anchorSearchFilter;
         setFIlterState(initial);
         setFilterItems('search-filter');
         break;
       case 'columns-filter':
         initial.title = 'Hide columns';
-        initial.items = ['code', 'description', 'unit'];
         initial.anchor = anchorColumnsFilter;
         setFIlterState(initial);
         setFilterItems('columns-filter');

@@ -47,7 +47,9 @@ const FilterColumns = (props: FilterProps) => {
   };
 
   const handleFilterReset = () => {
-    handleFilterChange(null, '');
+    setHidden([]);
+    setPartColumns(initialColumns);
+    props.setState('items', initialColumns);
   };
 
   const handleFilterRevert = () => {
@@ -63,7 +65,6 @@ const FilterColumns = (props: FilterProps) => {
   const handleFilterChange = (evt: Event | null, value: string) => {
     setSearch(value);
     if (value === '') {
-      //setHidden([]);
       const visible = initialColumns.filter(
         (x: string) => !hidden().includes(x),
       );
@@ -71,8 +72,12 @@ const FilterColumns = (props: FilterProps) => {
       setPartColumns(initialColumns);
       return;
     }
-    const found = initialColumns.filter((x: string) => x.includes(value));
-    setPartColumns(found);
+    untrack(() => {
+      const found = initialColumns.filter((x: string) => x.includes(value));
+      setPartColumns(found);
+      const visible = found.filter((x: string) => !hidden().includes(x));
+      props.setState('items', visible);
+    });
   };
 
   const SubheaderWithCloseIcon = () => (
