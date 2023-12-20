@@ -339,6 +339,8 @@ const EntryTypes: Component = (): JSX.Element => {
     anchor: undefined,
     open: false,
     title: 'Filter items',
+    search: '',
+    initials: [...initialColumns],
     items: initialColumns,
   } as FilterState;
   const [filterState, setFIlterState] = createStore<FilterState>(
@@ -360,7 +362,6 @@ const EntryTypes: Component = (): JSX.Element => {
     vals?: { [Key in (typeof cols)[number]]: any },
   ): JSX.Element => {
     const isHeadCell = vals === undefined;
-
     return (
       <For each={cols}>
         {(col: string, inx: () => number) => {
@@ -407,9 +408,9 @@ const EntryTypes: Component = (): JSX.Element => {
   };
 
   const startFilterComponent = (cmpstr: string, evt: Event) => {
-    const initial = structuredClone(initialFilterState);
+    const items = unwrap(filterState);
+    let initial = { ...initialFilterState, ...items };
     initial.open = true;
-    initial.items = ['code', 'description', 'unit'];
     switch (cmpstr) {
       case 'search-filter':
         initial.title = 'Search filter';

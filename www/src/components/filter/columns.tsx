@@ -14,10 +14,20 @@ import type { FilterProps, FilterState } from './types';
 import { produce } from 'solid-js/store';
 
 const FilterColumns = (props: FilterProps) => {
-  const initialColumns = [...props.state.items];
-  const [partColumns, setPartColumns] = createSignal(initialColumns);
+  // re-build its current state
+  const initialColumns = props.state.initials;
+  // visible after a search has been applied
+  let visibles = [...props.state.items];
+  const initialHidden = initialColumns.filter(
+    (x: string) => !visibles.includes(x),
+  );
+  // show all columns when no search has been applied
+  if (props.state.search === '') {
+    visibles = initialColumns;
+  }
+  const [partColumns, setPartColumns] = createSignal(visibles);
 
-  const [hiddenOrigin, setHidden] = createSignal([] as string[]);
+  const [hiddenOrigin, setHidden] = createSignal(initialHidden);
   const hidden = createMemo(() => hiddenOrigin());
 
   const handleToggle = (value: string) => () => {
@@ -48,8 +58,8 @@ const FilterColumns = (props: FilterProps) => {
 
   const handleFilterReset = () => {
     setHidden([]);
-    setPartColumns(initialColumns);
-    props.setState('items', initialColumns);
+    setPartColumns(visibles);
+    props.setState('items', visibles);
   };
 
   const handleFilterRevert = () => {
@@ -61,19 +71,16 @@ const FilterColumns = (props: FilterProps) => {
     props.setState('items', items);
   };
 
-  const [search, setSearch] = createSignal('');
   const handleFilterChange = (evt: Event | null, value: string) => {
-    setSearch(value);
+    props.setState('search', value);
     if (value === '') {
-      const visible = initialColumns.filter(
-        (x: string) => !hidden().includes(x),
-      );
+      const visible = visibles.filter((x: string) => !hidden().includes(x));
       props.setState('items', visible);
-      setPartColumns(initialColumns);
+      setPartColumns(visibles);
       return;
     }
     untrack(() => {
-      const found = initialColumns.filter((x: string) => x.includes(value));
+      const found = visibles.filter((x: string) => x.includes(value));
       setPartColumns(found);
       const visible = found.filter((x: string) => !hidden().includes(x));
       props.setState('items', visible);
@@ -140,7 +147,7 @@ const FilterColumns = (props: FilterProps) => {
           variant="filled"
           size="small"
           onChange={handleFilterChange}
-          value={search()}
+          value={props.state.search}
           autoComplete="off"
         />
         <Stack direction="column" sx={{ maxHeight: 360, overflow: 'auto' }}>

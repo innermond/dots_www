@@ -4,6 +4,8 @@ type FilterState = {
   anchor: HTMLElement | undefined;
   open: boolean;
   title: string;
+  search: string;
+  initials: string[];
   items: string[];
 };
 
