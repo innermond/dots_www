@@ -170,7 +170,7 @@ const FilterColumns = (props: FilterProps) => {
                     size="small"
                     edge="end"
                     onChange={handleToggle(item)}
-                    checked={hidden().indexOf(item) !== -1}
+                    checked={hidden().indexOf(item) === -1}
                     inputProps={{
                       'aria-labelledby': 'switch-list-filtering-columns',
                     }}
