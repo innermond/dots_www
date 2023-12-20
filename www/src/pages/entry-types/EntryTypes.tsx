@@ -328,13 +328,12 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const initialColumns = ['code', 'description', 'unit'];
   const initialFilterState = {
-    anchor: undefined,
+    anchor: null,
     open: false,
     title: 'Filter items',
     items: initialColumns,
     initial: [...initialColumns],
     search: '',
-    kind: '',
   } as FilterState;
   const [filterState, setFilterState] = createStore<FilterState>(
     structuredClone(initialFilterState),
@@ -390,7 +389,6 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const [run, setRun] = createSignal('');
   const filterComponent = () => {
-    console.log('run', filterState.kind);
     if (run() === 'search-filter') {
       return FilterSearch;
     }
@@ -427,16 +425,17 @@ const EntryTypes: Component = (): JSX.Element => {
         setRun(cmpstr);
         break;
     }
-    console.log('start', filterState.kind);
   };
 
   return (
     <>
-      <Dynamic
-        component={filterComponent()}
-        state={filterState}
-        setState={setFilterState}
-      />
+      <Show when={!!filterComponent()}>
+        <Dynamic
+          component={filterComponent()}
+          state={filterState}
+          setState={setFilterState}
+        />
+      </Show>
       {actionForm}
       <Show when={result.state === 'ready'} fallback={dummy(peakRow, '1rem')}>
         <TableContainer component={Paper}>

@@ -15,7 +15,6 @@ const FilterSearch = (props: FilterProps) => {
       produce((s: FilterState) => {
         s.anchor = null;
         s.open = false;
-        s.kind = '';
       }),
     );
   };
