@@ -9,7 +9,7 @@ import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import ToggleOnOutlinedIcon from '@suid/icons-material/ToggleOnOutlined';
 import ToggleOffOutlinedIcon from '@suid/icons-material/ToggleOffOutlined';
-import { For, createMemo, createSignal, untrack } from 'solid-js';
+import { For, batch, createMemo, createSignal, untrack } from 'solid-js';
 import type { FilterProps, FilterState } from './types';
 import { produce } from 'solid-js/store';
 
@@ -24,6 +24,10 @@ const FilterColumns = (props: FilterProps) => {
   // show all columns when no search has been applied
   if (props.state.search === '') {
     visibles = initialColumns;
+  } else {
+    visibles = initialColumns.filter((x: string) =>
+      x.includes(props.state.search),
+    );
   }
   const [partColumns, setPartColumns] = createSignal(visibles);
 
@@ -57,9 +61,12 @@ const FilterColumns = (props: FilterProps) => {
   };
 
   const handleFilterReset = () => {
-    setHidden([]);
-    setPartColumns(visibles);
-    props.setState('items', visibles);
+    batch(() => {
+      setHidden([]);
+      setPartColumns(initialColumns);
+      props.setState('items', initialColumns);
+      props.setState('search', '');
+    });
   };
 
   const handleFilterRevert = () => {
@@ -74,13 +81,15 @@ const FilterColumns = (props: FilterProps) => {
   const handleFilterChange = (evt: Event | null, value: string) => {
     props.setState('search', value);
     if (value === '') {
-      const visible = visibles.filter((x: string) => !hidden().includes(x));
+      const visible = initialColumns.filter(
+        (x: string) => !hidden().includes(x),
+      );
       props.setState('items', visible);
-      setPartColumns(visibles);
+      setPartColumns(initialColumns);
       return;
     }
     untrack(() => {
-      const found = visibles.filter((x: string) => x.includes(value));
+      const found = initialColumns.filter((x: string) => x.includes(value));
       setPartColumns(found);
       const visible = found.filter((x: string) => !hidden().includes(x));
       props.setState('items', visible);

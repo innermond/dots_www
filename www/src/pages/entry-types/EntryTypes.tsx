@@ -419,7 +419,7 @@ const EntryTypes: Component = (): JSX.Element => {
         setFilterItems('search-filter');
         break;
       case 'columns-filter':
-        initial.title = 'Hide columns';
+        initial.title = 'columns visibility';
         initial.anchor = anchorColumnsFilter;
         setFIlterState(initial);
         setFilterItems('columns-filter');
