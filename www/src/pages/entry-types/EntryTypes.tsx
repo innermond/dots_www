@@ -10,6 +10,10 @@ import {
   createComputed,
   onCleanup,
   untrack,
+  Suspense,
+  createEffect,
+  Switch,
+  Match,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -48,7 +52,7 @@ import ActionButton from '@/components/ActionButton';
 import { Dynamic } from 'solid-js/web';
 import toasting from '@/lib/toast';
 import { listen, unlisten } from '@/lib/customevent';
-import { SetStoreFunction, createStore, unwrap } from 'solid-js/store';
+import { SetStoreFunction, createStore, unwrap, produce } from 'solid-js/store';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 import ViewColumnOutlinedIcon from '@suid/icons-material/ViewColumnOutlined';
@@ -254,9 +258,7 @@ const EntryTypes: Component = (): JSX.Element => {
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
   const updateEntryType = lazy(() => import('./EntryTypeUpdate'));
   const detailEntryType = lazy(() => import('./EntryTypeDetail'));
-  const filterColumnsEntryType = lazy(
-    () => import('../../components/filter/columns'),
-  );
+  const FilterColumns = lazy(() => import('../../components/filter/columns'));
 
   const handleDialogWith = (
     args: { whatToLoad: LazyWhat; data?: EntryTypeData },
@@ -271,17 +273,7 @@ const EntryTypes: Component = (): JSX.Element => {
     });
   };
 
-  const [openFilterColumns, setOpenFilterColumns] = createSignal(false);
-  let anchorColumnsFilter: HTMLButtonElement | undefined;
-  const handleColumns = () => {
-    const isOpen = untrack(() => openFilterColumns());
-    setOpenFilterColumns(!isOpen);
-
-    const anchor = untrack(() => anchorElColumns());
-    if (anchor === null && !!anchorColumnsFilter) {
-      setAnchorElColumns(anchorColumnsFilter);
-    }
-  };
+  let anchorColumnsFilter: HTMLButtonElement | null;
 
   const theme = useTheme();
 
@@ -340,8 +332,11 @@ const EntryTypes: Component = (): JSX.Element => {
     open: false,
     title: 'Filter items',
     items: initialColumns,
+    initial: [...initialColumns],
+    search: '',
+    kind: '',
   } as FilterState;
-  const [filterState, setFIlterState] = createStore<FilterState>(
+  const [filterState, setFilterState] = createStore<FilterState>(
     structuredClone(initialFilterState),
   );
 
@@ -390,40 +385,49 @@ const EntryTypes: Component = (): JSX.Element => {
   const [anchorElColumns, setAnchorElColumns] =
     createSignal<HTMLButtonElement | null>(null);
 
-  const filterSearchEntryType = lazy(
-    () => import('../../components/filter/search'),
-  );
-  let anchorSearchFilter: HTMLButtonElement | undefined;
+  const FilterSearch = lazy(() => import('../../components/filter/search'));
+  let anchorSearchFilter: HTMLButtonElement | null;
 
-  const [filterItemsOrigin, setFilterItems] = createSignal<string>();
-  const filterItems = createMemo(() => filterItemsOrigin());
+  const [run, setRun] = createSignal('');
   const filterComponent = () => {
-    if (filterItems() === 'search-filter') {
-      return filterSearchEntryType;
+    console.log('run', filterState.kind);
+    if (run() === 'search-filter') {
+      return FilterSearch;
     }
-    if (filterItems() === 'columns-filter') {
-      return filterColumnsEntryType;
+    if (run() === 'columns-filter') {
+      return FilterColumns;
     }
   };
 
+  let startFilterComponentHasRun = false;
   const startFilterComponent = (cmpstr: string, evt: Event) => {
-    const initial = structuredClone(initialFilterState);
+    let initial = unwrap(filterState);
+    if (!startFilterComponentHasRun) {
+      startFilterComponentHasRun = true;
+      initial = structuredClone(initialFilterState);
+    }
     initial.open = true;
-    initial.items = ['code', 'description', 'unit'];
+    // use current items posibly filtered out from other filters
+    if (filterState.items.length) {
+      initial.items = filterState.items;
+    }
     switch (cmpstr) {
       case 'search-filter':
         initial.title = 'Search filter';
         initial.anchor = anchorSearchFilter;
-        setFIlterState(initial);
-        setFilterItems('search-filter');
+        initial.open = true;
+        setFilterState({ ...initial });
+        setRun(cmpstr);
         break;
       case 'columns-filter':
         initial.title = 'Hide columns';
         initial.anchor = anchorColumnsFilter;
-        setFIlterState(initial);
-        setFilterItems('columns-filter');
+        initial.open = true;
+        setFilterState({ ...initial });
+        setRun(cmpstr);
         break;
     }
+    console.log('start', filterState.kind);
   };
 
   return (
@@ -431,7 +435,7 @@ const EntryTypes: Component = (): JSX.Element => {
       <Dynamic
         component={filterComponent()}
         state={filterState}
-        setState={setFIlterState}
+        setState={setFilterState}
       />
       {actionForm}
       <Show when={result.state === 'ready'} fallback={dummy(peakRow, '1rem')}>
@@ -444,7 +448,7 @@ const EntryTypes: Component = (): JSX.Element => {
             }}
           >
             <ActionButton
-              ref={anchorSearchFilter}
+              ref={anchorSearchFilter!}
               size="large"
               variant="text"
               startIcon={
@@ -461,7 +465,7 @@ const EntryTypes: Component = (): JSX.Element => {
               Filters
             </ActionButton>
             <ActionButton
-              ref={anchorColumnsFilter}
+              ref={anchorColumnsFilter!}
               size="large"
               variant="text"
               startIcon={

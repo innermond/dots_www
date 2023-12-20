@@ -9,16 +9,25 @@ import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import ToggleOnOutlinedIcon from '@suid/icons-material/ToggleOnOutlined';
 import ToggleOffOutlinedIcon from '@suid/icons-material/ToggleOffOutlined';
-import { For, createMemo, createSignal, untrack } from 'solid-js';
+import { For, createMemo, createSignal, untrack, onMount } from 'solid-js';
 import type { FilterProps, FilterState } from './types';
-import { produce } from 'solid-js/store';
+import { produce, unwrap } from 'solid-js/store';
 
 const FilterColumns = (props: FilterProps) => {
-  const initialColumns = [...props.state.items];
-  const [partColumns, setPartColumns] = createSignal(initialColumns);
-
-  const [hiddenOrigin, setHidden] = createSignal([] as string[]);
+  let initialColumns = props.state.initial;
+  let value = props.state.search ?? '';
+  let found = initialColumns;
+  if (value.length) {
+    found = initialColumns.filter((x: string) => x.includes(value));
+  }
+  const hide = found.filter((x: string) => !props.state.items.includes(x));
+  const [hiddenOrigin, setHidden] = createSignal(hide);
   const hidden = createMemo(() => hiddenOrigin());
+  const [partColumns, setPartColumns] = createSignal(found);
+
+  onMount(() => {
+    console.log('columns', props.state);
+  });
 
   const handleToggle = (value: string) => () => {
     const found = hidden().indexOf(value);
@@ -40,7 +49,7 @@ const FilterColumns = (props: FilterProps) => {
   const handleClose = () => {
     props.setState(
       produce((s: FilterState) => {
-        s.anchor = undefined;
+        s.anchor = null;
         s.open = false;
       }),
     );
@@ -61,9 +70,8 @@ const FilterColumns = (props: FilterProps) => {
     props.setState('items', items);
   };
 
-  const [search, setSearch] = createSignal('');
   const handleFilterChange = (evt: Event | null, value: string) => {
-    setSearch(value);
+    props.setState('search', value);
     if (value === '') {
       const visible = initialColumns.filter(
         (x: string) => !hidden().includes(x),
@@ -140,7 +148,7 @@ const FilterColumns = (props: FilterProps) => {
           variant="filled"
           size="small"
           onChange={handleFilterChange}
-          value={search()}
+          value={props.state.search}
           autoComplete="off"
         />
         <Stack direction="column" sx={{ maxHeight: 360, overflow: 'auto' }}>

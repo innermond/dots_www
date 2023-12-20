@@ -1,10 +1,12 @@
 import { SetStoreFunction, Store } from 'solid-js/store';
 
 type FilterState = {
-  anchor: HTMLElement | undefined;
+  anchor: HTMLElement | null;
   open: boolean;
   title: string;
   items: string[];
+  initial: string[];
+  search: string;
 };
 
 type FilterProps = {

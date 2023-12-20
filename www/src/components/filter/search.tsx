@@ -13,8 +13,9 @@ const FilterSearch = (props: FilterProps) => {
   const handleClose = () => {
     props.setState(
       produce((s: FilterState) => {
-        s.anchor = undefined;
+        s.anchor = null;
         s.open = false;
+        s.kind = '';
       }),
     );
   };
