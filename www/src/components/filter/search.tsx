@@ -7,15 +7,20 @@ import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import ExpandLessIcon from '@suid/icons-material/ExpandLess';
 import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
-import { For, createSignal, createMemo, untrack } from 'solid-js';
-import { produce } from 'solid-js/store';
-import type { FilterProps, FilterState } from './types';
+import { For, createSignal, untrack } from 'solid-js';
+import { produce, createStore, unwrap } from 'solid-js/store';
+import type {
+  FilterProps,
+  FilterState,
+  FilterSearchCriteria,
+  FilterSearchState,
+} from './types';
 import ModeSearch from './mode-search';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
 
-const FilterSearch = (props: FilterProps) => {
+const FilterSearch = (props: FilterProps<FilterState>) => {
   if (search() === undefined) {
     setSearch(props.state.search);
   }
@@ -24,9 +29,6 @@ const FilterSearch = (props: FilterProps) => {
   const initialColumns = props.state.initials;
   // visible after a search has been applied
   let visibles = [...props.state.items];
-  const initialHidden = initialColumns.filter(
-    (x: string) => !visibles.includes(x),
-  );
   // show all columns when no search has been applied
   if (search() === '') {
     visibles = initialColumns;
@@ -37,15 +39,44 @@ const FilterSearch = (props: FilterProps) => {
   }
 
   const [partColumns, setPartColumns] = createSignal(visibles);
-  const [hiddenOrigin] = createSignal(initialHidden);
-  const hidden = createMemo(() => hiddenOrigin());
+
+  const filterSearchCriteria = {
+    mode: 0,
+    value: '',
+    order: -1,
+  } as FilterSearchCriteria;
+  const filterSearchState = initialColumns.reduce(
+    (acc: FilterSearchState, c: string) => {
+      acc[c] = structuredClone(filterSearchCriteria);
+      return acc;
+    },
+    {},
+  );
+  const [state, setState] = createStore<FilterSearchState>(filterSearchState);
+  const handleValue = (field: string, evt: Event) => {
+    if (!visibles.includes(field)) {
+      return;
+    }
+
+    const { target } = evt;
+    if (target === null || !('value' in target)) {
+      return;
+    }
+    const value = (evt.target as HTMLInputElement).value;
+    setState(
+      produce((s: FilterSearchState) => {
+        if (s[field as keyof typeof s] === undefined) {
+          s[field as keyof typeof s] = { ...filterSearchCriteria };
+        }
+        s[field as keyof typeof s].value = value;
+        console.log(unwrap(s));
+      }),
+    );
+  };
 
   const handleFilterChange = (evt: Event | null, value: string) => {
     setSearch(value);
     if (value === '') {
-      const visible = initialColumns.filter(
-        (x: string) => !hidden().includes(x),
-      );
       setPartColumns(initialColumns);
       return;
     }
@@ -114,15 +145,27 @@ const FilterSearch = (props: FilterProps) => {
               const id = `search-${item}`;
               return (
                 <ListItem divider={false} dense>
-                  <Stack direction="row" alignItems="center">
-                    <ModeSearch />
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={theme.spacing(1)}
+                  >
+                    <ModeSearch
+                      fieldName={item}
+                      keyValueMap={Object.entries({
+                        starts: 0,
+                        includes: 1,
+                        ends: 2,
+                      })}
+                      state={state}
+                      setState={setState}
+                    />
                     <TextField
                       id={id}
                       label={item}
                       size="small"
-                      //onChange={handleChangeFilteringColumns}
-                      //value={search()}
                       autoComplete="off"
+                      onInput={[handleValue, item]}
                     />
                     <Stack direction="column">
                       <IconButton

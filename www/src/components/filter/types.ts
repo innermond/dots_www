@@ -9,9 +9,24 @@ type FilterState = {
   items: string[];
 };
 
-type FilterProps = {
-  state: Store<FilterState>;
-  setState: SetStoreFunction<FilterState>;
+type FilterProps<T> = {
+  state: Store<T>;
+  setState: SetStoreFunction<T>;
 };
 
-export type { FilterState, FilterProps };
+type FilterSearchCriteria = {
+  mode: 0 | 1 | 2;
+  value: string;
+  order: -1 | 1;
+};
+
+type FilterSearchState = {
+  [key: string]: FilterSearchCriteria;
+};
+
+export type {
+  FilterState,
+  FilterProps,
+  FilterSearchCriteria,
+  FilterSearchState,
+};
