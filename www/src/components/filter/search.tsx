@@ -10,6 +10,7 @@ import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import { For, createSignal, createMemo, untrack } from 'solid-js';
 import { produce } from 'solid-js/store';
 import type { FilterProps, FilterState } from './types';
+import ModeSearch from './mode-search';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
@@ -97,7 +98,8 @@ const FilterSearch = (props: FilterProps) => {
         <Divider />
         <ListItem divider={false} dense>
           <TextField
-            id="filteringColumns"
+            sx={{ width: '100%' }}
+            id="filteringSearchColumns"
             label="Search by name"
             variant="filled"
             size="small"
@@ -113,6 +115,7 @@ const FilterSearch = (props: FilterProps) => {
               return (
                 <ListItem divider={false} dense>
                   <Stack direction="row" alignItems="center">
+                    <ModeSearch />
                     <TextField
                       id={id}
                       label={item}
@@ -125,12 +128,12 @@ const FilterSearch = (props: FilterProps) => {
                       <IconButton
                         sx={{ height: theme.spacing(2), borderRadius: 0 }}
                       >
-                        <ExpandLessIcon />
+                        <ExpandLessIcon sx={{ fontSize: theme.spacing(3) }} />
                       </IconButton>
                       <IconButton
                         sx={{ height: theme.spacing(2), borderRadius: 0 }}
                       >
-                        <ExpandMoreIcon />
+                        <ExpandMoreIcon sx={{ fontSize: theme.spacing(3) }} />
                       </IconButton>
                     </Stack>
                   </Stack>
