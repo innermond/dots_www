@@ -9,7 +9,7 @@ import { For, createSignal, createMemo, untrack } from 'solid-js';
 import { produce } from 'solid-js/store';
 import type { FilterProps, FilterState } from './types';
 
-const [search, setSearch] = createSignal();
+const [search, setSearch] = createSignal<string>();
 
 const FilterSearch = (props: FilterProps) => {
   if (search() === undefined) {
@@ -28,7 +28,7 @@ const FilterSearch = (props: FilterProps) => {
     visibles = initialColumns;
   } else {
     visibles = initialColumns.filter((x: string) =>
-      x.includes(props.state.search),
+      typeof search() !== 'string' ? true : x.includes(search() as string),
     );
   }
 
