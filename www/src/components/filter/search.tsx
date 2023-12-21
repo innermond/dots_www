@@ -1,14 +1,17 @@
-import { Popover, Stack, TextField } from '@suid/material';
+import { Popover, Stack, TextField, useTheme } from '@suid/material';
 import List from '@suid/material/List';
 import ListItem from '@suid/material/ListItem';
 import ListSubheader from '@suid/material/ListSubheader';
 import Divider from '@suid/material/Divider';
 import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
+import ExpandLessIcon from '@suid/icons-material/ExpandLess';
+import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import { For, createSignal, createMemo, untrack } from 'solid-js';
 import { produce } from 'solid-js/store';
 import type { FilterProps, FilterState } from './types';
 
+const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
 
 const FilterSearch = (props: FilterProps) => {
@@ -109,14 +112,28 @@ const FilterSearch = (props: FilterProps) => {
               const id = `search-${item}`;
               return (
                 <ListItem divider={false} dense>
-                  <TextField
-                    id={id}
-                    label={item}
-                    size="small"
-                    //onChange={handleChangeFilteringColumns}
-                    //value={search()}
-                    autoComplete="off"
-                  />
+                  <Stack direction="row" alignItems="center">
+                    <TextField
+                      id={id}
+                      label={item}
+                      size="small"
+                      //onChange={handleChangeFilteringColumns}
+                      //value={search()}
+                      autoComplete="off"
+                    />
+                    <Stack direction="column">
+                      <IconButton
+                        sx={{ height: theme.spacing(2), borderRadius: 0 }}
+                      >
+                        <ExpandLessIcon />
+                      </IconButton>
+                      <IconButton
+                        sx={{ height: theme.spacing(2), borderRadius: 0 }}
+                      >
+                        <ExpandMoreIcon />
+                      </IconButton>
+                    </Stack>
+                  </Stack>
                 </ListItem>
               );
             }}
