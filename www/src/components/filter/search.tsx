@@ -7,6 +7,8 @@ import CloseIcon from '@suid/icons-material/Close';
 import IconButton from '@suid/material/IconButton';
 import ExpandLessIcon from '@suid/icons-material/ExpandLess';
 import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
+import ToggleButton from '@suid/material/ToggleButton';
+import ToggleButtonGroup from '@suid/material/ToggleButtonGroup';
 import { For, createSignal, untrack } from 'solid-js';
 import { produce, createStore, unwrap } from 'solid-js/store';
 import type {
@@ -85,6 +87,11 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
       setPartColumns(found);
     });
   };
+
+  const handleOrderChange =
+    (fieldName: string) => (evt: Event | null, order: string) => {
+      setState(fieldName, 'order', order);
+    };
 
   const handleClose = () => {
     props.setState(
@@ -167,18 +174,19 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
                       autoComplete="off"
                       onInput={[handleValue, item]}
                     />
-                    <Stack direction="column">
-                      <IconButton
-                        sx={{ height: theme.spacing(2), borderRadius: 0 }}
-                      >
-                        <ExpandLessIcon sx={{ fontSize: theme.spacing(3) }} />
-                      </IconButton>
-                      <IconButton
-                        sx={{ height: theme.spacing(2), borderRadius: 0 }}
-                      >
-                        <ExpandMoreIcon sx={{ fontSize: theme.spacing(3) }} />
-                      </IconButton>
-                    </Stack>
+                    <ToggleButtonGroup
+                      size="small"
+                      exclusive
+                      value={state[item]['order']}
+                      onChange={handleOrderChange(item)}
+                    >
+                      <ToggleButton value="1">
+                        <ExpandLessIcon />
+                      </ToggleButton>
+                      <ToggleButton value="-1">
+                        <ExpandMoreIcon />
+                      </ToggleButton>
+                    </ToggleButtonGroup>
                   </Stack>
                 </ListItem>
               );
