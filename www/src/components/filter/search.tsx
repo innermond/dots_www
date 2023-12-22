@@ -43,9 +43,9 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
   const [partColumns, setPartColumns] = createSignal(visibles);
 
   const filterSearchCriteria = {
-    mode: 0,
+    mode: '0',
     value: '',
-    order: -1,
+    order: '-1',
   } as FilterSearchCriteria;
   const filterSearchState = initialColumns.reduce(
     (acc: FilterSearchState, c: string) => {
@@ -90,6 +90,10 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
 
   const handleOrderChange =
     (fieldName: string) => (evt: Event | null, order: string) => {
+      if (!Object.keys(state).includes(fieldName)) {
+        return;
+      }
+
       setState(fieldName, 'order', order);
     };
 

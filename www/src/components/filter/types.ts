@@ -15,9 +15,9 @@ type FilterProps<T> = {
 };
 
 type FilterSearchCriteria = {
-  mode: 0 | 1 | 2;
+  mode: string;
   value: string;
-  order: -1 | 1;
+  order: string;
 };
 
 type FilterSearchState = {

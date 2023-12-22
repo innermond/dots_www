@@ -10,13 +10,10 @@ import type {
 
 type ModeSearchProps = FilterProps<FilterSearchState> & {
   fieldName: string;
-  modeName?: string;
   keyValueMap: Array<[string, number | string]>;
 };
 
 export default function ModeSearch(props: ModeSearchProps) {
-  const modeKey = props.modeName ?? 'mode';
-
   const handleChange = (event: SelectChangeEvent) => {
     const mode = event.target.value;
 
@@ -28,15 +25,15 @@ export default function ModeSearch(props: ModeSearchProps) {
       return;
     }
 
-    props.setState(
-      produce((s: FilterSearchState) => {
-        if (!(props.fieldName in s && modeKey in s[props.fieldName])) {
-          return;
-        }
-        s[props.fieldName][modeKey as keyof FilterSearchCriteria] = mode;
-      }),
-    );
-    console.log(props.state);
+    if (!Object.keys(props.state).includes(props.fieldName)) {
+      return;
+    }
+
+    if (!Object.keys(props.state[props.fieldName]).includes('mode')) {
+      return;
+    }
+
+    props.setState(props.fieldName, 'mode', mode);
   };
 
   return (
@@ -46,9 +43,7 @@ export default function ModeSearch(props: ModeSearchProps) {
         <Select
           labelId="mode-filter-search-label"
           id="mode-filter-search"
-          value={
-            props.state[props.fieldName as keyof typeof props.state][modeKey]
-          }
+          value={props.state[props.fieldName]['mode']}
           label="Mode"
           onChange={handleChange}
         >
