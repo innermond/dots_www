@@ -1,4 +1,4 @@
-import { Popover, Stack, TextField, useTheme } from '@suid/material';
+import { Popover, Stack, TextField, useTheme, InputAdornment, FormControl, Input, InputLabel, } from '@suid/material';
 import List from '@suid/material/List';
 import ListItem from '@suid/material/ListItem';
 import ListSubheader from '@suid/material/ListSubheader';
@@ -141,16 +141,31 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
       >
         <Divider />
         <ListItem divider={false} dense>
-          <TextField
-            sx={{ width: '100%' }}
+        <FormControl
+          sx={{ width: '100%' }}
+          variant="filled"
+          size="small"
+         >
+         <InputLabel for="filteringSearchColumns">Search by name</InputLabel>
+         <Input
             id="filteringSearchColumns"
-            label="Search by name"
-            variant="filled"
-            size="small"
             onChange={handleFilterChange}
             value={search()}
             autoComplete="off"
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  sx={{p:0, m:0,}}
+                  aria-label="clear-filtering-search-columns"
+                  edge="end"
+                  onClick={() => handleFilterChange(null, '')}
+                >
+                  {search() ? <CloseIcon fontSize="small" /> : undefined}
+                </IconButton>
+              </InputAdornment>
+            }
           />
+        </FormControl>
         </ListItem>
         <Stack direction="column" sx={{ maxHeight: 360, overflow: 'auto' }}>
           <For each={partColumns()}>
