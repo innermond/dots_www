@@ -9,7 +9,7 @@ import ExpandLessIcon from '@suid/icons-material/ExpandLess';
 import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import ToggleButton from '@suid/material/ToggleButton';
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup';
-import { For, createSignal, untrack } from 'solid-js';
+import { For, createSignal, untrack, } from 'solid-js';
 import { produce, createStore, unwrap } from 'solid-js/store';
 import type {
   FilterProps,
@@ -18,6 +18,7 @@ import type {
   FilterSearchState,
 } from './types';
 import ModeSearch from './mode-search';
+import { dispatch, } from '@/lib/customevent';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
@@ -104,6 +105,7 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
         s.open = false;
       }),
     );
+    dispatch('dots:filter:SearchEntryType', search());
   };
 
   const SubheaderWithCloseIcon = () => (

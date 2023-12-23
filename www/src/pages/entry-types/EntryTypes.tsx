@@ -197,6 +197,12 @@ const EntryTypes: Component = (): JSX.Element => {
     setKillOneEntryType(evt.detail);
   };
 
+  const [isSearchFiltered, setIsSearchFiltered] = createSignal(false);
+  const handleIsFilteredSearch = (evt: CustomEvent) => {
+    const isFiltered = evt.detail !== ""; 
+    setIsSearchFiltered(isFiltered);
+  };
+
   const rows = (): EntryTypeData[] => {
     const changed = freshEntryType() as EntryTypeData;
     const killed = killOneEntryType() as EntryTypeData;
@@ -235,11 +241,13 @@ const EntryTypes: Component = (): JSX.Element => {
     listen('dots:fresh:EntryType', handleFreshEntryType as EventListener);
     listen('dots:close:ActionForm', handleCloseActionForm);
     listen('dots:killone:EntryType', handleKillOneEntryType as EventListener);
+    listen('dots:filter:SearchEntryType', handleIsFilteredSearch as EventListener);
   });
   onCleanup(() => {
     unlisten('dots:fresh:EntryType', handleFreshEntryType as EventListener);
     listen('dots:close:ActionForm', handleCloseActionForm);
     unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
+    unlisten('dots:filter:SearchEntryType', handleIsFilteredSearch as EventListener);
   });
 
   type LazyWhat =
@@ -449,7 +457,7 @@ const EntryTypes: Component = (): JSX.Element => {
               size="large"
               variant="text"
               startIcon={
-                isColumnsFiltered() ? (
+                isSearchFiltered() ? (
                   <Badge overlap="circular" variant="dot" color="error">
                     <FilterListIcon />
                   </Badge>
