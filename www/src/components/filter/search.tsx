@@ -1,4 +1,4 @@
-import { Popover, Stack, TextField, useTheme, InputAdornment, FormControl, Input, InputLabel, } from '@suid/material';
+import { Popover, Stack, TextField, useTheme, InputAdornment, FormControl, Input, InputLabel, Box, } from '@suid/material';
 import List from '@suid/material/List';
 import ListItem from '@suid/material/ListItem';
 import ListSubheader from '@suid/material/ListSubheader';
@@ -9,6 +9,7 @@ import ExpandLessIcon from '@suid/icons-material/ExpandLess';
 import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import ToggleButton from '@suid/material/ToggleButton';
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup';
+import FilterAltIcon from '@suid/icons-material/FilterAlt';
 import { For, createSignal, untrack, } from 'solid-js';
 import { produce, createStore, unwrap } from 'solid-js/store';
 import type {
@@ -19,6 +20,7 @@ import type {
 } from './types';
 import ModeSearch from './mode-search';
 import { dispatch, } from '@/lib/customevent';
+import ActionButton from '../ActionButton';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
@@ -140,9 +142,10 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
         }
       >
         <Divider />
-        <ListItem divider={false} dense>
+        <ListItem divider={false} dense disablePadding>
         <FormControl
-          sx={{ width: '100%' }}
+          fullWidth
+          sx={{ m: theme.spacing(2)}}
           variant="filled"
           size="small"
           style={{background: theme.palette.grey[100]}}
@@ -168,7 +171,6 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
           />
         </FormControl>
         </ListItem>
-        <Stack direction="column" sx={{ maxHeight: 360, overflow: 'auto' }}>
           <For each={partColumns()}>
             {(item: string) => {
               const id = `search-${item}`;
@@ -214,8 +216,16 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
               );
             }}
           </For>
-        </Stack>
       </List>
+      <Box sx={{m: theme.spacing(2), display: 'flex', justifyContent: 'flex-end'}} >
+        <ActionButton
+          size="large"
+          variant="contained"
+          startIcon={<FilterAltIcon />}
+        >
+          Apply Filters
+        </ActionButton>
+      </Box>
     </Popover>
   );
 };
