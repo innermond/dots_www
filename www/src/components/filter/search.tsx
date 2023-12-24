@@ -145,6 +145,7 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
           sx={{ width: '100%' }}
           variant="filled"
           size="small"
+          style={{background: theme.palette.grey[100]}}
          >
          <InputLabel for="filteringSearchColumns">Search by name</InputLabel>
          <Input
