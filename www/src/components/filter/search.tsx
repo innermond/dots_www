@@ -115,8 +115,16 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
     if ( !!evt?.target && ! ('form' in evt!.target)) {
       return;
     }
+    const names = [] as string[];
+    untrack(() => {
+      for (const column of partColumns()) {
+        names.push(`search-${column}`, `mode-filter-search-${column}`, `order-${column}`);
+      }
+    });
+    if (names.length === 0) {
+      return;
+    }
 
-    const names = ['search-code', 'search-description', 'search-unit', 'mode-filter-search-code', 'mode-filter-search-description', 'mode-filter-search-unit', 'order-code', 'order-description', 'order-unit', ];
     const form = (evt.target as HTMLFormElement).form;
     const collected = collectFormData(form, names);
     console.log(collected);
@@ -241,6 +249,7 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
           size="large"
           variant="contained"
           startIcon={<FilterAltIcon />}
+          disabled={partColumns().length === 0}
           onClick={handleSearch}
         >
           Apply Filters
