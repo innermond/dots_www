@@ -10,8 +10,8 @@ import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import ToggleButton from '@suid/material/ToggleButton';
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup';
 import FilterAltIcon from '@suid/icons-material/FilterAlt';
-import { For, createSignal, untrack, } from 'solid-js';
-import { produce, createStore, unwrap } from 'solid-js/store';
+import { JSX, For, createSignal, untrack, } from 'solid-js';
+import { produce, createStore, } from 'solid-js/store';
 import type {
   FilterProps,
   FilterState,
@@ -21,6 +21,7 @@ import type {
 import ModeSearch from './mode-search';
 import { dispatch, } from '@/lib/customevent';
 import ActionButton from '../ActionButton';
+import {collectFormData} from '@/lib/form';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
@@ -74,7 +75,6 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
           s[field as keyof typeof s] = { ...filterSearchCriteria };
         }
         s[field as keyof typeof s].value = value;
-        console.log(unwrap(s));
       }),
     );
   };
@@ -110,6 +110,18 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
     dispatch('dots:filter:SearchEntryType', search());
   };
 
+  const handleSearch = (evt: Event) => {
+    evt.preventDefault();
+    if ( !!evt?.target && ! ('form' in evt!.target)) {
+      return;
+    }
+
+    const names = ['search-code', 'search-description', 'search-unit', 'mode-filter-search-code', 'mode-filter-search-description', 'mode-filter-search-unit', 'order-code', 'order-description', 'order-unit', ];
+    const form = (evt.target as HTMLFormElement).form;
+    const collected = collectFormData(form, names);
+    console.log(collected);
+  };
+
   const SubheaderWithCloseIcon = () => (
     <Stack
       direction="row"
@@ -133,6 +145,9 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
       anchorEl={props.state.anchor}
       onClose={handleClose}
     >
+<Box
+      component="form"
+>
       <List
         sx={{ width: '100%', maxWidth: 360 }}
         subheader={
@@ -174,6 +189,7 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
           <For each={partColumns()}>
             {(item: string) => {
               const id = `search-${item}`;
+              const orderid = `order-${item}`;
               return (
                 <ListItem divider={false} dense>
                   <Stack
@@ -193,6 +209,7 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
                     />
                     <TextField
                       id={id}
+                      name={id}
                       label={item}
                       size="small"
                       autoComplete="off"
@@ -210,6 +227,7 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
                       <ToggleButton value="-1">
                         <ExpandMoreIcon />
                       </ToggleButton>
+                      <Input type="hidden" value={state[item]['order']}  inputProps={{id: orderid, name: orderid}}/>
                     </ToggleButtonGroup>
                   </Stack>
                 </ListItem>
@@ -219,13 +237,16 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
       </List>
       <Box sx={{m: theme.spacing(2), display: 'flex', justifyContent: 'flex-end'}} >
         <ActionButton
+          type="submit"
           size="large"
           variant="contained"
           startIcon={<FilterAltIcon />}
+          onClick={handleSearch}
         >
           Apply Filters
         </ActionButton>
       </Box>
+</Box>
     </Popover>
   );
 };

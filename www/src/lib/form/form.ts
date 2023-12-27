@@ -138,6 +138,31 @@ const makeValidable = (
   return defaults as ReturnType<typeof makeValidable>;
 };
 
+// collect data from event
+function collectFormData<T>(
+  form: HTMLFormElement,
+  names: string[] | undefined,
+): T {
+  // prepare data from DOM
+  const arr = Array.from(new FormData(form).entries());
+  const data = arr.reduce(
+    (
+      acc: Record<string, FormDataEntryValue>,
+      [k, v]: [string, FormDataEntryValue],
+    ) => {
+      if (!names?.includes(k)) {
+        return acc;
+      }
+      acc[k] = v;
+      return acc;
+    },
+    {} as Record<string, FormDataEntryValue>,
+  );
+
+  return data as T;
+}
+
+
 type ValuableFormControl =
   | HTMLInputElement
   | HTMLTextAreaElement
@@ -157,4 +182,4 @@ export type {
   InnerValidation,
 };
 
-export { validate, makeValidable };
+export { validate, makeValidable, collectFormData, };

@@ -1,10 +1,8 @@
 import { Box, FormControl, InputLabel, MenuItem, Select } from '@suid/material';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { For } from 'solid-js';
-import { produce } from 'solid-js/store';
 import type {
   FilterSearchState,
-  FilterSearchCriteria,
   FilterProps,
 } from './types';
 
@@ -36,13 +34,15 @@ export default function ModeSearch(props: ModeSearchProps) {
     props.setState(props.fieldName, 'mode', mode);
   };
 
+  const id = `mode-filter-search-${props.fieldName}`;
+  const labelid = id + '-label';
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl size="small" fullWidth>
-        <InputLabel id="mode-filter-search-label">Mode</InputLabel>
+        <InputLabel id={labelid}>Mode</InputLabel>
         <Select
-          labelId="mode-filter-search-label"
-          id="mode-filter-search"
+          labelId={labelid}
+          inputProps={{id, name: id,}}
           value={props.state[props.fieldName]['mode']}
           label="Mode"
           onChange={handleChange}

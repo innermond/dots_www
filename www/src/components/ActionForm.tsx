@@ -17,7 +17,7 @@ import type { Component } from 'solid-js';
 import { AlertColor } from '@suid/material/Alert/AlertProps';
 
 import type { MessagesMap, Validable, Validators } from '@/lib/form';
-import { makeValidable } from '@/lib/form';
+import { collectFormData, makeValidable } from '@/lib/form';
 import { setLoading } from '@/components/Loading';
 import { useNavigate } from '@solidjs/router';
 import toasting from '@/lib/toast';
@@ -109,29 +109,6 @@ const ActionForm = <T extends {}>(props: ParentProps<ActionFormProps<T>>) => {
       ss[k] = mapfn ? mapfn(v) : v;
     }
     return ss;
-  }
-
-  // collect data from event
-  function collectFormData<T>(
-    form: HTMLFormElement,
-    names: string[] | undefined,
-  ): T {
-    // prepare data from DOM
-    const data = Array.from(new FormData(form).entries()).reduce(
-      (
-        acc: Record<string, FormDataEntryValue>,
-        [k, v]: [string, FormDataEntryValue],
-      ) => {
-        if (!names?.includes(k)) {
-          return acc;
-        }
-        acc[k] = v;
-        return acc;
-      },
-      {} as Record<string, FormDataEntryValue>,
-    );
-
-    return data as T;
   }
 
   // submit data
