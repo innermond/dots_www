@@ -1,3 +1,5 @@
+import {EntryTypeData} from "@/pages/entry-types/types";
+
 const API = 'http://api.dots.volt.com/v1';
 
 class ApiError extends Error {
@@ -112,9 +114,13 @@ const api = async <T>(args: ApiArgs<T>): Promise<T | Error> => {
   return convertKeysToCamelCase(verifiedOrError) as T;
 };
 
-type Slice<T> = { offset: number; limit: number } & Partial<{
-  [K in keyof T]: Function | string;
-}>;
+type SliceFilter<T> = (
+| {
+  [Key in keyof T extends infer K ? `_mask_${string & K}` : never]: string;
+} 
+|  {[K in keyof T]: T[K] | string})[];
+
+type Slice<T> = { offset: number; limit: number, filter: SliceFilter<Partial<T>>};
 
 type URLParams = Record<string, string>;
 
@@ -222,5 +228,5 @@ const zero = (undef: boolean = false) => ({
   message: [],
 });
 
-export type { ApiArgs, Slice, QueryFilter };
+export type { ApiArgs, Slice, };
 export { ApiError, api, apix, query, send, payload, zero };

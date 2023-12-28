@@ -10,7 +10,7 @@ import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import ToggleButton from '@suid/material/ToggleButton';
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup';
 import FilterAltIcon from '@suid/icons-material/FilterAlt';
-import { JSX, For, createSignal, untrack, } from 'solid-js';
+import { For, createSignal, untrack, } from 'solid-js';
 import { produce, createStore, } from 'solid-js/store';
 import type {
   FilterProps,
@@ -22,6 +22,8 @@ import ModeSearch from './mode-search';
 import { dispatch, } from '@/lib/customevent';
 import ActionButton from '../ActionButton';
 import {collectFormData} from '@/lib/form';
+import {query} from '@/lib/api';
+import {apiEntryType} from '@/api';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
@@ -115,9 +117,11 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
     if ( !!evt?.target && ! ('form' in evt!.target)) {
       return;
     }
+    let columns = [] as string[];
     const names = [] as string[];
     untrack(() => {
-      for (const column of partColumns()) {
+      columns = partColumns();
+      for (const column of columns) {
         names.push(`search-${column}`, `mode-filter-search-${column}`, `order-${column}`);
       }
     });
@@ -126,8 +130,30 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
     }
 
     const form = (evt.target as HTMLFormElement).form;
-    const collected = collectFormData(form, names);
-    console.log(collected);
+    const collected = collectFormData<Record<string, string>>(form, names);
+    const collectedKeys = Object.keys(collected); 
+    const pp = columns.map((k: string) => {
+      const keys = [`search-${k}`, `order-${k}`, `mode-filter-search-${k}`]; 
+      let meta = '';
+      const values = [];
+      for (let i = 0; i < keys.length; i++) {
+        const expectedKey = keys[i];
+        if (collected[expectedKey] === '') {
+          continue;
+        }
+
+        if (collectedKeys.includes(expectedKey)) {
+          values.push({[k]: collected[expectedKey]});
+          if (i === 0) meta += 'v';
+          if (i === 1) meta += 'o';
+          if (i === 2) meta += 'k';
+        }
+      }
+      const mask = {[`_mask_${k}`]: meta};
+      return [...values, mask];
+    }).flat();
+    const rr = apiEntryType.all({filter: pp})
+    console.log(rr)
   };
 
   const SubheaderWithCloseIcon = () => (

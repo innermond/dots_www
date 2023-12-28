@@ -61,26 +61,17 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
 
-  const peakRow = 20;
-  const defaultFilter = {
-    id: 'desc',
-  };
+  const peakRow = 3;
+  const defaultFilter = [
+    {id: 'desc'},
+    {_mask_id: 'o'},
+  ];
 
   const [slice, setSliceOrigin] = createStore<Slice<EntryTypeData>>({
     offset: 0,
     limit: peakRow,
-    ...defaultFilter,
+    filter: defaultFilter,
   });
-
-  const isSliceKey = (k: unknown): k is keyof Slice<EntryTypeData> => {
-    if (typeof k !== 'string') {
-      return false;
-    }
-    if (['offset', 'limit'].includes(k) && isKeyofEntryTypeData(k)) {
-      return true;
-    }
-    return false;
-  };
 
   type ParametersSetSliceOrigin = Parameters<
     SetStoreFunction<Slice<EntryTypeData>>

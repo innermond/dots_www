@@ -8,48 +8,22 @@ import {
   isDataEntryTypes,
   isDataEntryTypeUnits,
   isEntryTypeData,
-  isKeyofEntryTypeData,
-  entryTypeZero,
 } from '@/pages/entry-types/types';
 
 class APIEntryType {
   async all(slice: Slice<EntryTypeData>): Promise<DataEntryTypes | Error> {
-    const pp = {} as any;
+    const pp = [];
     if (!isNaN(Number(slice?.offset))) {
-      pp.offset = slice!.offset;
+      pp.push({offset: slice!.offset});
     }
     if (!isNaN(Number(slice?.limit))) {
-      pp.limit = slice!.limit;
+      pp.push({limit: slice!.limit});
+    }
+    if (Array.isArray(slice?.filter)) {
+      pp.push(...slice.filter);
     }
 
-    let params = { ...pp };
-    const filterKeys = Object.keys(entryTypeZero) as Array<keyof EntryTypeData>;
-    const [filters] = splitProps(slice, filterKeys);
-    if (!!filters) {
-      const fpp = {} as Partial<{
-        [K in keyof EntryTypeData]: Function | string;
-      }>;
-      for (let k of Object.keys(filters)) {
-        if (!isKeyofEntryTypeData(k)) {
-          continue;
-        }
-        const fn = filters[k as keyof typeof filters] as Function | string;
-        if (typeof fn === 'function') {
-          fpp[k] = fn();
-        } else {
-          fpp[k] = fn;
-        }
-      }
-      params = [
-        params,
-        fpp,
-        { code: 'd' },
-        { code: 'middle' },
-        { _mask_code: 'vk' },
-        { _mask_id: 'o' },
-      ];
-    }
-    const url = query('/entry-types', params);
+    const url = query('/entry-types', pp as Record<string, any>[]);
     const args = {
       hint: 'loading entry types',
       method: 'GET',
