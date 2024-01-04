@@ -1,4 +1,14 @@
-import { Popover, Stack, TextField, useTheme, InputAdornment, FormControl, Input, InputLabel, Box, } from '@suid/material';
+import {
+  Popover,
+  Stack,
+  TextField,
+  useTheme,
+  InputAdornment,
+  FormControl,
+  Input,
+  InputLabel,
+  Box,
+} from '@suid/material';
 import List from '@suid/material/List';
 import ListItem from '@suid/material/ListItem';
 import ListSubheader from '@suid/material/ListSubheader';
@@ -10,25 +20,28 @@ import ExpandMoreIcon from '@suid/icons-material/ExpandMore';
 import ToggleButton from '@suid/material/ToggleButton';
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup';
 import FilterAltIcon from '@suid/icons-material/FilterAlt';
-import { For, createSignal, untrack, } from 'solid-js';
-import { produce, createStore, } from 'solid-js/store';
+import { For, createSignal, untrack } from 'solid-js';
+import { produce, createStore } from 'solid-js/store';
 import type {
   FilterProps,
   FilterState,
   FilterSearchCriteria,
   FilterSearchState,
 } from './types';
+import type { ParametersSetSliceOrigin } from '@/pages/entry-types/EntryTypes';
+
 import ModeSearch from './mode-search';
-import { dispatch, } from '@/lib/customevent';
+import { dispatch } from '@/lib/customevent';
 import ActionButton from '../ActionButton';
-import {collectFormData} from '@/lib/form';
-import {query} from '@/lib/api';
-import {apiEntryType} from '@/api';
+import { collectFormData } from '@/lib/form';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
 
-const FilterSearch = (props: FilterProps<FilterState>) => {
+type FilterSearchProps = FilterProps<FilterState> & {
+  setSlice: (...args: ParametersSetSliceOrigin) => void;
+};
+const FilterSearch = (props: FilterSearchProps) => {
   if (search() === undefined) {
     setSearch(props.state.search);
   }
@@ -114,7 +127,7 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
 
   const handleSearch = (evt: Event) => {
     evt.preventDefault();
-    if ( !!evt?.target && ! ('form' in evt!.target)) {
+    if (!!evt?.target && !('form' in evt!.target)) {
       return;
     }
     let columns = [] as string[];
@@ -122,7 +135,11 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
     untrack(() => {
       columns = partColumns();
       for (const column of columns) {
-        names.push(`search-${column}`, `mode-filter-search-${column}`, `order-${column}`);
+        names.push(
+          `search-${column}`,
+          `mode-filter-search-${column}`,
+          `order-${column}`,
+        );
       }
     });
     if (names.length === 0) {
@@ -131,29 +148,31 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
 
     const form = (evt.target as HTMLFormElement).form;
     const collected = collectFormData<Record<string, string>>(form, names);
-    const collectedKeys = Object.keys(collected); 
-    const pp = columns.map((k: string) => {
-      const keys = [`search-${k}`, `order-${k}`, `mode-filter-search-${k}`]; 
-      let meta = '';
-      const values = [];
-      for (let i = 0; i < keys.length; i++) {
-        const expectedKey = keys[i];
-        if (collected[expectedKey] === '') {
-          continue;
-        }
+    const collectedKeys = Object.keys(collected);
+    const pp = columns
+      .map((k: string) => {
+        const keys = [`search-${k}`, `order-${k}`, `mode-filter-search-${k}`];
+        let meta = '';
+        const values = [];
+        for (let i = 0; i < keys.length; i++) {
+          const expectedKey = keys[i];
+          if (collected[expectedKey] === '') {
+            continue;
+          }
 
-        if (collectedKeys.includes(expectedKey)) {
-          values.push({[k]: collected[expectedKey]});
-          if (i === 0) meta += 'v';
-          if (i === 1) meta += 'o';
-          if (i === 2) meta += 'k';
+          if (collectedKeys.includes(expectedKey)) {
+            values.push({ [k]: collected[expectedKey] });
+            if (i === 0) meta += 'v';
+            if (i === 1) meta += 'o';
+            if (i === 2) meta += 'k';
+          }
         }
-      }
-      const mask = {[`_mask_${k}`]: meta};
-      return [...values, mask];
-    }).flat();
-    const rr = apiEntryType.all({filter: pp})
-    console.log(rr)
+        const mask = { [`_mask_${k}`]: meta };
+        return [...values, mask];
+      })
+      .flat();
+    // send filter upward
+    props.setSlice({ offset: 0, filter: pp });
   };
 
   const SubheaderWithCloseIcon = () => (
@@ -179,47 +198,47 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
       anchorEl={props.state.anchor}
       onClose={handleClose}
     >
-<Box
-      component="form"
->
-      <List
-        sx={{ width: '100%', maxWidth: 360 }}
-        subheader={
-          <ListSubheader>
-            <SubheaderWithCloseIcon />
-          </ListSubheader>
-        }
-      >
-        <Divider />
-        <ListItem divider={false} dense disablePadding>
-        <FormControl
-          fullWidth
-          sx={{ m: theme.spacing(2)}}
-          variant="filled"
-          size="small"
-          style={{background: theme.palette.grey[100]}}
-         >
-         <InputLabel for="filteringSearchColumns">Search by name</InputLabel>
-         <Input
-            id="filteringSearchColumns"
-            onChange={handleFilterChange}
-            value={search()}
-            autoComplete="off"
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  sx={{p:0, m:0,}}
-                  aria-label="clear-filtering-search-columns"
-                  edge="end"
-                  onClick={() => handleFilterChange(null, '')}
-                >
-                  {search() ? <CloseIcon fontSize="small" /> : undefined}
-                </IconButton>
-              </InputAdornment>
-            }
-          />
-        </FormControl>
-        </ListItem>
+      <Box component="form">
+        <List
+          sx={{ width: '100%', maxWidth: 360 }}
+          subheader={
+            <ListSubheader>
+              <SubheaderWithCloseIcon />
+            </ListSubheader>
+          }
+        >
+          <Divider />
+          <ListItem divider={false} dense disablePadding>
+            <FormControl
+              fullWidth
+              sx={{ m: theme.spacing(2) }}
+              variant="filled"
+              size="small"
+              style={{ background: theme.palette.grey[100] }}
+            >
+              <InputLabel for="filteringSearchColumns">
+                Search by name
+              </InputLabel>
+              <Input
+                id="filteringSearchColumns"
+                onChange={handleFilterChange}
+                value={search()}
+                autoComplete="off"
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      sx={{ p: 0, m: 0 }}
+                      aria-label="clear-filtering-search-columns"
+                      edge="end"
+                      onClick={() => handleFilterChange(null, '')}
+                    >
+                      {search() ? <CloseIcon fontSize="small" /> : undefined}
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
+          </ListItem>
           <For each={partColumns()}>
             {(item: string) => {
               const id = `search-${item}`;
@@ -261,27 +280,37 @@ const FilterSearch = (props: FilterProps<FilterState>) => {
                       <ToggleButton value="-1">
                         <ExpandMoreIcon />
                       </ToggleButton>
-                      <Input type="hidden" value={state[item]['order']}  inputProps={{id: orderid, name: orderid}}/>
+                      <Input
+                        type="hidden"
+                        value={state[item]['order']}
+                        inputProps={{ id: orderid, name: orderid }}
+                      />
                     </ToggleButtonGroup>
                   </Stack>
                 </ListItem>
               );
             }}
           </For>
-      </List>
-      <Box sx={{m: theme.spacing(2), display: 'flex', justifyContent: 'flex-end'}} >
-        <ActionButton
-          type="submit"
-          size="large"
-          variant="contained"
-          startIcon={<FilterAltIcon />}
-          disabled={partColumns().length === 0}
-          onClick={handleSearch}
+        </List>
+        <Box
+          sx={{
+            m: theme.spacing(2),
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
         >
-          Apply Filters
-        </ActionButton>
+          <ActionButton
+            type="submit"
+            size="large"
+            variant="contained"
+            startIcon={<FilterAltIcon />}
+            disabled={partColumns().length === 0}
+            onClick={handleSearch}
+          >
+            Apply Filters
+          </ActionButton>
+        </Box>
       </Box>
-</Box>
     </Popover>
   );
 };

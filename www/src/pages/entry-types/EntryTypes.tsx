@@ -42,7 +42,6 @@ import {
   EntryTypeData,
   entryTypeZero,
   isEntryTypeData,
-  isKeyofEntryTypeData,
 } from './types';
 import ActionButton from '@/components/ActionButton';
 import { Dynamic } from 'solid-js/web';
@@ -56,26 +55,23 @@ import FilterListIcon from '@suid/icons-material/FilterList';
 import ActionFormProvider from '@/contexts/ActionFormContext';
 import type { FilterState } from '@/components/filter';
 
+export type ParametersSetSliceOrigin = Parameters<
+  SetStoreFunction<Slice<EntryTypeData>>
+>;
+
 const EntryTypes: Component = (): JSX.Element => {
   const [, setState] = appstate;
 
   const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
 
   const peakRow = 3;
-  const defaultFilter = [
-    {id: 'desc'},
-    {_mask_id: 'o'},
-  ];
+  const defaultFilter = [{ id: 'desc' }, { _mask_id: 'o' }];
 
   const [slice, setSliceOrigin] = createStore<Slice<EntryTypeData>>({
     offset: 0,
     limit: peakRow,
     filter: defaultFilter,
   });
-
-  type ParametersSetSliceOrigin = Parameters<
-    SetStoreFunction<Slice<EntryTypeData>>
-  >;
 
   const [sliceChanged, setSliceChanged] = createSignal<number>(1);
   // wrap origin setStore
@@ -190,7 +186,7 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const [isSearchFiltered, setIsSearchFiltered] = createSignal(false);
   const handleIsFilteredSearch = (evt: CustomEvent) => {
-    const isFiltered = evt.detail !== ""; 
+    const isFiltered = evt.detail !== '';
     setIsSearchFiltered(isFiltered);
   };
 
@@ -232,13 +228,19 @@ const EntryTypes: Component = (): JSX.Element => {
     listen('dots:fresh:EntryType', handleFreshEntryType as EventListener);
     listen('dots:close:ActionForm', handleCloseActionForm);
     listen('dots:killone:EntryType', handleKillOneEntryType as EventListener);
-    listen('dots:filter:SearchEntryType', handleIsFilteredSearch as EventListener);
+    listen(
+      'dots:filter:SearchEntryType',
+      handleIsFilteredSearch as EventListener,
+    );
   });
   onCleanup(() => {
     unlisten('dots:fresh:EntryType', handleFreshEntryType as EventListener);
     listen('dots:close:ActionForm', handleCloseActionForm);
     unlisten('dots:killone:EntryType', handleKillOneEntryType as EventListener);
-    unlisten('dots:filter:SearchEntryType', handleIsFilteredSearch as EventListener);
+    unlisten(
+      'dots:filter:SearchEntryType',
+      handleIsFilteredSearch as EventListener,
+    );
   });
 
   type LazyWhat =
@@ -431,6 +433,7 @@ const EntryTypes: Component = (): JSX.Element => {
       <Dynamic
         component={filterComponent()}
         state={filterState}
+        setSlice={setSlice}
         setState={setFIlterState}
       />
       {actionForm}
