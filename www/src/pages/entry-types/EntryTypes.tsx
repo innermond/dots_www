@@ -24,11 +24,11 @@ import {
   Stack,
   useTheme,
   IconButton,
-  Box,
   Badge,
   FormControl,
   MenuItem,
   Select,
+  Typography,
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
@@ -571,14 +571,14 @@ const EntryTypes: Component = (): JSX.Element => {
           </Table>
         </Show>
       </TableContainer>
-      <Box>
+      <Stack direction="row">
         <IconButton
           disabled={positionOverflowLeft()}
           onClick={() => goSlice(-1)}
         >
           <Show when={!positionOverflowLeft()} fallback={<ChevronLeftIcon />}>
             <Badge max={1000} badgeContent={slice.offset} color="primary">
-              <ChevronLeftIcon />
+              <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
             </Badge>
           </Show>
         </IconButton>
@@ -596,10 +596,20 @@ const EntryTypes: Component = (): JSX.Element => {
               }
               color="primary"
             >
-              <ChevronRightIcon />
+              <ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />
             </Badge>
           </Show>
         </IconButton>
+        <Typography
+          variant="body2"
+          sx={{
+            alignSelf: 'center',
+            ml: theme.spacing(3),
+            mr: theme.spacing(1),
+          }}
+        >
+          Rows per page
+        </Typography>
         <FormControl size="small" margin="dense">
           <Select value={see()} onChange={handleSeechange}>
             <For each={[1, 2.5, 5, 10, 20, 30].map(v => v * peakRow)}>
@@ -607,7 +617,7 @@ const EntryTypes: Component = (): JSX.Element => {
             </For>
           </Select>
         </FormControl>
-      </Box>
+      </Stack>
     </>
   );
 };
