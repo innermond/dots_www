@@ -145,13 +145,15 @@ const EntryTypes: Component = (): JSX.Element => {
     }
 
     dir = dir > 0 ? 1 : -1;
-    const position = untrack(() => dir * slice.limit + 1 * slice.offset);
+    let position = untrack(() => dir * slice.limit + 1 * slice.offset);
     if (isNaN(Number(position))) {
       return;
     }
 
-    if (position < 0 || position > peak) {
-      return;
+    if (position < 0) {
+      position = 0;
+    } else if (position > peak) {
+      position = peak;
     }
 
     // This version, while valid upsets typescript compiler
@@ -507,7 +509,7 @@ const EntryTypes: Component = (): JSX.Element => {
             Add Entry Type
           </ActionButton>
         </Stack>
-        <Show when={result.state === 'ready'} fallback={dummy(peakRow)}>
+        <Show when={result.state === 'ready'} fallback={dummy(see())}>
           <Table size="small" aria-label="entry types table">
             <TableHead>
               <TableRow hover>
@@ -573,20 +575,40 @@ const EntryTypes: Component = (): JSX.Element => {
       </TableContainer>
       <Stack direction="row">
         <IconButton
-          disabled={positionOverflowLeft()}
+          //disabled={positionOverflowLeft()}
+          sx={{
+            pointerEvents: positionOverflowLeft() ? 'none' : 'auto',
+            color: positionOverflowLeft() ? theme.palette.grey[400] : undefined,
+          }}
           onClick={() => goSlice(-1)}
         >
-          <Show when={!positionOverflowLeft()} fallback={<ChevronLeftIcon />}>
+          <Show
+            when={!positionOverflowLeft()}
+            fallback={
+              <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
+            }
+          >
             <Badge max={1000} badgeContent={slice.offset} color="primary">
               <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
             </Badge>
           </Show>
         </IconButton>
         <IconButton
-          disabled={positionOverflowRight()}
+          //disabled={positionOverflowRight()}
+          sx={{
+            pointerEvents: positionOverflowRight() ? 'none' : 'auto',
+            color: positionOverflowRight()
+              ? theme.palette.grey[400]
+              : undefined,
+          }}
           onClick={() => goSlice(1)}
         >
-          <Show when={!positionOverflowRight()} fallback={<ChevronRightIcon />}>
+          <Show
+            when={!positionOverflowRight()}
+            fallback={
+              <ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />
+            }
+          >
             <Badge
               max={1000}
               badgeContent={
