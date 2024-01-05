@@ -311,9 +311,9 @@ const EntryTypes: Component = (): JSX.Element => {
   });
 
   const dummy = (num: number, height: string = '1rem') => (
-    <Grid container rowSpacing={4.5}>
+    <Grid container rowSpacing={3.25}>
       <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'end' }}>
-        <Skeleton width="10rem" height="3rem" variant="text" />
+        <Skeleton width="100%" height="3rem" variant="text" />
       </Grid>
       <For each={new Array(num)}>
         {_ => {
@@ -437,61 +437,61 @@ const EntryTypes: Component = (): JSX.Element => {
         setState={setFIlterState}
       />
       {actionForm}
-      <Show when={result.state === 'ready'} fallback={dummy(peakRow, '1rem')}>
-        <TableContainer component={Paper}>
-          <Stack
-            direction="row"
-            sx={{
-              display: 'flex',
-              justifyContent: 'end',
-            }}
-          >
-            <ActionButton
-              ref={anchorSearchFilter}
-              size="large"
-              variant="text"
-              startIcon={
-                isSearchFiltered() ? (
-                  <Badge overlap="circular" variant="dot" color="error">
-                    <FilterListIcon />
-                  </Badge>
-                ) : (
+      <TableContainer component={Paper}>
+        <Stack
+          direction="row"
+          sx={{
+            display: 'flex',
+            justifyContent: 'end',
+          }}
+        >
+          <ActionButton
+            ref={anchorSearchFilter}
+            size="large"
+            variant="text"
+            startIcon={
+              isSearchFiltered() ? (
+                <Badge overlap="circular" variant="dot" color="error">
                   <FilterListIcon />
-                )
-              }
-              onClick={[startFilterComponent, 'search-filter']}
-            >
-              Filters
-            </ActionButton>
-            <ActionButton
-              ref={anchorColumnsFilter}
-              size="large"
-              variant="text"
-              startIcon={
-                isColumnsFiltered() ? (
-                  <Badge overlap="circular" variant="dot" color="error">
-                    <ViewColumnOutlinedIcon />
-                  </Badge>
-                ) : (
+                </Badge>
+              ) : (
+                <FilterListIcon />
+              )
+            }
+            onClick={[startFilterComponent, 'search-filter']}
+          >
+            Filters
+          </ActionButton>
+          <ActionButton
+            ref={anchorColumnsFilter}
+            size="large"
+            variant="text"
+            startIcon={
+              isColumnsFiltered() ? (
+                <Badge overlap="circular" variant="dot" color="error">
                   <ViewColumnOutlinedIcon />
-                )
-              }
-              onClick={[startFilterComponent, 'columns-filter']}
-            >
-              Columns
-            </ActionButton>
-            <ActionButton
-              size="large"
-              variant="text"
-              startIcon={<AddIcon />}
-              onClick={[
-                handleDialogWith,
-                { whatToLoad: 'addEntry', data: entryTypeZero },
-              ]}
-            >
-              Add Entry Type
-            </ActionButton>
-          </Stack>
+                </Badge>
+              ) : (
+                <ViewColumnOutlinedIcon />
+              )
+            }
+            onClick={[startFilterComponent, 'columns-filter']}
+          >
+            Columns
+          </ActionButton>
+          <ActionButton
+            size="large"
+            variant="text"
+            startIcon={<AddIcon />}
+            onClick={[
+              handleDialogWith,
+              { whatToLoad: 'addEntry', data: entryTypeZero },
+            ]}
+          >
+            Add Entry Type
+          </ActionButton>
+        </Stack>
+        <Show when={result.state === 'ready'} fallback={dummy(peakRow)}>
           <Table size="small" aria-label="simple table">
             <TableHead>
               <TableRow hover>
@@ -553,41 +553,38 @@ const EntryTypes: Component = (): JSX.Element => {
               </For>
             </TableBody>
           </Table>
-        </TableContainer>
-        <Box>
-          <IconButton
-            disabled={positionOverflowLeft()}
-            onClick={() => goSlice(-1)}
-          >
-            <Show when={!positionOverflowLeft()} fallback={<ChevronLeftIcon />}>
-              <Badge max={1000} badgeContent={slice.offset} color="primary">
-                <ChevronLeftIcon />
-              </Badge>
-            </Show>
-          </IconButton>
-          <IconButton
-            disabled={positionOverflowRight()}
-            onClick={() => goSlice(1)}
-          >
-            <Show
-              when={!positionOverflowRight()}
-              fallback={<ChevronRightIcon />}
+        </Show>
+      </TableContainer>
+      <Box>
+        <IconButton
+          disabled={positionOverflowLeft()}
+          onClick={() => goSlice(-1)}
+        >
+          <Show when={!positionOverflowLeft()} fallback={<ChevronLeftIcon />}>
+            <Badge max={1000} badgeContent={slice.offset} color="primary">
+              <ChevronLeftIcon />
+            </Badge>
+          </Show>
+        </IconButton>
+        <IconButton
+          disabled={positionOverflowRight()}
+          onClick={() => goSlice(1)}
+        >
+          <Show when={!positionOverflowRight()} fallback={<ChevronRightIcon />}>
+            <Badge
+              max={1000}
+              badgeContent={
+                totalRows() < slice.limit
+                  ? totalRows()
+                  : totalRows() - (slice.offset + slice.limit)
+              }
+              color="primary"
             >
-              <Badge
-                max={1000}
-                badgeContent={
-                  totalRows() < slice.limit
-                    ? totalRows()
-                    : totalRows() - (slice.offset + slice.limit)
-                }
-                color="primary"
-              >
-                <ChevronRightIcon />
-              </Badge>
-            </Show>
-          </IconButton>
-        </Box>
-      </Show>
+              <ChevronRightIcon />
+            </Badge>
+          </Show>
+        </IconButton>
+      </Box>
     </>
   );
 };
