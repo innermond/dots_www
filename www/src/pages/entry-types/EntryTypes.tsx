@@ -26,6 +26,9 @@ import {
   IconButton,
   Box,
   Badge,
+  FormControl,
+  MenuItem,
+  Select,
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
@@ -54,6 +57,7 @@ import ViewColumnOutlinedIcon from '@suid/icons-material/ViewColumnOutlined';
 import FilterListIcon from '@suid/icons-material/FilterList';
 import ActionFormProvider from '@/contexts/ActionFormContext';
 import type { FilterState } from '@/components/filter';
+import { SelectChangeEvent } from '@suid/material/Select';
 
 export type ParametersSetSliceOrigin = Parameters<
   SetStoreFunction<Slice<EntryTypeData>>
@@ -64,7 +68,7 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const [initialInputs, setInitialInputs] = createSignal(entryTypeZero);
 
-  const peakRow = 3;
+  const peakRow = 10;
   const defaultFilter = [{ id: 'desc' }, { _mask_id: 'o' }];
 
   const [slice, setSliceOrigin] = createStore<Slice<EntryTypeData>>({
@@ -284,6 +288,18 @@ const EntryTypes: Component = (): JSX.Element => {
     }
   };
 
+  const [see, setSee] = createSignal<number>(10);
+
+  const handleSeechange = (evt: SelectChangeEvent) => {
+    const v = Number(evt.target.value);
+    if (isNaN(v)) {
+      return;
+    }
+
+    setSee(v);
+    setSlice.apply(null, ['limit', v] as ParametersSetSliceOrigin);
+  };
+
   const theme = useTheme();
 
   const handleCloseActionForm = () => setDyn(undefined);
@@ -492,7 +508,7 @@ const EntryTypes: Component = (): JSX.Element => {
           </ActionButton>
         </Stack>
         <Show when={result.state === 'ready'} fallback={dummy(peakRow)}>
-          <Table size="small" aria-label="simple table">
+          <Table size="small" aria-label="entry types table">
             <TableHead>
               <TableRow hover>
                 <TableCell component="th">
@@ -584,6 +600,13 @@ const EntryTypes: Component = (): JSX.Element => {
             </Badge>
           </Show>
         </IconButton>
+        <FormControl size="small" margin="dense">
+          <Select value={see()} onChange={handleSeechange}>
+            <For each={[1, 2.5, 5, 10, 20, 30].map(v => v * peakRow)}>
+              {v => <MenuItem value={v}>{v}</MenuItem>}
+            </For>
+          </Select>
+        </FormControl>
       </Box>
     </>
   );
