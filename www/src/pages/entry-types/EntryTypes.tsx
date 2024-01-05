@@ -10,6 +10,7 @@ import {
   createComputed,
   onCleanup,
   untrack,
+  createEffect,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -446,6 +447,38 @@ const EntryTypes: Component = (): JSX.Element => {
     }
   };
 
+  const [checks, setChecks] = createSignal<number[]>([]);
+  const selectedRows = createMemo(() => checks());
+  const handleChangeChecks = (evt: Event, checked: boolean) => {
+    const { target } = evt;
+    if (!target || !('value' in target)) {
+      return;
+    }
+
+    const v = Number(target.value);
+    if (isNaN(v)) {
+      return;
+    }
+    const cc = untrack(() => checks());
+    const pos = cc.indexOf(v);
+    if (checked && pos === -1) {
+      const kk = [...cc, v];
+      setChecks(kk);
+    }
+
+    if (!checked && pos >= 0) {
+      cc.splice(pos, 1);
+      const kk = [...cc];
+      setChecks(kk);
+    }
+  };
+
+  const isChecked = (id: number): boolean => {
+    const cc = selectedRows();
+    const pos = cc.indexOf(id);
+    return pos >= 0;
+  };
+
   return (
     <>
       <Dynamic
@@ -463,6 +496,11 @@ const EntryTypes: Component = (): JSX.Element => {
             justifyContent: 'end',
           }}
         >
+          <Show when={!!selectedRows().length}>
+            <Typography sx={{ alignSelf: 'center' }} variant="body2">
+              Selected rows {selectedRows().length}
+            </Typography>
+          </Show>
           <ActionButton
             ref={anchorSearchFilter}
             size="large"
@@ -528,7 +566,12 @@ const EntryTypes: Component = (): JSX.Element => {
                   return (
                     <TableRow>
                       <TableCell>
-                        <Checkbox name="entries" value={et.id} />
+                        <Checkbox
+                          checked={isChecked(et.id)}
+                          name="entries"
+                          value={et.id}
+                          onChange={handleChangeChecks}
+                        />
                       </TableCell>
                       {tableCells(columns(), et)}
                       <TableCell align="right">
