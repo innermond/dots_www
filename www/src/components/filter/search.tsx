@@ -256,6 +256,7 @@ const FilterSearch = (props: FilterSearchProps) => {
                         starts: 0,
                         includes: 1,
                         ends: 2,
+                        empty: 3,
                       })}
                       state={state}
                       setState={setState}
