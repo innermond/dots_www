@@ -29,10 +29,12 @@ import {
   MenuItem,
   Select,
   Typography,
+  Box,
 } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
 import EditIcon from '@suid/icons-material/Edit';
+import DeselectIcon from '@suid/icons-material/Deselect';
 
 import { Grid } from '@suid/material';
 import Skeleton from '@suid/material/Skeleton';
@@ -509,6 +511,8 @@ const EntryTypes: Component = (): JSX.Element => {
     //rowsOnPageSelected())
   };
 
+  const unselectAllChecks = () => setChecks([]);
+
   const isChecked = (id: number): boolean => {
     const cc = selectedRows();
     const pos = cc.indexOf(id);
@@ -528,55 +532,79 @@ const EntryTypes: Component = (): JSX.Element => {
         <Stack
           direction="row"
           sx={{
+            width: '100%',
             display: 'flex',
-            justifyContent: 'end',
+            justifyContent: 'space-between',
           }}
         >
-          <ActionButton
-            ref={anchorSearchFilter}
-            size="large"
-            variant="text"
-            startIcon={
-              isSearchFiltered() ? (
-                <Badge overlap="circular" variant="dot" color="error">
+          <Show when={selectedRows().length}>
+            <ActionButton
+              size="large"
+              variant="text"
+              startIcon={
+                selectedRows().length ? (
+                  <Badge
+                    max={300}
+                    overlap="circular"
+                    badgeContent={selectedRows().length}
+                    color="error"
+                  >
+                    <DeselectIcon />
+                  </Badge>
+                ) : undefined
+              }
+              onClick={unselectAllChecks}
+            >
+              Unselect all
+            </ActionButton>
+          </Show>
+          <Box sx={{ display: 'flex', justifyContent: 'end', flexGrow: 1 }}>
+            <ActionButton
+              ref={anchorSearchFilter}
+              size="large"
+              variant="text"
+              startIcon={
+                isSearchFiltered() ? (
+                  <Badge overlap="circular" variant="dot" color="error">
+                    <FilterListIcon />
+                  </Badge>
+                ) : (
                   <FilterListIcon />
-                </Badge>
-              ) : (
-                <FilterListIcon />
-              )
-            }
-            onClick={[startFilterComponent, 'search-filter']}
-          >
-            Filters
-          </ActionButton>
-          <ActionButton
-            ref={anchorColumnsFilter}
-            size="large"
-            variant="text"
-            startIcon={
-              isColumnsFiltered() ? (
-                <Badge overlap="circular" variant="dot" color="error">
+                )
+              }
+              onClick={[startFilterComponent, 'search-filter']}
+            >
+              Filters
+            </ActionButton>
+            <ActionButton
+              ref={anchorColumnsFilter}
+              size="large"
+              variant="text"
+              startIcon={
+                isColumnsFiltered() ? (
+                  <Badge overlap="circular" variant="dot" color="error">
+                    <ViewColumnOutlinedIcon />
+                  </Badge>
+                ) : (
                   <ViewColumnOutlinedIcon />
-                </Badge>
-              ) : (
-                <ViewColumnOutlinedIcon />
-              )
-            }
-            onClick={[startFilterComponent, 'columns-filter']}
-          >
-            Columns
-          </ActionButton>
-          <ActionButton
-            size="large"
-            variant="text"
-            startIcon={<AddIcon />}
-            onClick={[
-              handleDialogWith,
-              { whatToLoad: 'addEntry', data: entryTypeZero },
-            ]}
-          >
-            Add Entry Type
-          </ActionButton>
+                )
+              }
+              onClick={[startFilterComponent, 'columns-filter']}
+            >
+              Columns
+            </ActionButton>
+            <ActionButton
+              size="large"
+              variant="text"
+              startIcon={<AddIcon />}
+              onClick={[
+                handleDialogWith,
+                { whatToLoad: 'addEntry', data: entryTypeZero },
+              ]}
+            >
+              Add Entry Type
+            </ActionButton>
+          </Box>
         </Stack>
         <Show when={result.state === 'ready'} fallback={dummy(see())}>
           <Table size="small" aria-label="entry types table">
@@ -616,6 +644,7 @@ const EntryTypes: Component = (): JSX.Element => {
                       <TableCell align="right">
                         <Stack direction="row" paddingLeft={theme.spacing(2)}>
                           <IconButton
+                            disabled={isChecked(et.id)}
                             title="view entry type"
                             color="primary"
                             size="small"
@@ -631,6 +660,7 @@ const EntryTypes: Component = (): JSX.Element => {
                             <VisibilityOutlinedIcon fontSize="small" />
                           </IconButton>
                           <IconButton
+                            disabled={isChecked(et.id)}
                             title="edit entry type"
                             color="primary"
                             size="small"
@@ -657,11 +687,11 @@ const EntryTypes: Component = (): JSX.Element => {
       </TableContainer>
       <Stack direction="row">
         <IconButton
-          //disabled={positionOverflowLeft()}
-          sx={{
+          disabled={positionOverflowLeft()}
+          /*sx={{
             pointerEvents: positionOverflowLeft() ? 'none' : 'auto',
             color: positionOverflowLeft() ? theme.palette.grey[400] : undefined,
-          }}
+          }}*/
           onClick={() => goSlice(-1)}
         >
           <Show
@@ -676,13 +706,13 @@ const EntryTypes: Component = (): JSX.Element => {
           </Show>
         </IconButton>
         <IconButton
-          //disabled={positionOverflowRight()}
-          sx={{
+          disabled={positionOverflowRight()}
+          /*sx={{
             pointerEvents: positionOverflowRight() ? 'none' : 'auto',
             color: positionOverflowRight()
               ? theme.palette.grey[400]
               : undefined,
-          }}
+          }}*/
           onClick={() => goSlice(1)}
         >
           <Show
