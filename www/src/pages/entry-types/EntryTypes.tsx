@@ -10,7 +10,6 @@ import {
   createComputed,
   onCleanup,
   untrack,
-  createEffect,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
 import {
@@ -459,6 +458,7 @@ const EntryTypes: Component = (): JSX.Element => {
     if (isNaN(v)) {
       return;
     }
+
     const cc = untrack(() => checks());
     const pos = cc.indexOf(v);
     if (checked && pos === -1) {
@@ -471,6 +471,42 @@ const EntryTypes: Component = (): JSX.Element => {
       const kk = [...cc];
       setChecks(kk);
     }
+  };
+
+  const rowsOnPage = createMemo(() =>
+    dataTable()
+      .data.filter(el => !(el instanceof Error))
+      .map(el => (el as EntryTypeData).id),
+  );
+  const rowsOnPageSelected = createMemo(() => {
+    const selected = rowsOnPage().filter(v => selectedRows().includes(v));
+    return selected;
+  });
+  const rowsOnPageUnselected = createMemo(() => {
+    const selected = rowsOnPage().filter(v => !selectedRows().includes(v));
+    return selected;
+  });
+
+  const handleChangeMasterChecks = (evt: Event, checked: boolean) => {
+    const { target } = evt;
+    if (!target || !('value' in target)) {
+      return;
+    }
+    untrack(() => {
+      if (checked) {
+        const rowsTargeted = rowsOnPageUnselected();
+        const cc = [
+          ...selectedRows().filter(v => !rowsOnPageSelected().includes(v)),
+          ...rowsTargeted,
+        ];
+        setChecks(cc);
+      } else {
+        const rowsTargeted = rowsOnPageSelected();
+        const cc = [...selectedRows().filter(v => !rowsTargeted.includes(v))];
+        setChecks(cc);
+      }
+    });
+    //rowsOnPageSelected())
   };
 
   const isChecked = (id: number): boolean => {
@@ -496,11 +532,6 @@ const EntryTypes: Component = (): JSX.Element => {
             justifyContent: 'end',
           }}
         >
-          <Show when={!!selectedRows().length}>
-            <Typography sx={{ alignSelf: 'center' }} variant="body2">
-              Selected rows {selectedRows().length}
-            </Typography>
-          </Show>
           <ActionButton
             ref={anchorSearchFilter}
             size="large"
@@ -552,7 +583,15 @@ const EntryTypes: Component = (): JSX.Element => {
             <TableHead>
               <TableRow hover>
                 <TableCell component="th">
-                  <Checkbox id="entries-all" />
+                  <Checkbox
+                    id="entries-all"
+                    checked={rowsOnPageUnselected().length === 0}
+                    indeterminate={
+                      !!rowsOnPageSelected().length &&
+                      !!rowsOnPageUnselected().length
+                    }
+                    onChange={handleChangeMasterChecks}
+                  />
                 </TableCell>
                 {tableCells(columns())}
                 <TableCell component="th" align="right">
@@ -682,6 +721,14 @@ const EntryTypes: Component = (): JSX.Element => {
             </For>
           </Select>
         </FormControl>
+        <Show when={!!selectedRows().length}>
+          <Typography
+            sx={{ alignSelf: 'center', ml: theme.spacing(1) }}
+            variant="body2"
+          >
+            selected {selectedRows().length}, here {rowsOnPageSelected().length}
+          </Typography>
+        </Show>
       </Stack>
     </>
   );
