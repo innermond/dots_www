@@ -80,7 +80,7 @@ const theme = createTheme({
   },
   typography,
   //palette: {mode: 'dark'},
-  palette,
+  //palette,
 });
 
 export default theme;
