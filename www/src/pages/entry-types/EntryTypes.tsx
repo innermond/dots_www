@@ -280,17 +280,7 @@ const EntryTypes: Component = (): JSX.Element => {
     });
   };
 
-  const [openFilterColumns, setOpenFilterColumns] = createSignal(false);
   let anchorColumnsFilter: HTMLButtonElement | undefined;
-  const handleColumns = () => {
-    const isOpen = untrack(() => openFilterColumns());
-    setOpenFilterColumns(!isOpen);
-
-    const anchor = untrack(() => anchorElColumns());
-    if (anchor === null && !!anchorColumnsFilter) {
-      setAnchorElColumns(anchorColumnsFilter);
-    }
-  };
 
   const [see, setSee] = createSignal<number>(10);
 
@@ -409,9 +399,6 @@ const EntryTypes: Component = (): JSX.Element => {
 
   const isColumnsFiltered = () => columns()?.length !== initialColumns.length;
 
-  const [anchorElColumns, setAnchorElColumns] =
-    createSignal<HTMLButtonElement | null>(null);
-
   const filterSearchEntryType = lazy(
     () => import('../../components/filter/search'),
   );
@@ -508,7 +495,6 @@ const EntryTypes: Component = (): JSX.Element => {
         setChecks(cc);
       }
     });
-    //rowsOnPageSelected())
   };
 
   const unselectAllChecks = () => setChecks([]);
@@ -688,10 +674,6 @@ const EntryTypes: Component = (): JSX.Element => {
       <Stack direction="row">
         <IconButton
           disabled={positionOverflowLeft()}
-          /*sx={{
-            pointerEvents: positionOverflowLeft() ? 'none' : 'auto',
-            color: positionOverflowLeft() ? theme.palette.grey[400] : undefined,
-          }}*/
           onClick={() => goSlice(-1)}
         >
           <Show
@@ -707,12 +689,6 @@ const EntryTypes: Component = (): JSX.Element => {
         </IconButton>
         <IconButton
           disabled={positionOverflowRight()}
-          /*sx={{
-            pointerEvents: positionOverflowRight() ? 'none' : 'auto',
-            color: positionOverflowRight()
-              ? theme.palette.grey[400]
-              : undefined,
-          }}*/
           onClick={() => goSlice(1)}
         >
           <Show
