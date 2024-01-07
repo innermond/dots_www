@@ -80,6 +80,7 @@ const EntryTypes: Component = (): JSX.Element => {
     filter: defaultFilter,
   });
 
+  // used to trigger server data request
   const [sliceChanged, setSliceChanged] = createSignal<number>(1);
   // wrap origin setStore
   // so every call will trigger the signal used to drive associated request
@@ -99,7 +100,7 @@ const EntryTypes: Component = (): JSX.Element => {
       if (isDeepEqual(before, after)) {
         return;
       }
-      // notify slice has changed
+      // notify slice has changed according with check above
       setSliceChanged((v: number) => v + 1);
     } catch (err) {
       console.log(err);
@@ -107,8 +108,10 @@ const EntryTypes: Component = (): JSX.Element => {
   };
 
   const [result] = createResource(() => {
+    // this (re)triggers server request
     if (sliceChanged()) {
       const slicesrc = unwrap(slice);
+      // params for calling apiEntryType.all
       return { ...slicesrc };
     }
   }, apiEntryType.all);
