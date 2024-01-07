@@ -56,11 +56,11 @@ import { listen, unlisten } from '@/lib/customevent';
 import { SetStoreFunction, createStore, unwrap } from 'solid-js/store';
 import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
 import ChevronRightIcon from '@suid/icons-material/ChevronRight';
-import ViewColumnOutlinedIcon from '@suid/icons-material/ViewColumnOutlined';
 import FilterListIcon from '@suid/icons-material/FilterList';
 import ActionFormProvider from '@/contexts/ActionFormContext';
 import type { FilterState } from '@/components/filter';
 import { SelectChangeEvent } from '@suid/material/Select';
+import Rows from '@/components/rows/Rows';
 
 export type ParametersSetSliceOrigin = Parameters<
   SetStoreFunction<Slice<EntryTypeData>>
@@ -579,64 +579,6 @@ const EntryTypes: Component = (): JSX.Element => {
     </Box>
   );
 
-  const tableSlicing = () => (
-    <Stack direction="row">
-      <IconButton disabled={positionOverflowLeft()} onClick={() => goSlice(-1)}>
-        <Show
-          when={!positionOverflowLeft()}
-          fallback={<ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />}
-        >
-          <Badge max={1000} badgeContent={slice.offset} color="primary">
-            <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
-          </Badge>
-        </Show>
-      </IconButton>
-      <IconButton disabled={positionOverflowRight()} onClick={() => goSlice(1)}>
-        <Show
-          when={!positionOverflowRight()}
-          fallback={<ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />}
-        >
-          <Badge
-            max={1000}
-            badgeContent={
-              totalRows() < slice.limit
-                ? totalRows()
-                : totalRows() - (slice.offset + slice.limit)
-            }
-            color="primary"
-          >
-            <ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />
-          </Badge>
-        </Show>
-      </IconButton>
-      <Typography
-        variant="body2"
-        sx={{
-          alignSelf: 'center',
-          ml: theme.spacing(3),
-          mr: theme.spacing(1),
-        }}
-      >
-        Rows per page
-      </Typography>
-      <FormControl size="small" margin="dense">
-        <Select value={see()} onChange={handleSeechange}>
-          <For each={[1, 2.5, 5, 10, 20, 30].map(v => v * peakRow)}>
-            {v => <MenuItem value={v}>{v}</MenuItem>}
-          </For>
-        </Select>
-      </FormControl>
-      <Show when={!!selectedRows().length}>
-        <Typography
-          sx={{ alignSelf: 'center', ml: theme.spacing(1) }}
-          variant="body2"
-        >
-          selected {selectedRows().length}, here {rowsOnPageSelected().length}
-        </Typography>
-      </Show>
-    </Stack>
-  );
-
   return (
     <>
       <Dynamic
@@ -646,96 +588,7 @@ const EntryTypes: Component = (): JSX.Element => {
         setState={setFIlterState}
       />
       {actionForm}
-      <TableContainer component={Paper}>
-        <Stack
-          direction="row"
-          sx={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Show when={selectedRows().length}>
-            <ActionButton
-              size="large"
-              variant="text"
-              startIcon={
-                selectedRows().length ? (
-                  <Badge
-                    max={300}
-                    overlap="circular"
-                    badgeContent={selectedRows().length}
-                    color="error"
-                  >
-                    <DeselectIcon />
-                  </Badge>
-                ) : undefined
-              }
-              onClick={unselectAllChecks}
-            >
-              Unselect all
-            </ActionButton>
-          </Show>
-          {tableActions()}
-        </Stack>
-        <Show when={result.state === 'ready'} fallback={dummy(see())}>
-          <Table size="small" aria-label="entry types table">
-            <TableHead>
-              <TableRow hover>
-                <TableCell component="th">
-                  <Checkbox
-                    id="entries-all"
-                    checked={rowsOnPageUnselected().length === 0}
-                    indeterminate={
-                      !!rowsOnPageSelected().length &&
-                      !!rowsOnPageUnselected().length
-                    }
-                    onChange={handleChangeMasterChecks}
-                  />
-                </TableCell>
-                {tableCells(columns())}
-                <TableCell component="th">
-                  <IconButton
-                    ref={anchorColumnsFilter}
-                    size="large"
-                    sx={{ ml: theme.spacing(1) }}
-                    onClick={[startFilterComponent, 'columns-filter']}
-                  >
-                    {isColumnsFiltered() ? (
-                      <Badge overlap="circular" variant="dot" color="error">
-                        <VisibilityOutlinedIcon />
-                      </Badge>
-                    ) : (
-                      <VisibilityOutlinedIcon />
-                    )}
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <For each={rows()}>
-                {(et: EntryTypeData) => {
-                  return (
-                    <TableRow>
-                      <TableCell>
-                        <Checkbox
-                          checked={isChecked(et.id)}
-                          name="entries"
-                          value={et.id}
-                          onChange={handleChangeChecks}
-                        />
-                      </TableCell>
-                      {tableCells(columns(), et)}
-                      <TableCell>{rowActions(et)}</TableCell>
-                    </TableRow>
-                  );
-                }}
-              </For>
-            </TableBody>
-          </Table>
-        </Show>
-      </TableContainer>
-      {tableSlicing()}
+      <Rows<EntryTypeData> result={result} initialColumns={initialColumns} />
     </>
   );
 };

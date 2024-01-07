@@ -1,3 +1,4 @@
+import { RowsData } from '@/components/rows/Rows';
 import { ApiError } from '../../lib/api';
 
 type EntryTypeData = {
@@ -7,7 +8,7 @@ type EntryTypeData = {
   unit: string;
 };
 
-type DataEntryTypes = { data: (EntryTypeData | Error)[]; n: number };
+type DataEntryTypes = RowsData<EntryTypeData>;
 
 function isEntryTypeData(d: unknown): d is EntryTypeData {
   return (
