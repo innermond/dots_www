@@ -35,6 +35,7 @@ import AddIcon from '@suid/icons-material/Add';
 import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
 import EditIcon from '@suid/icons-material/Edit';
 import DeselectIcon from '@suid/icons-material/Deselect';
+import ToggleOffOutlinedIcon from '@suid/icons-material/ToggleOffOutlined';
 
 import { Grid } from '@suid/material';
 import Skeleton from '@suid/material/Skeleton';
@@ -563,23 +564,6 @@ const EntryTypes: Component = (): JSX.Element => {
               Filters
             </ActionButton>
             <ActionButton
-              ref={anchorColumnsFilter}
-              size="large"
-              variant="text"
-              startIcon={
-                isColumnsFiltered() ? (
-                  <Badge overlap="circular" variant="dot" color="error">
-                    <ViewColumnOutlinedIcon />
-                  </Badge>
-                ) : (
-                  <ViewColumnOutlinedIcon />
-                )
-              }
-              onClick={[startFilterComponent, 'columns-filter']}
-            >
-              Columns
-            </ActionButton>
-            <ActionButton
               size="large"
               variant="text"
               startIcon={<AddIcon />}
@@ -608,8 +592,21 @@ const EntryTypes: Component = (): JSX.Element => {
                   />
                 </TableCell>
                 {tableCells(columns())}
-                <TableCell component="th" align="right">
-                  &nbsp;
+                <TableCell component="th">
+                  <IconButton
+                    ref={anchorColumnsFilter}
+                    size="large"
+                    sx={{ ml: theme.spacing(1) }}
+                    onClick={[startFilterComponent, 'columns-filter']}
+                  >
+                    {isColumnsFiltered() ? (
+                      <Badge overlap="circular" variant="dot" color="error">
+                        <VisibilityOutlinedIcon />
+                      </Badge>
+                    ) : (
+                      <VisibilityOutlinedIcon />
+                    )}
+                  </IconButton>
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -627,24 +624,8 @@ const EntryTypes: Component = (): JSX.Element => {
                         />
                       </TableCell>
                       {tableCells(columns(), et)}
-                      <TableCell align="right">
+                      <TableCell>
                         <Stack direction="row" paddingLeft={theme.spacing(2)}>
-                          <IconButton
-                            disabled={isChecked(et.id)}
-                            title="view entry type"
-                            color="primary"
-                            size="small"
-                            aria-label="view entry type"
-                            onClick={[
-                              handleDialogWith,
-                              {
-                                whatToLoad: 'detailEntry' as LazyWhat,
-                                data: et,
-                              },
-                            ]}
-                          >
-                            <VisibilityOutlinedIcon fontSize="small" />
-                          </IconButton>
                           <IconButton
                             disabled={isChecked(et.id)}
                             title="edit entry type"
@@ -660,6 +641,22 @@ const EntryTypes: Component = (): JSX.Element => {
                             ]}
                           >
                             <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            disabled={isChecked(et.id)}
+                            title="view entry type"
+                            color="primary"
+                            size="small"
+                            aria-label="view entry type"
+                            onClick={[
+                              handleDialogWith,
+                              {
+                                whatToLoad: 'detailEntry' as LazyWhat,
+                                data: et,
+                              },
+                            ]}
+                          >
+                            <ToggleOffOutlinedIcon fontSize="small" />
                           </IconButton>
                         </Stack>
                       </TableCell>

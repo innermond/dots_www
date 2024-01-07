@@ -13,7 +13,7 @@ import { For, batch, createMemo, createSignal, untrack } from 'solid-js';
 import type { FilterProps, FilterState } from './types';
 import { produce } from 'solid-js/store';
 
-const FilterColumns = (props: FilterProps) => {
+const FilterColumns = (props: FilterProps<FilterState>) => {
   // re-build its current state
   const initialColumns = props.state.initials;
   // visible after a search has been applied
