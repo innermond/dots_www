@@ -141,8 +141,7 @@ const FilterColumns = (props: FilterProps<FilterState>) => {
             Revert
           </Button>
           <Button
-            sx={{ pointerEvents: hidden()?.length ? 'all' : 'none' }}
-            color={hidden()?.length ? 'primary' : 'secondary'}
+            disabled={!hidden()?.length}
             startIcon={<ToggleOffOutlinedIcon />}
             variant="text"
             onClick={handleFilterReset}
