@@ -506,6 +506,134 @@ const EntryTypes: Component = (): JSX.Element => {
     return pos >= 0;
   };
 
+  const rowActions = (et: EntryTypeData) => (
+    <Stack direction="row" paddingLeft={theme.spacing(2)}>
+      <IconButton
+        disabled={isChecked(et.id)}
+        title="edit entry type"
+        color="primary"
+        size="small"
+        aria-label="edit entry type"
+        onClick={[
+          handleDialogWith,
+          {
+            whatToLoad: 'updateEntry' as LazyWhat,
+            data: et,
+          },
+        ]}
+      >
+        <EditIcon fontSize="small" />
+      </IconButton>
+      <IconButton
+        disabled={isChecked(et.id)}
+        title="view entry type"
+        color="primary"
+        size="small"
+        aria-label="view entry type"
+        onClick={[
+          handleDialogWith,
+          {
+            whatToLoad: 'detailEntry' as LazyWhat,
+            data: et,
+          },
+        ]}
+      >
+        <ToggleOffOutlinedIcon fontSize="small" />
+      </IconButton>
+    </Stack>
+  );
+
+  const tableActions = () => (
+    <Box sx={{ display: 'flex', justifyContent: 'end', flexGrow: 1 }}>
+      <ActionButton
+        ref={anchorSearchFilter}
+        size="large"
+        variant="text"
+        startIcon={
+          isSearchFiltered() ? (
+            <Badge overlap="circular" variant="dot" color="error">
+              <FilterListIcon />
+            </Badge>
+          ) : (
+            <FilterListIcon />
+          )
+        }
+        onClick={[startFilterComponent, 'search-filter']}
+      >
+        Filters
+      </ActionButton>
+      <ActionButton
+        size="large"
+        variant="text"
+        startIcon={<AddIcon />}
+        onClick={[
+          handleDialogWith,
+          { whatToLoad: 'addEntry', data: entryTypeZero },
+        ]}
+      >
+        Add Entry Type
+      </ActionButton>
+    </Box>
+  );
+
+  const tableSlicing = () => (
+    <Stack direction="row">
+      <IconButton disabled={positionOverflowLeft()} onClick={() => goSlice(-1)}>
+        <Show
+          when={!positionOverflowLeft()}
+          fallback={<ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />}
+        >
+          <Badge max={1000} badgeContent={slice.offset} color="primary">
+            <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
+          </Badge>
+        </Show>
+      </IconButton>
+      <IconButton disabled={positionOverflowRight()} onClick={() => goSlice(1)}>
+        <Show
+          when={!positionOverflowRight()}
+          fallback={<ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />}
+        >
+          <Badge
+            max={1000}
+            badgeContent={
+              totalRows() < slice.limit
+                ? totalRows()
+                : totalRows() - (slice.offset + slice.limit)
+            }
+            color="primary"
+          >
+            <ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />
+          </Badge>
+        </Show>
+      </IconButton>
+      <Typography
+        variant="body2"
+        sx={{
+          alignSelf: 'center',
+          ml: theme.spacing(3),
+          mr: theme.spacing(1),
+        }}
+      >
+        Rows per page
+      </Typography>
+      <FormControl size="small" margin="dense">
+        <Select value={see()} onChange={handleSeechange}>
+          <For each={[1, 2.5, 5, 10, 20, 30].map(v => v * peakRow)}>
+            {v => <MenuItem value={v}>{v}</MenuItem>}
+          </For>
+        </Select>
+      </FormControl>
+      <Show when={!!selectedRows().length}>
+        <Typography
+          sx={{ alignSelf: 'center', ml: theme.spacing(1) }}
+          variant="body2"
+        >
+          selected {selectedRows().length}, here {rowsOnPageSelected().length}
+        </Typography>
+      </Show>
+    </Stack>
+  );
+
   return (
     <>
       <Dynamic
@@ -545,36 +673,7 @@ const EntryTypes: Component = (): JSX.Element => {
               Unselect all
             </ActionButton>
           </Show>
-          <Box sx={{ display: 'flex', justifyContent: 'end', flexGrow: 1 }}>
-            <ActionButton
-              ref={anchorSearchFilter}
-              size="large"
-              variant="text"
-              startIcon={
-                isSearchFiltered() ? (
-                  <Badge overlap="circular" variant="dot" color="error">
-                    <FilterListIcon />
-                  </Badge>
-                ) : (
-                  <FilterListIcon />
-                )
-              }
-              onClick={[startFilterComponent, 'search-filter']}
-            >
-              Filters
-            </ActionButton>
-            <ActionButton
-              size="large"
-              variant="text"
-              startIcon={<AddIcon />}
-              onClick={[
-                handleDialogWith,
-                { whatToLoad: 'addEntry', data: entryTypeZero },
-              ]}
-            >
-              Add Entry Type
-            </ActionButton>
-          </Box>
+          {tableActions()}
         </Stack>
         <Show when={result.state === 'ready'} fallback={dummy(see())}>
           <Table size="small" aria-label="entry types table">
@@ -624,42 +723,7 @@ const EntryTypes: Component = (): JSX.Element => {
                         />
                       </TableCell>
                       {tableCells(columns(), et)}
-                      <TableCell>
-                        <Stack direction="row" paddingLeft={theme.spacing(2)}>
-                          <IconButton
-                            disabled={isChecked(et.id)}
-                            title="edit entry type"
-                            color="primary"
-                            size="small"
-                            aria-label="edit entry type"
-                            onClick={[
-                              handleDialogWith,
-                              {
-                                whatToLoad: 'updateEntry' as LazyWhat,
-                                data: et,
-                              },
-                            ]}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            disabled={isChecked(et.id)}
-                            title="view entry type"
-                            color="primary"
-                            size="small"
-                            aria-label="view entry type"
-                            onClick={[
-                              handleDialogWith,
-                              {
-                                whatToLoad: 'detailEntry' as LazyWhat,
-                                data: et,
-                              },
-                            ]}
-                          >
-                            <ToggleOffOutlinedIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                      </TableCell>
+                      <TableCell>{rowActions(et)}</TableCell>
                     </TableRow>
                   );
                 }}
@@ -668,71 +732,7 @@ const EntryTypes: Component = (): JSX.Element => {
           </Table>
         </Show>
       </TableContainer>
-      <Stack direction="row">
-        <IconButton
-          disabled={positionOverflowLeft()}
-          onClick={() => goSlice(-1)}
-        >
-          <Show
-            when={!positionOverflowLeft()}
-            fallback={
-              <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
-            }
-          >
-            <Badge max={1000} badgeContent={slice.offset} color="primary">
-              <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
-            </Badge>
-          </Show>
-        </IconButton>
-        <IconButton
-          disabled={positionOverflowRight()}
-          onClick={() => goSlice(1)}
-        >
-          <Show
-            when={!positionOverflowRight()}
-            fallback={
-              <ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />
-            }
-          >
-            <Badge
-              max={1000}
-              badgeContent={
-                totalRows() < slice.limit
-                  ? totalRows()
-                  : totalRows() - (slice.offset + slice.limit)
-              }
-              color="primary"
-            >
-              <ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />
-            </Badge>
-          </Show>
-        </IconButton>
-        <Typography
-          variant="body2"
-          sx={{
-            alignSelf: 'center',
-            ml: theme.spacing(3),
-            mr: theme.spacing(1),
-          }}
-        >
-          Rows per page
-        </Typography>
-        <FormControl size="small" margin="dense">
-          <Select value={see()} onChange={handleSeechange}>
-            <For each={[1, 2.5, 5, 10, 20, 30].map(v => v * peakRow)}>
-              {v => <MenuItem value={v}>{v}</MenuItem>}
-            </For>
-          </Select>
-        </FormControl>
-        <Show when={!!selectedRows().length}>
-          <Typography
-            sx={{ alignSelf: 'center', ml: theme.spacing(1) }}
-            variant="body2"
-          >
-            selected {selectedRows().length}, here {rowsOnPageSelected().length}
-          </Typography>
-        </Show>
-      </Stack>
+      {tableSlicing()}
     </>
   );
 };
