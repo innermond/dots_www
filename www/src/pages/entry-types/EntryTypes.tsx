@@ -2,7 +2,6 @@ import {
   onMount,
   createResource,
   Show,
-  For,
   createSignal,
   lazy,
   batch,
@@ -12,54 +11,23 @@ import {
   untrack,
 } from 'solid-js';
 import type { Component, JSX } from 'solid-js';
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Checkbox,
-  Stack,
-  useTheme,
-  IconButton,
-  Badge,
-  FormControl,
-  MenuItem,
-  Select,
-  Typography,
-  Box,
-} from '@suid/material';
+import { Stack, useTheme, IconButton, Badge, Box } from '@suid/material';
 import AddIcon from '@suid/icons-material/Add';
-import VisibilityOutlinedIcon from '@suid/icons-material/VisibilityOutlined';
 import EditIcon from '@suid/icons-material/Edit';
-import DeselectIcon from '@suid/icons-material/Deselect';
 import ToggleOffOutlinedIcon from '@suid/icons-material/ToggleOffOutlined';
-
-import { Grid } from '@suid/material';
-import Skeleton from '@suid/material/Skeleton';
 
 import type { Slice } from '@/lib/api';
 import { apiEntryType } from '@/api';
 import appstate, { isDeepEqual } from '@/lib/app';
-import {
-  DataEntryTypes,
-  EntryTypeData,
-  entryTypeZero,
-  isEntryTypeData,
-} from './types';
+import { EntryTypeData, entryTypeZero, isEntryTypeData } from './types';
 import ActionButton from '@/components/ActionButton';
 import { Dynamic } from 'solid-js/web';
 import toasting from '@/lib/toast';
 import { listen, unlisten } from '@/lib/customevent';
 import { SetStoreFunction, createStore, unwrap } from 'solid-js/store';
-import ChevronLeftIcon from '@suid/icons-material/ChevronLeft';
-import ChevronRightIcon from '@suid/icons-material/ChevronRight';
 import FilterListIcon from '@suid/icons-material/FilterList';
 import ActionFormProvider from '@/contexts/ActionFormContext';
 import type { FilterState } from '@/components/filter';
-import { SelectChangeEvent } from '@suid/material/Select';
 import Rows from '@/components/rows/Rows';
 
 export type ParametersSetSliceOrigin<T> = Parameters<
@@ -89,6 +57,12 @@ const EntryTypes: Component = (): JSX.Element => {
       return;
     }
 
+    untrack(() => {
+      if (Array.isArray(altered()) && altered().length !== 0) {
+        setAltered([]);
+      }
+    });
+
     try {
       // before
       const before = structuredClone(unwrap(slice));
@@ -116,6 +90,9 @@ const EntryTypes: Component = (): JSX.Element => {
     }
   }, apiEntryType.all);
 
+  // altered rows on the slice without checking with server
+  const [altered, setAltered] = createSignal<EntryTypeData[]>([]);
+
   const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
   const [killOneEntryType, setKillOneEntryType] = createSignal<EntryTypeData>();
 
@@ -128,7 +105,10 @@ const EntryTypes: Component = (): JSX.Element => {
       return;
     }
     setKillOneEntryType(undefined);
+    // this refresh the slice/rows
+    //setSliceChanged((v: number) => v + 1);
     setFreshEntryType(evt.detail);
+    setAltered([evt.detail]);
   };
 
   const handleKillOneEntryType = (evt: CustomEvent) => {
@@ -353,6 +333,7 @@ const EntryTypes: Component = (): JSX.Element => {
       {actionForm}
       <Rows<EntryTypeData>
         result={result}
+        altered={altered}
         initialColumns={initialColumns}
         slice={slice}
         setSlice={setSlice}

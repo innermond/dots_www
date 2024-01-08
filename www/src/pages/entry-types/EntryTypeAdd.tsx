@@ -91,7 +91,6 @@ export default function EntryTypeAdd(): JSX.Element {
   // list of units
   const [unitsResource, { mutate }] = createResource(apiEntryType.units);
   const units = createMemo((): InputOrSelectOption[] => {
-    console.log('units');
     if (unitsResource.state !== 'ready') {
       return [];
     }

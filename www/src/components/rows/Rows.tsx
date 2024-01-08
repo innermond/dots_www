@@ -2,13 +2,12 @@ import {
   Show,
   For,
   createSignal,
-  lazy,
   createMemo,
   createComputed,
   untrack,
   JSX,
 } from 'solid-js';
-import type { ResourceReturn } from 'solid-js';
+import type { ResourceReturn, Accessor } from 'solid-js';
 import {
   Paper,
   Table,
@@ -42,7 +41,6 @@ import ActionButton from '@/components/ActionButton';
 import { Slice } from '@/lib/api';
 import { ParametersSetSliceOrigin } from '@/pages/entry-types/EntryTypes';
 import { SelectChangeEvent } from '@suid/material/Select';
-import { Component } from 'solid-js';
 
 const dummy = (num: number, height: string = '1rem') => (
   <Grid container rowSpacing={3.25}>
@@ -67,12 +65,13 @@ type RowsData<T> = { data: (T | Error)[]; n: number };
 // index 0 for first object of a ResourceReturn
 type RowsProps<T> = {
   result: ResourceReturn<RowsData<T> | Error>[0];
+  altered: Accessor<T[]>;
   initialColumns: string[];
   slice: Store<Slice<T>>;
   setSlice: (...args: ParametersSetSliceOrigin<T>) => void;
   peakRow: number;
   rowActions: (r: T, ischecked: (id: number) => boolean) => JSX.Element;
-  tableActions: Component;
+  tableActions: () => JSX.Element;
 };
 
 const theme = useTheme();
@@ -95,10 +94,36 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
   });
 
   const rows = (): T[] => {
-    const { data } = dataTable();
+    let { data } = dataTable();
 
     if (data === undefined || data === null) {
       return [];
+    }
+
+    const altered = props.altered();
+    if (Array.isArray(altered) && altered.length > 0) {
+      // edit
+      data = data.map(v => {
+        if (v instanceof Error) {
+          return v;
+        }
+        const found = altered.find(a => a.id === v.id);
+        if (found === undefined) {
+          // add
+          return v;
+        } else {
+          // edit
+          return found;
+        }
+      });
+
+      // add
+      altered.map(a => {
+        const found = data.find(v => !(v instanceof Error) && v.id === a.id);
+        if (found === undefined) {
+          data.unshift(a);
+        }
+      });
     }
 
     return data as T[];
