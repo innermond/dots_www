@@ -41,6 +41,7 @@ import ActionButton from '@/components/ActionButton';
 import { Slice } from '@/lib/api';
 import { ParametersSetSliceOrigin } from '@/pages/entry-types/EntryTypes';
 import { SelectChangeEvent } from '@suid/material/Select';
+import { Component } from 'solid-js';
 
 const dummy = (num: number, height: string = '1rem') => (
   <Grid container rowSpacing={3.25}>
@@ -69,6 +70,7 @@ type RowsProps<T> = {
   slice: Store<Slice<T>>;
   setSlice: (...args: ParametersSetSliceOrigin<T>) => void;
   peakRow: number;
+  rowActions: Component;
 };
 
 const theme = useTheme();
@@ -78,6 +80,7 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
   const slice = props.slice;
   const setSlice = props.setSlice;
   const peakRow = props.peakRow;
+  const rowActions = props.rowActions;
 
   // displayable data
   const dataTable = createMemo((): RowsData<T> => {
@@ -436,6 +439,7 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
                         />
                       </TableCell>
                       {tableCells(columns(), r)}
+                      <TableCell>{rowActions(r)}</TableCell>
                     </TableRow>
                   );
                 }}
