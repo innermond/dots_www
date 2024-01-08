@@ -34,12 +34,13 @@ import ModeSearch from './mode-search';
 import { dispatch } from '@/lib/customevent';
 import ActionButton from '../ActionButton';
 import { collectFormData } from '@/lib/form';
+import { EntryTypeData } from '@/pages/entry-types/types';
 
 const theme = useTheme();
 const [search, setSearch] = createSignal<string>();
 
 type FilterSearchProps = FilterProps<FilterState> & {
-  setSlice: (...args: ParametersSetSliceOrigin) => void;
+  setSlice: (...args: ParametersSetSliceOrigin<EntryTypeData>) => void;
 };
 const FilterSearch = (props: FilterSearchProps) => {
   if (search() === undefined) {
