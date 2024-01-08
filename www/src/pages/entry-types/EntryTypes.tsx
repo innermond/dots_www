@@ -116,59 +116,6 @@ const EntryTypes: Component = (): JSX.Element => {
     }
   }, apiEntryType.all);
 
-  const dataTable = createMemo((): DataEntryTypes => {
-    const info = result();
-    if (info instanceof Error || !info) {
-      return { data: [], n: 0 };
-    }
-    return info;
-  });
-
-  const totalRows = createMemo(() => {
-    const { n } = dataTable();
-    return n;
-  });
-
-  const positionOverflowRight = createMemo((): boolean => {
-    const peak = totalRows();
-    if (peak === -1) {
-      return false;
-    }
-    const curr = slice.offset + slice.limit;
-    const overflow = curr >= peak;
-    return overflow;
-  });
-
-  const positionOverflowLeft = createMemo((): boolean => {
-    const overflow = slice.offset <= 0;
-    return overflow;
-  });
-
-  const goSlice = (dir: number) => {
-    const peak = untrack(() => totalRows());
-    if (isNaN(Number(peak)) || peak < 0) {
-      return;
-    }
-
-    dir = dir > 0 ? 1 : -1;
-    let position = untrack(() => dir * slice.limit + 1 * slice.offset);
-    if (isNaN(Number(position))) {
-      return;
-    }
-
-    if (position < 0) {
-      position = 0;
-    } else if (position > peak) {
-      position = peak;
-    }
-
-    // This version, while valid upsets typescript compiler
-    //setSlice('offset', position);
-    // but this makes it happy as we inform compiler that everything is fine ("as ParametersSetSliceOrigin")
-    // TODO gives the power back to the compiler
-    setSlice.apply(null, ['offset', position] as ParametersSetSliceOrigin);
-  };
-
   const [freshEntryType, setFreshEntryType] = createSignal<EntryTypeData>();
   const [killOneEntryType, setKillOneEntryType] = createSignal<EntryTypeData>();
 
@@ -200,39 +147,6 @@ const EntryTypes: Component = (): JSX.Element => {
   const handleIsFilteredSearch = (evt: CustomEvent) => {
     const isFiltered = evt.detail !== '';
     setIsSearchFiltered(isFiltered);
-  };
-
-  const rows = (): EntryTypeData[] => {
-    const changed = freshEntryType() as EntryTypeData;
-    const killed = killOneEntryType() as EntryTypeData;
-    const { data } = dataTable();
-
-    if (data === undefined || data === null) {
-      return [];
-    }
-
-    let inx = -1;
-    if (!!changed) {
-      inx = data.findIndex(
-        (et: EntryTypeData | Error) =>
-          isEntryTypeData(et) && et.id == changed.id,
-      );
-      if (inx === -1) {
-        data.unshift(changed);
-      } else {
-        data[inx] = changed;
-      }
-    } else if (!!killed) {
-      inx = data.findIndex(
-        (et: EntryTypeData | Error) =>
-          isEntryTypeData(et) && et.id == killed.id,
-      );
-      if (inx !== -1) {
-        data.splice(inx, 1);
-      }
-    }
-    // data shape is filtered above such here is only EntryTypeData[]
-    return data as EntryTypeData[];
   };
 
   onMount(() => {
@@ -267,9 +181,6 @@ const EntryTypes: Component = (): JSX.Element => {
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
   const updateEntryType = lazy(() => import('./EntryTypeUpdate'));
   const detailEntryType = lazy(() => import('./EntryTypeDetail'));
-  const filterColumnsEntryType = lazy(
-    () => import('../../components/filter/columns'),
-  );
 
   const handleDialogWith = (
     args: { whatToLoad: LazyWhat; data?: EntryTypeData },
@@ -282,20 +193,6 @@ const EntryTypes: Component = (): JSX.Element => {
         setInitialInputs(data as EntryTypeData);
       }
     });
-  };
-
-  let anchorColumnsFilter: HTMLButtonElement | undefined;
-
-  const [see, setSee] = createSignal<number>(10);
-
-  const handleSeechange = (evt: SelectChangeEvent) => {
-    const v = Number(evt.target.value);
-    if (isNaN(v)) {
-      return;
-    }
-
-    setSee(v);
-    setSlice.apply(null, ['limit', v] as ParametersSetSliceOrigin);
   };
 
   const theme = useTheme();
@@ -324,23 +221,6 @@ const EntryTypes: Component = (): JSX.Element => {
     }
   });
 
-  const dummy = (num: number, height: string = '1rem') => (
-    <Grid container rowSpacing={3.25}>
-      <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'end' }}>
-        <Skeleton width="100%" height="3rem" variant="text" />
-      </Grid>
-      <For each={new Array(num)}>
-        {_ => {
-          return (
-            <Grid item xs={12}>
-              <Skeleton width="100%" height={height} variant="rectangular" />
-            </Grid>
-          );
-        }}
-      </For>
-    </Grid>
-  );
-
   const actionForm = (
     <Show when={!!cmp() && !!initialInputs()}>
       <ActionFormProvider<EntryTypeData> initialInputs={initialInputs()}>
@@ -362,47 +242,6 @@ const EntryTypes: Component = (): JSX.Element => {
     structuredClone(initialFilterState),
   );
 
-  const [columnsChanged, setColumnsChanged] = createSignal(initialColumns);
-  createComputed(() => {
-    let cc = unwrap(filterState.items);
-    if (cc === undefined) {
-      cc = initialColumns;
-    }
-    setColumnsChanged(cc);
-  });
-  const columns = createMemo(() => columnsChanged());
-
-  const tableCells = (
-    cols: string[],
-    vals?: { [Key in (typeof cols)[number]]: any },
-  ): JSX.Element => {
-    const isHeadCell = vals === undefined;
-    return (
-      <For each={cols}>
-        {(col: string, inx: () => number) => {
-          if (inx() === 0) {
-            return isHeadCell ? (
-              <TableCell component="th">{col}</TableCell>
-            ) : (
-              <TableCell component="td">{vals ? vals[col] : ''}</TableCell>
-            );
-          }
-          return isHeadCell ? (
-            <TableCell component="th" align="right">
-              {col}
-            </TableCell>
-          ) : (
-            <TableCell component="td" align="right">
-              {vals ? vals[col] : ''}
-            </TableCell>
-          );
-        }}
-      </For>
-    );
-  };
-
-  const isColumnsFiltered = () => columns()?.length !== initialColumns.length;
-
   const filterSearchEntryType = lazy(
     () => import('../../components/filter/search'),
   );
@@ -413,9 +252,6 @@ const EntryTypes: Component = (): JSX.Element => {
   const filterComponent = () => {
     if (filterItems() === 'search-filter') {
       return filterSearchEntryType;
-    }
-    if (filterItems() === 'columns-filter') {
-      return filterColumnsEntryType;
     }
   };
 
@@ -430,86 +266,13 @@ const EntryTypes: Component = (): JSX.Element => {
         setFIlterState(initial);
         setFilterItems('search-filter');
         break;
-      case 'columns-filter':
-        initial.title = 'columns visibility';
-        initial.anchor = anchorColumnsFilter;
-        setFIlterState(initial);
-        setFilterItems('columns-filter');
-        break;
     }
   };
 
-  const [checks, setChecks] = createSignal<number[]>([]);
-  const selectedRows = createMemo(() => checks());
-  const handleChangeChecks = (evt: Event, checked: boolean) => {
-    const { target } = evt;
-    if (!target || !('value' in target)) {
-      return;
-    }
-
-    const v = Number(target.value);
-    if (isNaN(v)) {
-      return;
-    }
-
-    const cc = untrack(() => checks());
-    const pos = cc.indexOf(v);
-    if (checked && pos === -1) {
-      const kk = [...cc, v];
-      setChecks(kk);
-    }
-
-    if (!checked && pos >= 0) {
-      cc.splice(pos, 1);
-      const kk = [...cc];
-      setChecks(kk);
-    }
-  };
-
-  const rowsOnPage = createMemo(() =>
-    dataTable()
-      .data.filter(el => !(el instanceof Error))
-      .map(el => (el as EntryTypeData).id),
-  );
-  const rowsOnPageSelected = createMemo(() => {
-    const selected = rowsOnPage().filter(v => selectedRows().includes(v));
-    return selected;
-  });
-  const rowsOnPageUnselected = createMemo(() => {
-    const selected = rowsOnPage().filter(v => !selectedRows().includes(v));
-    return selected;
-  });
-
-  const handleChangeMasterChecks = (evt: Event, checked: boolean) => {
-    const { target } = evt;
-    if (!target || !('value' in target)) {
-      return;
-    }
-    untrack(() => {
-      if (checked) {
-        const rowsTargeted = rowsOnPageUnselected();
-        const cc = [
-          ...selectedRows().filter(v => !rowsOnPageSelected().includes(v)),
-          ...rowsTargeted,
-        ];
-        setChecks(cc);
-      } else {
-        const rowsTargeted = rowsOnPageSelected();
-        const cc = [...selectedRows().filter(v => !rowsTargeted.includes(v))];
-        setChecks(cc);
-      }
-    });
-  };
-
-  const unselectAllChecks = () => setChecks([]);
-
-  const isChecked = (id: number): boolean => {
-    const cc = selectedRows();
-    const pos = cc.indexOf(id);
-    return pos >= 0;
-  };
-
-  const rowActions = (et: EntryTypeData) => (
+  const rowActions = (
+    et: EntryTypeData,
+    isChecked: (id: number) => boolean,
+  ) => (
     <Stack direction="row" paddingLeft={theme.spacing(2)}>
       <IconButton
         disabled={isChecked(et.id)}

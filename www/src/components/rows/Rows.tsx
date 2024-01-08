@@ -6,8 +6,9 @@ import {
   createMemo,
   createComputed,
   untrack,
+  JSX,
 } from 'solid-js';
-import type { JSX, ResourceReturn } from 'solid-js';
+import type { ResourceReturn } from 'solid-js';
 import {
   Paper,
   Table,
@@ -70,7 +71,7 @@ type RowsProps<T> = {
   slice: Store<Slice<T>>;
   setSlice: (...args: ParametersSetSliceOrigin<T>) => void;
   peakRow: number;
-  rowActions: Component;
+  rowActions: (r: T, ischecked: (id: number) => boolean) => JSX.Element;
   tableActions: Component;
 };
 
@@ -304,17 +305,17 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
       <IconButton disabled={positionOverflowLeft()} onClick={() => goSlice(-1)}>
         <Show
           when={!positionOverflowLeft()}
-          fallback={<ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />}
+          fallback={<ChevronLeftIcon sx={{ fontSize: theme.typography.h5 }} />}
         >
           <Badge max={1000} badgeContent={slice.offset} color="primary">
-            <ChevronLeftIcon sx={{ fontSize: theme.typography.h2 }} />
+            <ChevronLeftIcon sx={{ fontSize: theme.typography.h5 }} />
           </Badge>
         </Show>
       </IconButton>
       <IconButton disabled={positionOverflowRight()} onClick={() => goSlice(1)}>
         <Show
           when={!positionOverflowRight()}
-          fallback={<ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />}
+          fallback={<ChevronRightIcon sx={{ fontSize: theme.typography.h5 }} />}
         >
           <Badge
             max={1000}
@@ -325,7 +326,7 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
             }
             color="primary"
           >
-            <ChevronRightIcon sx={{ fontSize: theme.typography.h2 }} />
+            <ChevronRightIcon sx={{ fontSize: theme.typography.h5 }} />
           </Badge>
         </Show>
       </IconButton>
@@ -442,7 +443,7 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
                         />
                       </TableCell>
                       {tableCells(columns(), r)}
-                      <TableCell>{rowActions(r)}</TableCell>
+                      <TableCell>{rowActions(r, isChecked)}</TableCell>
                     </TableRow>
                   );
                 }}
