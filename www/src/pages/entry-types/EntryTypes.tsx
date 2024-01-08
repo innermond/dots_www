@@ -595,6 +595,7 @@ const EntryTypes: Component = (): JSX.Element => {
         setSlice={setSlice}
         peakRow={peakRow}
         rowActions={rowActions}
+        tableActions={tableActions}
       />
     </>
   );

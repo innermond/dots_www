@@ -71,6 +71,7 @@ type RowsProps<T> = {
   setSlice: (...args: ParametersSetSliceOrigin<T>) => void;
   peakRow: number;
   rowActions: Component;
+  tableActions: Component;
 };
 
 const theme = useTheme();
@@ -81,6 +82,7 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
   const setSlice = props.setSlice;
   const peakRow = props.peakRow;
   const rowActions = props.rowActions;
+  const tableActions = props.tableActions;
 
   // displayable data
   const dataTable = createMemo((): RowsData<T> => {
@@ -390,6 +392,7 @@ const Rows = <T extends { id: number }>(props: RowsProps<T>): JSX.Element => {
               Unselect all
             </ActionButton>
           </Show>
+          {tableActions()}
         </Stack>
         <Show when={result.state === 'ready'} fallback={dummy(see())}>
           <Table size="small" aria-label="entry types table">
