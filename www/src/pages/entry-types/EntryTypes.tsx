@@ -62,8 +62,8 @@ import type { FilterState } from '@/components/filter';
 import { SelectChangeEvent } from '@suid/material/Select';
 import Rows from '@/components/rows/Rows';
 
-export type ParametersSetSliceOrigin = Parameters<
-  SetStoreFunction<Slice<EntryTypeData>>
+export type ParametersSetSliceOrigin<T> = Parameters<
+  SetStoreFunction<Slice<T>>
 >;
 
 const EntryTypes: Component = (): JSX.Element => {
@@ -84,7 +84,7 @@ const EntryTypes: Component = (): JSX.Element => {
   const [sliceChanged, setSliceChanged] = createSignal<number>(1);
   // wrap origin setStore
   // so every call will trigger the signal used to drive associated request
-  const setSlice = (...args: ParametersSetSliceOrigin) => {
+  const setSlice = (...args: ParametersSetSliceOrigin<EntryTypeData>) => {
     if (!Array.isArray(args)) {
       return;
     }
@@ -588,7 +588,13 @@ const EntryTypes: Component = (): JSX.Element => {
         setState={setFIlterState}
       />
       {actionForm}
-      <Rows<EntryTypeData> result={result} initialColumns={initialColumns} />
+      <Rows<EntryTypeData>
+        result={result}
+        initialColumns={initialColumns}
+        slice={slice}
+        setSlice={setSlice}
+        peakRow={peakRow}
+      />
     </>
   );
 };
