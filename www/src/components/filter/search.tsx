@@ -258,6 +258,7 @@ const FilterSearch = (props: FilterSearchProps) => {
                         includes: 1,
                         ends: 2,
                         empty: 3,
+                        equal: 4, // on server equal case is default so any value different than any "specials" will work
                       })}
                       state={state}
                       setState={setState}
