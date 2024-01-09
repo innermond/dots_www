@@ -26,6 +26,7 @@ import toasting from '@/lib/toast';
 import { listen, unlisten } from '@/lib/customevent';
 import { SetStoreFunction, createStore, unwrap } from 'solid-js/store';
 import FilterListIcon from '@suid/icons-material/FilterList';
+import UploadFileIcon from '@suid/icons-material/UploadFile';
 import ActionFormProvider from '@/contexts/ActionFormContext';
 import type { FilterState } from '@/components/filter';
 import Rows from '@/components/rows/Rows';
@@ -152,12 +153,14 @@ const EntryTypes: Component = (): JSX.Element => {
   type LazyWhat =
     | 'editEntry'
     | 'addEntry'
+    | 'addManyEntryType'
     | 'updateEntry'
     | 'detailEntry'
     | undefined;
 
   const [dyn, setDyn] = createSignal<LazyWhat>();
   const addEntryType = lazy(() => import('./EntryTypeAdd'));
+  const addManyEntryType = lazy(() => import('./EntryTypeAddMany'));
   const editEntryType = lazy(() => import('./EntryTypeEdit'));
   const updateEntryType = lazy(() => import('./EntryTypeUpdate'));
   const detailEntryType = lazy(() => import('./EntryTypeDetail'));
@@ -169,7 +172,7 @@ const EntryTypes: Component = (): JSX.Element => {
     const { whatToLoad, data } = args;
     batch(() => {
       setDyn(whatToLoad);
-      if (isEntryTypeData(data)) {
+      if (data && isEntryTypeData(data)) {
         setInitialInputs(data as EntryTypeData);
       }
     });
@@ -188,6 +191,9 @@ const EntryTypes: Component = (): JSX.Element => {
     }
     if ((dyn() as string) === 'addEntry') {
       return addEntryType;
+    }
+    if ((dyn() as string) === 'addManyEntryType') {
+      return addManyEntryType;
     }
     if ((dyn() as string) === 'detailEntry') {
       return detailEntryType;
@@ -317,7 +323,15 @@ const EntryTypes: Component = (): JSX.Element => {
           { whatToLoad: 'addEntry', data: entryTypeZero },
         ]}
       >
-        Add Entry Type
+        add one
+      </ActionButton>
+      <ActionButton
+        size="large"
+        variant="text"
+        startIcon={<UploadFileIcon />}
+        onClick={[handleDialogWith, { whatToLoad: 'addManyEntryType' }]}
+      >
+        add many
       </ActionButton>
     </Box>
   );
