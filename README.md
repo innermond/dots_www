@@ -20,6 +20,7 @@ Authenticated users land on a dashboard shell (app bar + nav drawer) with a comp
 ├── docker-compose.yml       # dots_www service definition
 ├── Dockerfile                # nginx image, copies files/ into the container root
 ├── LICENSE                    # MIT
+├── pre-commit                 # prettier-on-staged-files hook (not auto-installed, see below)
 ├── files/                     # files baked into the nginx image
 │   └── etc/
 │       ├── nginx/nginx.conf         # base nginx config
@@ -48,9 +49,10 @@ Authenticated users land on a dashboard shell (app bar + nav drawer) with a comp
     │   └── pages/
     │       ├── routes.tsx              # route table + auth guard (token in sessionStorage)
     │       ├── login/                   # LoginForm
-    │       ├── dashboard/                # Dashboard shell, nav items, StatisticsCard
+    │       ├── HelloDashboard.tsx        # placeholder landing content rendered at "/"
+    │       ├── dashboard/                # Dashboard shell (Dashboard.tsx), nav items, StatisticsCard
     │       ├── company/                  # Company list + CompanyDetails (stats, depletion)
-    │       ├── entry-types/               # Entry type list + add/edit/detail CRUD
+    │       ├── entry-types/               # EntryTypes list + Add/Edit/Update/Detail CRUD
     │       ├── deed/                       # DeedNew (stub, not yet routed)
     │       └── 404.tsx
     ├── public/                  # static assets served as-is
@@ -95,6 +97,14 @@ Auth token is stored in `sessionStorage['dots.tok']` after a successful `/login`
 | `npm run clean`  | Remove build output in `dist/`                                          |
 | `npm run dist`   | Clean, build, and copy the output into `distant/` (deployment dir)       |
 
+### Git hooks
+
+The repo-root `pre-commit` script runs `prettier --write` on staged files and re-stages them, but it is **not** installed automatically — Git only picks up hooks from `.git/hooks/`. To enable it:
+
+```bash
+ln -s ../../pre-commit .git/hooks/pre-commit
+```
+
 ## Deployment
 
 The `distant/` folder (produced by `npm run dist`) is mounted into the nginx container as the served web root:
@@ -115,6 +125,7 @@ The `dots_www` service:
 
 ## Notes
 
+- The `/` route renders `src/pages/HelloDashboard.tsx`, currently a placeholder (console-logged lifecycle, no real content) rather than a finished home page.
 - `src/pages/deed/DeedNew.tsx` is a stub and not yet wired into `routes.tsx` — deed/entry CRUD is still to be built out.
 - `src/contexts/DialogContext.tsx` looks like an earlier, more manual predecessor to `ActionFormContext.tsx`/`ActionForm.tsx`; the two overlap in responsibility.
 - TLS certificates under `files/etc/ssl/certs/` are for local/dev use; do not treat them as production secrets.
