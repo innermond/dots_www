@@ -1,6 +1,7 @@
 node_modules
 dist
 distant/*
+.env
 
 # Swap
 [._]*.s[a-v][a-z]
